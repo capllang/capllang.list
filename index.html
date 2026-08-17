@@ -411,37 +411,44 @@
     filterData();
   }
 
-  function filterData() {
-    const query = document.getElementById('searchInput').value.trim();
-    const resultList = document.getElementById('resultList');
-    resultList.innerHTML = "";
+ function filterData() {
+  const query = document.getElementById('searchInput').value.trim();
+  const resultList = document.getElementById('resultList');
+  resultList.innerHTML = "";
 
-    const currentData = database[activeTab] || [];
-    const filtered = currentData.filter(nomor => nomor.includes(query));
+  const currentData = database[activeTab] || [];
+  const filtered = currentData.filter(nomor => nomor.includes(query));
 
-    if (filtered.length === 0) {
-      resultList.innerHTML = `<li class="empty-msg">Tidak ada nomor terdaftar di database.</li>`;
-      return;
+  if (filtered.length === 0) {
+    resultList.innerHTML = `<li class="empty-msg">Tidak ada nomor terdaftar di database.</li>`;
+    return;
+  }
+
+  filtered.forEach(nomor => {
+    const li = document.createElement('li');
+    li.className = 'result-item';
+
+    const spanNumber = document.createElement('span');
+    spanNumber.className = 'number';
+    spanNumber.textContent = nomor; // Lebih aman dari XSS
+
+    const rightContent = document.createElement('div');
+    rightContent.className = 'right-content';
+    rightContent.innerHTML = `<span class="badge">BAHAYA</span>`;
+
+    if (isAdmin) {
+      const btnDelete = document.createElement('button');
+      btnDelete.className = 'btn btn-delete';
+      btnDelete.textContent = 'Hapus';
+      btnDelete.onclick = () => deleteNumber(nomor);
+      rightContent.appendChild(btnDelete);
     }
 
-    filtered.forEach(nomor => {
-      const li = document.createElement('li');
-      li.className = 'result-item';
-      
-      const deleteBtnHTML = isAdmin 
-        ? `<button class="btn btn-delete" onclick="deleteNumber('${nomor}')">Hapus</button>` 
-        : '';
-
-      li.innerHTML = `
-        <span class="number">${nomor}</span>
-        <div class="right-content">
-          <span class="badge">BAHAYA</span>
-          ${deleteBtnHTML}
-        </div>
-      `;
-      resultList.appendChild(li);
-    });
-  }
+    li.appendChild(spanNumber);
+    li.appendChild(rightContent);
+    resultList.appendChild(li);
+  });
+}
 
   // TEMA
   function initTheme() {
