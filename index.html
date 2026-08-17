@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Online/Offline - Cek Scammer & UID</title>
+  <style>
+    :root {
+      --bg-body: #f4f6f9;
+      --bg-container: #ffffff;
+      --text-main: #333333;
+      --text-title: #1a252f;
+      --border-color: #e0e0e0;
+      --tab-inactive: #666666;
+      --tab-active: #e74c3c;
+      --input-bg: #ffffff;
+      --input-border: #dddddd;
+      --input-text: #333333;
+      --placeholder: #888888;
+      --panel-bg: #f8f9fa;
+      --panel-border: #cccccc;
+      --btn-admin-bg: #2c3e50;
+      --btn-admin-hover: #1a252f;
+      --item-bg: #fff5f5;
+      --item-border: #e74c3c;
+      --item-number: #c0392b;
+      --badge-bg: #e74c3c;
+      --empty-text: #888888;
+      --btn-theme-bg: #e0e0e0;
+      --btn-theme-text: #333333;
+      --donate-bg: #fff8e1;
+      --donate-border: #ffe082;
+      --scrollbar-thumb: #cccccc;
+    }
+
+    body.dark-mode {
+      --bg-body: #121212;
+      --bg-container: #1e1e1e;
+      --text-main: #e0e0e0;
+      --text-title: #ffffff;
+      --border-color: #2d2d2d;
+      --tab-inactive: #888888;
+      --tab-active: #ff5252;
+      --input-bg: #2a2a2a;
+      --input-border: #3d3d3d;
+      --input-text: #ffffff;
+      --placeholder: #777777;
+      --panel-bg: #252525;
+      --panel-border: #444444;
+      --btn-admin-bg: #37474f;
+      --btn-admin-hover: #455a64;
+      --item-bg: #2c1a1a;
+      --item-border: #ff5252;
+      --item-number: #ff8a80;
+      --badge-bg: #d32f2f;
+      --empty-text: #666666;
+      --btn-theme-bg: #333333;
+      --btn-theme-text: #ffffff;
+      --donate-bg: #2b261f;
+      --donate-border: #5d4037;
+      --scrollbar-thumb: #444444;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
+    
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      color: var(--text-main);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 550px;
+      max-height: 98vh;
+      background: var(--bg-container);
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    h2 { margin: 0; color: var(--text-title); font-size: 18px; }
+    .btn-theme { background: var(--btn-theme-bg); color: var(--btn-theme-text); border: none; padding: 6px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    
+    .tabs { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 12px; }
+    .tab-btn { flex: 1; padding: 8px; text-align: center; background: none; border: none; font-size: 14px; font-weight: bold; cursor: pointer; color: var(--tab-inactive); }
+    .tab-btn.active { color: var(--tab-active); border-bottom: 3px solid var(--tab-active); }
+    
+    .search-box { margin-bottom: 10px; }
+    .search-box input, .admin-box input { width: 100%; padding: 10px 12px; font-size: 14px; background: var(--input-bg); color: var(--input-text); border: 2px solid var(--input-border); border-radius: 8px; outline: none; }
+    .search-box input:focus, .admin-box input:focus { border-color: var(--tab-active); }
+    .search-box input::placeholder, .admin-box input::placeholder { color: var(--placeholder); }
+    
+    .admin-panel { background: var(--panel-bg); border: 1px dashed var(--panel-border); padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center; }
+    .admin-box { display: flex; gap: 8px; margin-top: 8px; }
+    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+    .btn-admin { background: var(--btn-admin-bg); color: #ffffff; width: 100%; }
+    .btn-admin:hover { background: var(--btn-admin-hover); }
+    .btn-add { background: #2e7d32; color: white; white-space: nowrap; }
+    .btn-add:hover { background: #388e3c; }
+    .btn-delete { background: #d32f2f; color: white; padding: 4px 8px; font-size: 11px; border-radius: 4px; }
+    .btn-delete:hover { background: #f44336; }
+    
+    /* DAFTAR HASIL DENGAN SCROLL INTERNAL */
+    .result-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 12px 0;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .result-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .result-list::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb);
+      border-radius: 4px;
+    }
+
+    .result-item { background: var(--item-bg); border-left: 4px solid var(--item-border); padding: 10px 12px; margin-bottom: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    .result-item .number { font-weight: bold; font-size: 14px; color: var(--item-number); letter-spacing: 0.5px; }
+    .right-content { display: flex; align-items: center; gap: 8px; }
+    .badge { background: var(--badge-bg); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; font-weight: bold; }
+    .empty-msg { text-align: center; color: var(--empty-text); padding: 15px; font-size: 13px; }
+    
+    .status-bar { font-size: 11px; text-align: center; margin-bottom: 10px; color: var(--empty-text); }
+
+    /* BAGIAN DONASI DIPINDAHKAN KE BAWAH */
+    .donation-section {
+      background-color: var(--donate-bg);
+      border: 1px solid var(--donate-border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-top: auto;
+      text-align: center;
+    }
+    .donation-title {
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .donation-desc {
+      font-size: 11px;
+      color: var(--empty-text);
+      margin-bottom: 6px;
+    }
+    .donation-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .qris-img {
+      max-width: 50px;
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+    .btn-donate-link {
+      display: inline-block;
+      background-color: #f39c12;
+      color: #ffffff;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 15px;
+      transition: background 0.2s;
+    }
+    .btn-donate-link:hover {
+      background-color: #d35400;
+    }
+
+    /* Modal untuk Zoom Gambar QRIS */
+    .qris-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .qris-modal img {
+      max-width: 85%;
+      max-height: 75%;
+      border-radius: 10px;
+      background: white;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-area">
+    <h2>🔍 UID HB & Payment Scammer</h2>
+    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Mode Gelap</button>
+  </div>
+  
+  <div id="statusBar" class="status-bar">Memuat data dari server online...</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('rekening')">Payment Scammer</button>
+    <button class="tab-btn" onclick="switchTab('genshin')">UID HB Genshin</button>
+  </div>
+
+  <div class="admin-panel">
+    <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Masuk Mode Pemilik</button>
+    
+    <div id="addBox" class="admin-box" style="display: none;">
+      <input type="text" id="newNumberInput" placeholder="Masukkan nomor/UID baru...">
+      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Tambah</button>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Masukkan Nomor Rekening / E-Wallet..." onkeyup="filterData()">
+  </div>
+
+  <ul class="result-list" id="resultList"></ul>
+
+  <!-- BAGIAN DONASI (SEKARANG DI PALING BAWAH) -->
+  <div class="donation-section">
+    <div class="donation-title">☕ Dukung Capllang</div>
+    <div class="donation-desc">Bantu server ini tetap aktif dengan donasi sukarela.</div>
+    
+    <div class="donation-content">
+      <img src="https://i.ibb.co.com/xZvNHPp/QRIS-Dana.jpg" alt="Scan QRIS Donasi" class="qris-img" onclick="openQrisModal(this.src)" title="Klik untuk memperbesar">
+      <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">
+        ❤️ Donasi via Saweria
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Zoom QRIS -->
+<div id="qrisModal" class="qris-modal" onclick="closeQrisModal()">
+  <img id="modalImg" src="" alt="QRIS Besar">
+</div>
+
+<script>
+  // ================= KONFIGURASI JSONBIN =================
+  const BIN_ID = "6a82d21cda38895dfeee1ef0"; 
+  const API_KEY = "$2a$10$z1s.Xlbea/IWxeloKFXpc.xmxqaVtnVvs5/F.L0aXO1Ah0y4T2m1G"; 
+  const HASH_PASSWORD_PEMILIK = "cdf291694fe40299afebc7c4b8796923a8eeff1a88413c9a8185fba3cb69e6de"; 
+
+  const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+  let database = { rekening: [], genshin: [] };
+  let isAdmin = false;
+  let activeTab = 'rekening';
+
+  // --- MENGAMBIL DATA DARI JSONBIN ---
+  async function fetchOnlineDatabase() {
+    const status = document.getElementById('statusBar');
+    try {
+      status.innerText = "⏳ Memperbarui data dari server...";
+      const res = await fetch(`${BASE_URL}/latest`, {
+        headers: { 'X-Master-Key': API_KEY }
+      });
+      if (!res.ok) throw new Error("Gagal terhubung ke JSONBin");
+      
+      const data = await res.json();
+      database = data.record;
+      
+      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+      status.innerText = "🟢 Terhubung dengan database online";
+    } catch (err) {
+      console.warn("Gagal mengambil data online, menggunakan data lokal:", err);
+      const cached = localStorage.getItem('cached_scammer_db');
+      if (cached) database = JSON.parse(cached);
+      status.innerText = "🔴 Mode Offline (Menggunakan data lokal)";
+    }
+    filterData();
+  }
+
+  // --- MENYIMPAN DATA KE JSONBIN ---
+  async function saveOnlineDatabase() {
+    const status = document.getElementById('statusBar');
+    status.innerText = "⏳ Menyimpan perubahan ke server...";
+    try {
+      const res = await fetch(BASE_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': API_KEY
+        },
+        body: JSON.stringify(database)
+      });
+      
+      if (!res.ok) throw new Error("Gagal menyimpan data ke server");
+      
+      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+      status.innerText = "🟢 Perubahan berhasil disimpan online!";
+      return true;
+    } catch (err) {
+      alert("Gagal memperbarui server online. Periksa koneksi atau API Key Anda.");
+      status.innerText = "⚠️ Gagal memperbarui server online";
+      return false;
+    }
+  }
+
+  // --- FITUR HASH KATA SANDI ---
+  async function hashString(str) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // --- LOGIKA UTAMA APLIKASI ---
+  async function toggleAdmin() {
+    if (!isAdmin) {
+      const inputPass = prompt("Masukkan Kata Sandi Pemilik:");
+      if (inputPass !== null) {
+        const hashedInput = await hashString(inputPass);
+        if (hashedInput === HASH_PASSWORD_PEMILIK) {
+          isAdmin = true;
+          document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
+          document.getElementById('addBox').style.display = "flex";
+          alert("Akses pemilik diterima!");
+        } else {
+          alert("Kata sandi salah!");
+        }
+      }
+    } else {
+      isAdmin = false;
+      document.getElementById('authBtn').innerText = "🔑 Masuk Mode Pemilik";
+      document.getElementById('addBox').style.display = "none";
+    }
+    filterData();
+  }
+
+  async function addNumber() {
+    const input = document.getElementById('newNumberInput');
+    const btnAdd = document.getElementById('btnAdd');
+    const val = input.value.trim();
+
+    if (!val) {
+      alert("Nomor tidak boleh kosong!");
+      return;
+    }
+
+    if (database[activeTab].includes(val)) {
+      alert("Nomor ini sudah ada dalam database!");
+      return;
+    }
+
+    btnAdd.disabled = true;
+    database[activeTab].push(val);
+    
+    const success = await saveOnlineDatabase();
+    if (success) {
+      input.value = "";
+      filterData();
+      alert("Nomor berhasil ditambahkan dan di-update secara online!");
+    } else {
+      database[activeTab].pop();
+    }
+    btnAdd.disabled = false;
+  }
+
+  async function deleteNumber(nomor) {
+    if (confirm(`Hapus ${nomor} dari database online?`)) {
+      const index = database[activeTab].indexOf(nomor);
+      if (index > -1) {
+        database[activeTab].splice(index, 1);
+        const success = await saveOnlineDatabase();
+        if (success) filterData();
+      }
+    }
+  }
+
+  function switchTab(tab) {
+    activeTab = tab;
+    
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons[0].classList.toggle('active', tab === 'rekening');
+    buttons[1].classList.toggle('active', tab === 'genshin');
+
+    const input = document.getElementById('searchInput');
+    input.placeholder = tab === 'rekening' 
+      ? "Masukkan Nomor Rekening / E-Wallet..." 
+      : "Masukkan UID Genshin Impact...";
+    input.value = "";
+
+    filterData();
+  }
+
+  function filterData() {
+    const query = document.getElementById('searchInput').value.trim();
+    const resultList = document.getElementById('resultList');
+    resultList.innerHTML = "";
+
+    const currentData = database[activeTab] || [];
+    const filtered = currentData.filter(nomor => nomor.includes(query));
+
+    if (filtered.length === 0) {
+      resultList.innerHTML = `<li class="empty-msg">Tidak ada nomor terdaftar di database.</li>`;
+      return;
+    }
+
+    filtered.forEach(nomor => {
+      const li = document.createElement('li');
+      li.className = 'result-item';
+      
+      const deleteBtnHTML = isAdmin 
+        ? `<button class="btn btn-delete" onclick="deleteNumber('${nomor}')">Hapus</button>` 
+        : '';
+
+      li.innerHTML = `
+        <span class="number">${nomor}</span>
+        <div class="right-content">
+          <span class="badge">BAHAYA</span>
+          ${deleteBtnHTML}
+        </div>
+      `;
+      resultList.appendChild(li);
+    });
+  }
+
+  // TEMA
+  function initTheme() {
+    const savedTheme = localStorage.getItem('theme_preference');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      document.getElementById('themeToggleBtn').innerHTML = "☀️ Mode Terang";
+    }
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    document.getElementById('themeToggleBtn').innerHTML = isDark ? "☀️ Mode Terang" : "🌙 Mode Gelap";
+    localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
+  }
+
+  // LOGIKA MODAL QRIS
+  function openQrisModal(src) {
+    document.getElementById('modalImg').src = src;
+    document.getElementById('qrisModal').style.display = 'flex';
+  }
+
+  function closeQrisModal() {
+    document.getElementById('qrisModal').style.display = 'none';
+  }
+
+  // Inisialisasi Aplikasi
+  initTheme();
+  fetchOnlineDatabase();
+</script>
+
+</body>
+</html>
