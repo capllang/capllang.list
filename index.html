@@ -3,212 +3,393 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Database Online/Offline - Cek Scammer & UID</title>
+  <title>Database Scammer & UID Genshin</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg-body: #f4f6f9;
-      --bg-container: #ffffff;
-      --text-main: #333333;
-      --text-title: #1a252f;
-      --border-color: #e0e0e0;
-      --tab-inactive: #666666;
-      --tab-active: #e74c3c;
-      --input-bg: #ffffff;
-      --input-border: #dddddd;
-      --input-text: #333333;
-      --placeholder: #888888;
-      --panel-bg: #f8f9fa;
-      --panel-border: #cccccc;
-      --btn-admin-bg: #2c3e50;
-      --btn-admin-hover: #1a252f;
-      --item-bg: #fff5f5;
-      --item-border: #e74c3c;
-      --item-number: #c0392b;
-      --badge-bg: #e74c3c;
-      --empty-text: #888888;
-      --btn-theme-bg: #e0e0e0;
-      --btn-theme-text: #333333;
-      --donate-bg: #fff8e1;
-      --donate-border: #ffe082;
-      --scrollbar-thumb: #cccccc;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      
+      /* Light Mode Palette */
+      --bg-gradient: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
+      --card-bg: rgba(255, 255, 255, 0.75);
+      --card-border: rgba(255, 255, 255, 0.6);
+      --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --text-main: #2d3748;
+      --text-muted: #718096;
+      --text-title: #1a202c;
+      
+      --tab-bg: rgba(0, 0, 0, 0.04);
+      --tab-active-bg: #ffffff;
+      --tab-active-text: #e53e3e;
+      --tab-active-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      
+      --input-bg: rgba(255, 255, 255, 0.8);
+      --input-border: #e2e8f0;
+      --input-focus: #4299e1;
+      
+      --item-bg: rgba(255, 255, 255, 0.9);
+      --item-border: #feb2b2;
+      --item-badge: #e53e3e;
+      --item-badge-bg: #fff5f5;
+      
+      --btn-primary: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+      --btn-admin: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+      --btn-add: linear-gradient(135deg, #38a169 0%, #276749 100%);
+      --btn-delete: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+      
+      --donate-bg: rgba(254, 235, 200, 0.4);
+      --donate-border: rgba(251, 211, 141, 0.6);
+      --scrollbar-thumb: #cbd5e0;
     }
 
     body.dark-mode {
-      --bg-body: #121212;
-      --bg-container: #1e1e1e;
-      --text-main: #e0e0e0;
-      --text-title: #ffffff;
-      --border-color: #2d2d2d;
-      --tab-inactive: #888888;
-      --tab-active: #ff5252;
-      --input-bg: #2a2a2a;
-      --input-border: #3d3d3d;
-      --input-text: #ffffff;
-      --placeholder: #777777;
-      --panel-bg: #252525;
-      --panel-border: #444444;
-      --btn-admin-bg: #37474f;
-      --btn-admin-hover: #455a64;
-      --item-bg: #2c1a1a;
-      --item-border: #ff5252;
-      --item-number: #ff8a80;
-      --badge-bg: #d32f2f;
-      --empty-text: #666666;
-      --btn-theme-bg: #333333;
-      --btn-theme-text: #ffffff;
-      --donate-bg: #2b261f;
-      --donate-border: #5d4037;
-      --scrollbar-thumb: #444444;
+      /* Dark Mode Palette */
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --card-bg: rgba(30, 41, 59, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-title: #f8fafc;
+      
+      --tab-bg: rgba(0, 0, 0, 0.2);
+      --tab-active-bg: #334155;
+      --tab-active-text: #f87171;
+      --tab-active-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      
+      --input-bg: rgba(15, 23, 42, 0.6);
+      --input-border: #334155;
+      --input-focus: #60a5fa;
+      
+      --item-bg: rgba(30, 41, 59, 0.9);
+      --item-border: #991b1b;
+      --item-badge: #f87171;
+      --item-badge-bg: rgba(153, 27, 27, 0.2);
+      
+      --btn-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      --btn-admin: linear-gradient(135deg, #475569 0%, #334155 100%);
+      --btn-add: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+      --btn-delete: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      
+      --donate-bg: rgba(120, 53, 15, 0.2);
+      --donate-border: rgba(180, 83, 9, 0.3);
+      --scrollbar-thumb: #475569;
     }
 
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; transition: background-color 0.3s, color 0.3s, border-color 0.3s; }
-    
+    * {
+      box-sizing: border-box;
+      font-family: var(--font-family);
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
     html, body {
       height: 100%;
       overflow: hidden;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      background-color: var(--bg-body);
+      background: var(--bg-gradient);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px;
+      padding: 16px;
       color: var(--text-main);
     }
 
+    /* Glassmorphism Card Container */
     .container {
       width: 100%;
-      max-width: 550px;
-      max-height: 98vh;
-      background: var(--bg-container);
-      padding: 18px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-      border: 1px solid var(--border-color);
+      max-width: 480px;
+      max-height: 94vh;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: var(--card-shadow);
       display: flex;
       flex-direction: column;
-    }
-    
-    .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    h2 { margin: 0; color: var(--text-title); font-size: 18px; }
-    .btn-theme { background: var(--btn-theme-bg); color: var(--btn-theme-text); border: none; padding: 6px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-    
-    .tabs { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 12px; }
-    .tab-btn { flex: 1; padding: 8px; text-align: center; background: none; border: none; font-size: 14px; font-weight: bold; cursor: pointer; color: var(--tab-inactive); }
-    .tab-btn.active { color: var(--tab-active); border-bottom: 3px solid var(--tab-active); }
-    
-    .search-box { margin-bottom: 10px; }
-    .search-box input, .admin-box input { width: 100%; padding: 10px 12px; font-size: 14px; background: var(--input-bg); color: var(--input-text); border: 2px solid var(--input-border); border-radius: 8px; outline: none; }
-    .search-box input:focus, .admin-box input:focus { border-color: var(--tab-active); }
-    .search-box input::placeholder, .admin-box input::placeholder { color: var(--placeholder); }
-    
-    .admin-panel { background: var(--panel-bg); border: 1px dashed var(--panel-border); padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center; }
-    .admin-box { display: flex; gap: 8px; margin-top: 8px; }
-    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
-    .btn-admin { background: var(--btn-admin-bg); color: #ffffff; width: 100%; }
-    .btn-admin:hover { background: var(--btn-admin-hover); }
-    .btn-add { background: #2e7d32; color: white; white-space: nowrap; }
-    .btn-add:hover { background: #388e3c; }
-    .btn-delete { background: #d32f2f; color: white; padding: 4px 8px; font-size: 11px; border-radius: 4px; }
-    .btn-delete:hover { background: #f44336; }
-    
-    /* DAFTAR HASIL DENGAN SCROLL INTERNAL */
-    .result-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 12px 0;
-      max-height: 200px;
-      overflow-y: auto;
-      padding-right: 4px;
+      gap: 16px;
     }
 
-    .result-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    .result-list::-webkit-scrollbar-thumb {
-      background-color: var(--scrollbar-thumb);
-      border-radius: 4px;
-    }
-
-    .result-item { background: var(--item-bg); border-left: 4px solid var(--item-border); padding: 10px 12px; margin-bottom: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-    .result-item .number { font-weight: bold; font-size: 14px; color: var(--item-number); letter-spacing: 0.5px; }
-    .right-content { display: flex; align-items: center; gap: 8px; }
-    .badge { background: var(--badge-bg); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; font-weight: bold; }
-    .empty-msg { text-align: center; color: var(--empty-text); padding: 15px; font-size: 13px; }
-    
-    .status-bar { font-size: 11px; text-align: center; margin-bottom: 10px; color: var(--empty-text); }
-
-    /* BAGIAN DONASI DIPINDAHKAN KE BAWAH */
-    .donation-section {
-      background-color: var(--donate-bg);
-      border: 1px solid var(--donate-border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin-top: auto;
-      text-align: center;
-    }
-    .donation-title {
-      font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 4px;
+    /* Header & Theme Toggle */
+    .header-area {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-title);
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-theme {
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--input-border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-theme:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Status Bar */
+    .status-bar {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-align: center;
+      color: var(--text-muted);
+      background: var(--input-bg);
+      padding: 6px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--input-border);
+    }
+
+    /* Modern Tabs */
+    .tabs {
+      display: flex;
+      background: var(--tab-bg);
+      padding: 4px;
+      border-radius: 12px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      background: transparent;
+      border: none;
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-muted);
+      border-radius: 8px;
+    }
+
+    .tab-btn.active {
+      background: var(--tab-active-bg);
+      color: var(--tab-active-text);
+      box-shadow: var(--tab-active-shadow);
+    }
+
+    /* Search & Admin Input */
+    .search-box input, .admin-box input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 0.875rem;
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--input-border);
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .search-box input:focus, .admin-box input:focus {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    }
+
+    .search-box input::placeholder, .admin-box input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Admin Panel */
+    .admin-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .admin-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Buttons Style */
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #ffffff;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
     }
-    .donation-desc {
-      font-size: 11px;
-      color: var(--empty-text);
-      margin-bottom: 6px;
-    }
-    .donation-content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    .qris-img {
-      max-width: 50px;
-      width: 100%;
-      height: auto;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-    }
-    .btn-donate-link {
-      display: inline-block;
-      background-color: #f39c12;
-      color: #ffffff;
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: bold;
-      text-decoration: none;
-      border-radius: 15px;
-      transition: background 0.2s;
-    }
-    .btn-donate-link:hover {
-      background-color: #d35400;
+
+    .btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
     }
 
-    /* Modal untuk Zoom Gambar QRIS */
+    .btn-admin { background: var(--btn-admin); width: 100%; }
+    .btn-add { background: var(--btn-add); white-space: nowrap; }
+    .btn-delete { background: var(--btn-delete); padding: 6px 10px; font-size: 0.7rem; border-radius: 6px; }
+
+    /* Results Scroll Area */
+    .result-list {
+      list-style: none;
+      max-height: 220px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-right: 4px;
+    }
+
+    .result-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .result-list::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb);
+      border-radius: 10px;
+    }
+
+    .result-item {
+      background: var(--item-bg);
+      border: 1px solid var(--card-border);
+      border-left: 4px solid var(--item-border);
+      padding: 12px 14px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .result-item .number {
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+
+    .right-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background: var(--item-badge-bg);
+      color: var(--item-badge);
+      border: 1px solid var(--item-border);
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 24px 12px;
+      font-size: 0.85rem;
+    }
+
+    /* Card Donasi modern */
+    .donation-section {
+      background: var(--donate-bg);
+      border: 1px solid var(--donate-border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .donation-text {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .donation-title {
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--text-title);
+    }
+
+    .donation-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .donation-action {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qris-img {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+    }
+
+    .btn-donate-link {
+      background: #f59e0b;
+      color: #ffffff;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    .btn-donate-link:hover {
+      background: #d97706;
+    }
+
+    /* Modal Zoom QRIS */
     .qris-modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       justify-content: center;
       align-items: center;
       z-index: 1000;
     }
+
     .qris-modal img {
-      max-width: 85%;
-      max-height: 75%;
-      border-radius: 10px;
-      background: white;
-      padding: 10px;
+      max-width: 80%;
+      max-height: 70%;
+      border-radius: 16px;
+      background: #ffffff;
+      padding: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
   </style>
 </head>
@@ -216,8 +397,8 @@
 
 <div class="container">
   <div class="header-area">
-    <h2>🔍 Uid Hb & Scammer</h2>
-    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Mode Gelap</button>
+    <h2>🛡️ Cek Scammer & UID</h2>
+    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
   </div>
   
   <div id="statusBar" class="status-bar">Memuat data dari server online...</div>
@@ -228,7 +409,7 @@
   </div>
 
   <div class="admin-panel">
-    <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Masuk Mode Pemilik</button>
+    <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
     
     <div id="addBox" class="admin-box" style="display: none;">
       <input type="text" id="newNumberInput" placeholder="Masukkan nomor/UID baru...">
@@ -237,38 +418,35 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Masukkan Nomor Rekening / E-Wallet..." onkeyup="filterData()">
+    <input type="text" id="searchInput" placeholder="Cari Rekening / E-Wallet..." onkeyup="filterData()">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
 
-  <!-- BAGIAN DONASI (SEKARANG DI PALING BAWAH) -->
+  <!-- DONASI CARD -->
   <div class="donation-section">
-    <div class="donation-title">☕ Dukung Capllang</div>
-    <div class="donation-desc">Bantu server ini tetap aktif dengan donasi sukarela.</div>
-    
-    <div class="donation-content">
-      <img src="https://i.ibb.co.com/xZvNHPp/QRIS-Dana.jpg" alt="Scan QRIS Donasi" class="qris-img" onclick="openQrisModal(this.src)" title="Klik untuk memperbesar">
+    <div class="donation-text">
+      <span class="donation-title">☕ Dukung Capllang</span>
+      <span class="donation-desc">Bantu server tetap aktif.</span>
+    </div>
+    <div class="donation-action">
+      <img src="https://i.ibb.co.com/xZvNHPp/QRIS-Dana.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
       <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">
-        ❤️ Donasi via Saweria
+        Saweria
       </a>
     </div>
   </div>
 </div>
 
-<!-- Modal Zoom QRIS -->
+<!-- Modal QRIS -->
 <div id="qrisModal" class="qris-modal" onclick="closeQrisModal()">
-  <img id="modalImg" src="" alt="QRIS Besar">
+  <img id="modalImg" src="" alt="QRIS Preview">
 </div>
 
 <script>
   // ================= KONFIGURASI JSONBIN =================
   const BIN_ID = "6a82d21cda38895dfeee1ef0"; 
-  
-  // 1. Kunci Read-Only untuk pembacaan data publik (Aman untuk frontend)
-  const READ_ONLY_API_KEY = "$2a$10$VsDc7DpbRTXnkVt4VQYDsecbPuhhHzwazm.WBDYKaJuSHGclKtBem"; 
-  
-  // 2. Kunci Master disimpan sementara di memori hanya saat mode admin aktif
+  const READ_ONLY_API_KEY = "$2a$10$GANTI_DENGAN_READ_ONLY_KEY_ANDA"; 
   let masterApiKey = ""; 
 
   const HASH_PASSWORD_PEMILIK = "cdf291694fe40299afebc7c4b8796923a8eeff1a88413c9a8185fba3cb69e6de"; 
@@ -278,7 +456,6 @@
   let isAdmin = false;
   let activeTab = 'rekening';
 
-  // --- MENGAMBIL DATA DARI JSONBIN (MENGGUNAKAN READ-ONLY KEY) ---
   async function fetchOnlineDatabase() {
     const status = document.getElementById('statusBar');
     try {
@@ -302,7 +479,6 @@
     filterData();
   }
 
-  // --- MENYIMPAN DATA KE JSONBIN (MENGGUNAKAN MASTER KEY) ---
   async function saveOnlineDatabase() {
     const status = document.getElementById('statusBar');
     status.innerText = "⏳ Menyimpan perubahan ke server...";
@@ -334,7 +510,6 @@
     }
   }
 
-  // --- FITUR HASH KATA SANDI ---
   async function hashString(str) {
     const encoder = new TextEncoder();
     const data = encoder.encode(str);
@@ -343,7 +518,6 @@
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // --- LOGIKA UTAMA APLIKASI ---
   async function toggleAdmin() {
     if (!isAdmin) {
       const inputPass = prompt("Masukkan Kata Sandi Pemilik:");
@@ -365,7 +539,7 @@
     } else {
       isAdmin = false;
       masterApiKey = "";
-      document.getElementById('authBtn').innerText = "🔑 Masuk Mode Pemilik";
+      document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
       document.getElementById('addBox').style.display = "none";
     }
     filterData();
@@ -393,7 +567,7 @@
     if (success) {
       input.value = "";
       filterData();
-      alert("Nomor berhasil ditambahkan dan di-update secara online!");
+      alert("Nomor berhasil ditambahkan!");
     } else {
       database[activeTab].pop();
     }
@@ -420,8 +594,8 @@
 
     const input = document.getElementById('searchInput');
     input.placeholder = tab === 'rekening' 
-      ? "Masukkan Nomor Rekening / E-Wallet..." 
-      : "Masukkan UID Genshin Impact...";
+      ? "Cari Rekening / E-Wallet..." 
+      : "Cari UID Genshin Impact...";
     input.value = "";
 
     filterData();
@@ -436,7 +610,7 @@
     const filtered = currentData.filter(nomor => nomor.includes(query));
 
     if (filtered.length === 0) {
-      resultList.innerHTML = `<li class="empty-msg">Tidak ada nomor terdaftar di database.</li>`;
+      resultList.innerHTML = `<li class="empty-msg">Tidak ada data ditemukan.</li>`;
       return;
     }
 
@@ -450,7 +624,7 @@
 
       const rightContent = document.createElement('div');
       rightContent.className = 'right-content';
-      rightContent.innerHTML = `<span class="badge">BAHAYA</span>`;
+      rightContent.innerHTML = `<span class="badge">TERLAPOR</span>`;
 
       if (isAdmin) {
         const btnDelete = document.createElement('button');
@@ -466,23 +640,21 @@
     });
   }
 
-  // TEMA
   function initTheme() {
     const savedTheme = localStorage.getItem('theme_preference');
     if (savedTheme === 'dark') {
       document.body.classList.add('dark-mode');
-      document.getElementById('themeToggleBtn').innerHTML = "☀️ Mode Terang";
+      document.getElementById('themeToggleBtn').innerHTML = "☀️ Terang";
     }
   }
 
   function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
-    document.getElementById('themeToggleBtn').innerHTML = isDark ? "☀️ Mode Terang" : "🌙 Mode Gelap";
+    document.getElementById('themeToggleBtn').innerHTML = isDark ? "☀️ Terang" : "🌙 Gelap";
     localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
   }
 
-  // LOGIKA MODAL QRIS
   function openQrisModal(src) {
     document.getElementById('modalImg').src = src;
     document.getElementById('qrisModal').style.display = 'flex';
@@ -492,7 +664,6 @@
     document.getElementById('qrisModal').style.display = 'none';
   }
 
-  // Inisialisasi Aplikasi
   initTheme();
   fetchOnlineDatabase();
 </script>
