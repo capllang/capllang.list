@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Database Scammer & UID Genshin</title>
+  <title>Database UID HB & Scammer</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -397,14 +397,14 @@
 
 <div class="container">
   <div class="header-area">
-    <h2>🛡️ Cek Scammer & UID</h2>
+    <h2>🛡️ UID HB & SCAMMER</h2>
     <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
   </div>
   
   <div id="statusBar" class="status-bar">Memuat data dari server online...</div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('rekening')">Payment Scammer</button>
+    <button class="tab-btn active" onclick="switchTab('rekening')">Rekening Scammer</button>
     <button class="tab-btn" onclick="switchTab('genshin')">UID HB Genshin</button>
   </div>
 
@@ -418,7 +418,7 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari Rekening / E-Wallet..." onkeyup="filterData()">
+    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer..." onkeyup="filterData()">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -427,7 +427,7 @@
   <div class="donation-section">
     <div class="donation-text">
       <span class="donation-title">☕ Dukung Capllang</span>
-      <span class="donation-desc">Bantu server tetap aktif.</span>
+      <span class="donation-desc">Bantu website tetap nyala.</span>
     </div>
     <div class="donation-action">
       <img src="https://i.ibb.co.com/xZvNHPp/QRIS-Dana.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
@@ -593,8 +593,8 @@
 
     const input = document.getElementById('searchInput');
     input.placeholder = tab === 'rekening' 
-      ? "Cari Rekening / E-Wallet..." 
-      : "Cari UID Genshin Impact...";
+      ? "Cari Payment/ E-Wallet..." 
+      : "Cari UID HB Genshin Impact...";
     input.value = "";
 
     filterData();
@@ -623,7 +623,7 @@
 
       const rightContent = document.createElement('div');
       rightContent.className = 'right-content';
-      rightContent.innerHTML = `<span class="badge">TERLAPOR</span>`;
+      rightContent.innerHTML = `<span class="badge">Waspada</span>`;
 
       if (isAdmin) {
         const btnDelete = document.createElement('button');
