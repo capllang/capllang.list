@@ -264,22 +264,27 @@
 <script>
   // ================= KONFIGURASI JSONBIN =================
   const BIN_ID = "6a82d21cda38895dfeee1ef0"; 
-  const API_KEY = "$2a$10$z1s.Xlbea/IWxeloKFXpc.xmxqaVtnVvs5/F.L0aXO1Ah0y4T2m1G"; 
-  const HASH_PASSWORD_PEMILIK = "cdf291694fe40299afebc7c4b8796923a8eeff1a88413c9a8185fba3cb69e6de"; 
+  
+  // 1. Kunci Read-Only untuk pembacaan data publik (Aman untuk frontend)
+  const READ_ONLY_API_KEY = "$2a$10$VsDc7DpbRTXnkVt4VQYDsecbPuhhHzwazm.WBDYKaJuSHGclKtBem"; 
+  
+  // 2. Kunci Master disimpan sementara di memori hanya saat mode admin aktif
+  let masterApiKey = ""; 
 
+  const HASH_PASSWORD_PEMILIK = "cdf291694fe40299afebc7c4b8796923a8eeff1a88413c9a8185fba3cb69e6de"; 
   const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 
   let database = { rekening: [], genshin: [] };
   let isAdmin = false;
   let activeTab = 'rekening';
 
-  // --- MENGAMBIL DATA DARI JSONBIN ---
+  // --- MENGAMBIL DATA DARI JSONBIN (MENGGUNAKAN READ-ONLY KEY) ---
   async function fetchOnlineDatabase() {
     const status = document.getElementById('statusBar');
     try {
       status.innerText = "⏳ Memperbarui data dari server...";
       const res = await fetch(`${BASE_URL}/latest`, {
-        headers: { 'X-Master-Key': API_KEY }
+        headers: { 'X-Access-Key': READ_ONLY_API_KEY }
       });
       if (!res.ok) throw new Error("Gagal terhubung ke JSONBin");
       
@@ -297,16 +302,22 @@
     filterData();
   }
 
-  // --- MENYIMPAN DATA KE JSONBIN ---
+  // --- MENYIMPAN DATA KE JSONBIN (MENGGUNAKAN MASTER KEY) ---
   async function saveOnlineDatabase() {
     const status = document.getElementById('statusBar');
     status.innerText = "⏳ Menyimpan perubahan ke server...";
+    
+    if (!masterApiKey) {
+      alert("Akses Master Key tidak ditemukan. Silakan masuk kembali ke mode pemilik.");
+      return false;
+    }
+
     try {
       const res = await fetch(BASE_URL, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Master-Key': API_KEY
+          'X-Master-Key': masterApiKey
         },
         body: JSON.stringify(database)
       });
@@ -317,7 +328,7 @@
       status.innerText = "🟢 Perubahan berhasil disimpan online!";
       return true;
     } catch (err) {
-      alert("Gagal memperbarui server online. Periksa koneksi atau API Key Anda.");
+      alert("Gagal memperbarui server online. Periksa koneksi atau Master Key Anda.");
       status.innerText = "⚠️ Gagal memperbarui server online";
       return false;
     }
@@ -339,16 +350,21 @@
       if (inputPass !== null) {
         const hashedInput = await hashString(inputPass);
         if (hashedInput === HASH_PASSWORD_PEMILIK) {
-          isAdmin = true;
-          document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
-          document.getElementById('addBox').style.display = "flex";
-          alert("Akses pemilik diterima!");
+          const inputMasterKey = prompt("Masukkan Master Key JSONBin Anda untuk izin edit:");
+          if (inputMasterKey) {
+            masterApiKey = inputMasterKey.trim();
+            isAdmin = true;
+            document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
+            document.getElementById('addBox').style.display = "flex";
+            alert("Akses pemilik diterima!");
+          }
         } else {
           alert("Kata sandi salah!");
         }
       }
     } else {
       isAdmin = false;
+      masterApiKey = "";
       document.getElementById('authBtn').innerText = "🔑 Masuk Mode Pemilik";
       document.getElementById('addBox').style.display = "none";
     }
@@ -411,44 +427,44 @@
     filterData();
   }
 
- function filterData() {
-  const query = document.getElementById('searchInput').value.trim();
-  const resultList = document.getElementById('resultList');
-  resultList.innerHTML = "";
+  function filterData() {
+    const query = document.getElementById('searchInput').value.trim();
+    const resultList = document.getElementById('resultList');
+    resultList.innerHTML = "";
 
-  const currentData = database[activeTab] || [];
-  const filtered = currentData.filter(nomor => nomor.includes(query));
+    const currentData = database[activeTab] || [];
+    const filtered = currentData.filter(nomor => nomor.includes(query));
 
-  if (filtered.length === 0) {
-    resultList.innerHTML = `<li class="empty-msg">Tidak ada nomor terdaftar di database.</li>`;
-    return;
-  }
-
-  filtered.forEach(nomor => {
-    const li = document.createElement('li');
-    li.className = 'result-item';
-
-    const spanNumber = document.createElement('span');
-    spanNumber.className = 'number';
-    spanNumber.textContent = nomor; // Lebih aman dari XSS
-
-    const rightContent = document.createElement('div');
-    rightContent.className = 'right-content';
-    rightContent.innerHTML = `<span class="badge">BAHAYA</span>`;
-
-    if (isAdmin) {
-      const btnDelete = document.createElement('button');
-      btnDelete.className = 'btn btn-delete';
-      btnDelete.textContent = 'Hapus';
-      btnDelete.onclick = () => deleteNumber(nomor);
-      rightContent.appendChild(btnDelete);
+    if (filtered.length === 0) {
+      resultList.innerHTML = `<li class="empty-msg">Tidak ada nomor terdaftar di database.</li>`;
+      return;
     }
 
-    li.appendChild(spanNumber);
-    li.appendChild(rightContent);
-    resultList.appendChild(li);
-  });
-}
+    filtered.forEach(nomor => {
+      const li = document.createElement('li');
+      li.className = 'result-item';
+
+      const spanNumber = document.createElement('span');
+      spanNumber.className = 'number';
+      spanNumber.textContent = nomor;
+
+      const rightContent = document.createElement('div');
+      rightContent.className = 'right-content';
+      rightContent.innerHTML = `<span class="badge">BAHAYA</span>`;
+
+      if (isAdmin) {
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'btn btn-delete';
+        btnDelete.textContent = 'Hapus';
+        btnDelete.onclick = () => deleteNumber(nomor);
+        rightContent.appendChild(btnDelete);
+      }
+
+      li.appendChild(spanNumber);
+      li.appendChild(rightContent);
+      resultList.appendChild(li);
+    });
+  }
 
   // TEMA
   function initTheme() {
