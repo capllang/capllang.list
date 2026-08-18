@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Database UID HB & Scammer</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,71 +13,73 @@
     :root {
       --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       
-      /* Light Mode Palette */
-      --bg-gradient: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%);
-      --card-bg: rgba(255, 255, 255, 0.75);
-      --card-border: rgba(255, 255, 255, 0.6);
-      --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-      --text-main: #2d3748;
-      --text-muted: #718096;
-      --text-title: #1a202c;
+      /* Mode Terang (Clean Slate Light) */
+      --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      --card-bg: rgba(255, 255, 255, 0.88);
+      --card-border: rgba(255, 255, 255, 0.9);
+      --card-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
       
-      --tab-bg: rgba(0, 0, 0, 0.04);
+      --text-main: #334155;
+      --text-muted: #64748b;
+      --text-title: #0f172a;
+      
+      --tab-bg: #f1f5f9;
       --tab-active-bg: #ffffff;
-      --tab-active-text: #e53e3e;
-      --tab-active-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      --tab-active-text: #4f46e5; /* Electric Indigo */
+      --tab-active-shadow: 0 4px 12px rgba(79, 70, 229, 0.12);
       
-      --input-bg: rgba(255, 255, 255, 0.8);
-      --input-border: #e2e8f0;
-      --input-focus: #4299e1;
+      --input-bg: #ffffff;
+      --input-border: #cbd5e1;
+      --input-focus: #6366f1;
       
-      --item-bg: rgba(255, 255, 255, 0.9);
-      --item-border: #feb2b2;
-      --item-badge: #e53e3e;
-      --item-badge-bg: #fff5f5;
+      --item-bg: #ffffff;
+      --item-border: #fecdd3;
+      --item-badge: #e11d48;
+      --item-badge-bg: #fff1f2;
       
-      --btn-primary: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
-      --btn-admin: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-      --btn-add: linear-gradient(135deg, #38a169 0%, #276749 100%);
-      --btn-delete: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+      --btn-primary: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+      --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+      --btn-add: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --btn-delete: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
       
-      --donate-bg: rgba(254, 235, 200, 0.4);
-      --donate-border: rgba(251, 211, 141, 0.6);
-      --scrollbar-thumb: #cbd5e0;
+      --donate-bg: rgba(254, 243, 199, 0.6);
+      --donate-border: rgba(252, 211, 77, 0.7);
+      --scrollbar-thumb: #cbd5e1;
     }
 
     body.dark-mode {
-      /* Dark Mode Palette */
-      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      --card-bg: rgba(30, 41, 59, 0.75);
+      /* Mode Gelap (Comfortable Midnight Dark) */
+      --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
+      --card-bg: rgba(17, 24, 39, 0.82);
       --card-border: rgba(255, 255, 255, 0.08);
-      --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      --text-main: #e2e8f0;
+      --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      
+      --text-main: #cbd5e1;
       --text-muted: #94a3b8;
       --text-title: #f8fafc;
       
-      --tab-bg: rgba(0, 0, 0, 0.2);
-      --tab-active-bg: #334155;
-      --tab-active-text: #f87171;
-      --tab-active-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      --tab-bg: rgba(15, 23, 42, 0.6);
+      --tab-active-bg: #1e293b;
+      --tab-active-text: #818cf8;
+      --tab-active-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       
-      --input-bg: rgba(15, 23, 42, 0.6);
+      --input-bg: rgba(15, 23, 42, 0.65);
       --input-border: #334155;
-      --input-focus: #60a5fa;
+      --input-focus: #818cf8;
       
-      --item-bg: rgba(30, 41, 59, 0.9);
-      --item-border: #991b1b;
-      --item-badge: #f87171;
-      --item-badge-bg: rgba(153, 27, 27, 0.2);
+      --item-bg: #1e293b;
+      --item-border: #881337;
+      --item-badge: #fda4af;
+      --item-badge-bg: rgba(225, 29, 72, 0.18);
       
-      --btn-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      --btn-admin: linear-gradient(135deg, #475569 0%, #334155 100%);
-      --btn-add: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
-      --btn-delete: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+      --btn-primary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+      --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+      --btn-add: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --btn-delete: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
       
       --donate-bg: rgba(120, 53, 15, 0.2);
       --donate-border: rgba(180, 83, 9, 0.3);
-      --scrollbar-thumb: #475569;
+      --scrollbar-thumb: #334155;
     }
 
     * {
@@ -85,11 +87,17 @@
       font-family: var(--font-family);
       margin: 0;
       padding: 0;
-      transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
+    body, .container, .tab-btn, .btn, .result-item, input {
+      transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    /* Fixed Full Screen Layout */
     html, body {
+      width: 100%;
       height: 100%;
+      height: 100dvh;
       overflow: hidden;
     }
 
@@ -98,25 +106,39 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
       color: var(--text-main);
     }
 
-    /* Glassmorphism Card Container */
+    /* App Interface Container */
     .container {
-      width: 100%;
-      max-width: 480px;
-      max-height: 94vh;
+      width: 100vw;
+      height: 100dvh;
+      max-width: 100%;
       background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: var(--card-shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: none;
+      border-radius: 0;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    @media (min-width: 640px) {
+      body {
+        padding: 20px;
+      }
+      .container {
+        max-width: 580px;
+        height: 100%;
+        max-height: 880px;
+        border-radius: 24px;
+        border: 1px solid var(--card-border);
+        box-shadow: var(--card-shadow);
+        padding: 24px;
+      }
     }
 
     /* Header & Theme Toggle */
@@ -124,6 +146,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
 
     h2 {
@@ -140,37 +163,57 @@
       background: var(--input-bg);
       color: var(--text-main);
       border: 1px solid var(--input-border);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
     }
     .btn-theme:hover {
       transform: translateY(-1px);
     }
 
-    /* Status Bar */
+    /* Status Bar & Counter */
+    .status-bar-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
     .status-bar {
-      font-size: 0.75rem;
+      font-size: 0.725rem;
       font-weight: 500;
-      text-align: center;
       color: var(--text-muted);
       background: var(--input-bg);
       padding: 6px 12px;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1px solid var(--input-border);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    /* Modern Tabs */
+    .data-counter {
+      font-size: 0.725rem;
+      font-weight: 600;
+      color: var(--text-title);
+      background: var(--input-bg);
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--input-border);
+      white-space: nowrap;
+    }
+
+    /* Tabs */
     .tabs {
       display: flex;
       background: var(--tab-bg);
       padding: 4px;
       border-radius: 12px;
+      flex-shrink: 0;
     }
 
     .tab-btn {
@@ -192,13 +235,17 @@
       box-shadow: var(--tab-active-shadow);
     }
 
-    /* Search & Admin Input */
+    /* Inputs & Admin Panel */
+    .search-box, .admin-panel {
+      flex-shrink: 0;
+    }
+
     .search-box input, .admin-box input {
       width: 100%;
       padding: 12px 16px;
       font-size: 0.875rem;
       background: var(--input-bg);
-      color: var(--text-main);
+      color: var(--text-title);
       border: 1px solid var(--input-border);
       border-radius: 12px;
       outline: none;
@@ -206,14 +253,13 @@
 
     .search-box input:focus, .admin-box input:focus {
       border-color: var(--input-focus);
-      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
 
     .search-box input::placeholder, .admin-box input::placeholder {
       color: var(--text-muted);
     }
 
-    /* Admin Panel */
     .admin-panel {
       display: flex;
       flex-direction: column;
@@ -225,7 +271,7 @@
       gap: 8px;
     }
 
-    /* Buttons Style */
+    /* Buttons */
     .btn {
       padding: 10px 16px;
       border: none;
@@ -242,22 +288,22 @@
 
     .btn:hover {
       opacity: 0.95;
-      transform: translateY(-1px);
     }
 
     .btn-admin { background: var(--btn-admin); width: 100%; }
     .btn-add { background: var(--btn-add); white-space: nowrap; }
-    .btn-delete { background: var(--btn-delete); padding: 6px 10px; font-size: 0.7rem; border-radius: 6px; }
+    .btn-delete { background: var(--btn-delete); padding: 5px 8px; font-size: 0.7rem; border-radius: 6px; }
 
     /* Results Scroll Area */
     .result-list {
       list-style: none;
-      max-height: 220px;
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      padding-right: 4px;
+      padding-right: 2px;
     }
 
     .result-list::-webkit-scrollbar {
@@ -278,12 +324,20 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .result-item:hover {
+      transform: scale(0.995);
     }
 
     .result-item .number {
       font-weight: 600;
       font-size: 0.9rem;
       letter-spacing: 0.5px;
+      word-break: break-all;
+      color: var(--text-title);
     }
 
     .right-content {
@@ -303,6 +357,17 @@
       letter-spacing: 0.5px;
     }
 
+    .btn-copy-icon {
+      font-size: 0.75rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      opacity: 0.6;
+    }
+    .btn-copy-icon:hover {
+      opacity: 1;
+    }
+
     .empty-msg {
       text-align: center;
       color: var(--text-muted);
@@ -310,13 +375,13 @@
       font-size: 0.85rem;
     }
 
-    /* Card Donasi modern */
+    /* Card Donasi */
     .donation-section {
       background: var(--donate-bg);
       border: 1px solid var(--donate-border);
       border-radius: 14px;
       padding: 12px 16px;
-      margin-top: auto;
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -326,7 +391,6 @@
     .donation-text {
       display: flex;
       flex-direction: column;
-      text-align: left;
     }
 
     .donation-title {
@@ -370,12 +434,12 @@
       background: #d97706;
     }
 
-    /* Modal Zoom QRIS */
+    /* Modal QRIS */
     .qris-modal {
       display: none;
       position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
+      top: 0; left: 0; width: 100vw; height: 100dvh;
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       justify-content: center;
@@ -384,12 +448,35 @@
     }
 
     .qris-modal img {
-      max-width: 80%;
-      max-height: 70%;
+      max-width: 85%;
+      max-height: 75%;
       border-radius: 16px;
       background: #ffffff;
       padding: 12px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      z-index: 2000;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
     }
   </style>
 </head>
@@ -401,7 +488,10 @@
     <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
   </div>
   
-  <div id="statusBar" class="status-bar">Memuat data dari server online...</div>
+  <div class="status-bar-container">
+    <div id="statusBar" class="status-bar">Memuat data online...</div>
+    <div id="dataCounter" class="data-counter">0 Data</div>
+  </div>
 
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('rekening')">Rekening Scammer</button>
@@ -412,13 +502,13 @@
     <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
     
     <div id="addBox" class="admin-box" style="display: none;">
-      <input type="text" id="newNumberInput" placeholder="Masukkan nomor/UID baru...">
+      <input type="text" id="newNumberInput" placeholder="Masukkan nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
       <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Tambah</button>
     </div>
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer..." onkeyup="filterData()">
+    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer..." oninput="filterData()">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -427,7 +517,7 @@
   <div class="donation-section">
     <div class="donation-text">
       <span class="donation-title">☕ Dukung Capllang</span>
-      <span class="donation-desc">Bantu website tetap nyala.</span>
+      <span class="donation-desc">Bantu server tetap aktif.</span>
     </div>
     <div class="donation-action">
       <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
@@ -442,6 +532,9 @@
 <div id="qrisModal" class="qris-modal" onclick="closeQrisModal()">
   <img id="modalImg" src="" alt="QRIS Preview">
 </div>
+
+<!-- Toast Container -->
+<div id="toast" class="toast">Berhasil disalin!</div>
 
 <script>
   // ================= KONFIGURASI JSONBIN =================
@@ -458,32 +551,41 @@
   async function fetchOnlineDatabase() {
     const status = document.getElementById('statusBar');
     try {
-      status.innerText = "⏳ Memperbarui data dari server...";
+      status.innerText = "⏳ Memperbarui server...";
       const res = await fetch(`${BASE_URL}/latest`, {
         headers: { 'X-Access-Key': READ_ONLY_API_KEY }
       });
       if (!res.ok) throw new Error("Gagal terhubung ke JSONBin");
       
       const data = await res.json();
-      database = data.record;
-      
-      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Terhubung dengan database online";
+      if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
+        database = data.record;
+        localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+        status.innerText = "🟢 Terhubung ke database";
+      } else {
+        throw new Error("Format data tidak sesuai");
+      }
     } catch (err) {
-      console.warn("Gagal mengambil data online, menggunakan data lokal:", err);
+      console.warn("Menggunakan cache lokal:", err);
       const cached = localStorage.getItem('cached_scammer_db');
-      if (cached) database = JSON.parse(cached);
-      status.innerText = "🔴 Mode Offline (Menggunakan data lokal)";
+      if (cached) {
+        try {
+          database = JSON.parse(cached);
+        } catch(e) {
+          database = { rekening: [], genshin: [] };
+        }
+      }
+      status.innerText = "🔴 Mode Offline (Data Lokal)";
     }
     filterData();
   }
 
   async function saveOnlineDatabase() {
     const status = document.getElementById('statusBar');
-    status.innerText = "⏳ Menyimpan perubahan ke server...";
+    status.innerText = "⏳ Menyimpan data...";
     
     if (!masterApiKey) {
-      alert("Akses Master Key tidak ditemukan. Silakan masuk kembali ke mode pemilik.");
+      alert("Master Key belum diisi. Silakan login kembali ke Mode Pemilik.");
       return false;
     }
 
@@ -497,14 +599,14 @@
         body: JSON.stringify(database)
       });
       
-      if (!res.ok) throw new Error("Gagal menyimpan data ke server");
+      if (!res.ok) throw new Error("Gagal menyimpan data");
       
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Perubahan berhasil disimpan online!";
+      status.innerText = "🟢 Tersimpan di server!";
       return true;
     } catch (err) {
-      alert("Gagal memperbarui server online. Periksa koneksi atau Master Key Anda.");
-      status.innerText = "⚠️ Gagal memperbarui server online";
+      alert("Gagal memperbarui server online. Periksa koneksi atau Master Key.");
+      status.innerText = "⚠️ Simpan gagal";
       return false;
     }
   }
@@ -520,16 +622,18 @@
   async function toggleAdmin() {
     if (!isAdmin) {
       const inputPass = prompt("Masukkan Kata Sandi Pemilik:");
-      if (inputPass !== null) {
-        const hashedInput = await hashString(inputPass);
+      if (inputPass !== null && inputPass.trim() !== "") {
+        const hashedInput = await hashString(inputPass.trim());
         if (hashedInput === HASH_PASSWORD_PEMILIK) {
-          const inputMasterKey = prompt("Masukkan Master Key JSONBin Anda untuk izin edit:");
-          if (inputMasterKey) {
+          const inputMasterKey = prompt("Masukkan Master Key JSONBin:");
+          if (inputMasterKey && inputMasterKey.trim() !== "") {
             masterApiKey = inputMasterKey.trim();
             isAdmin = true;
             document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
             document.getElementById('addBox').style.display = "flex";
-            alert("Akses pemilik diterima!");
+            showToast("Mode Pemilik Aktif");
+          } else if (inputMasterKey !== null) {
+            alert("Master Key wajib diisi!");
           }
         } else {
           alert("Kata sandi salah!");
@@ -540,8 +644,15 @@
       masterApiKey = "";
       document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
       document.getElementById('addBox').style.display = "none";
+      showToast("Keluar Mode Pemilik");
     }
     filterData();
+  }
+
+  function handleInputKeyDown(e) {
+    if (e.key === 'Enter') {
+      addNumber();
+    }
   }
 
   async function addNumber() {
@@ -554,8 +665,9 @@
       return;
     }
 
-    if (database[activeTab].includes(val)) {
-      alert("Nomor ini sudah ada dalam database!");
+    const exists = database[activeTab].some(item => item.toLowerCase() === val.toLowerCase());
+    if (exists) {
+      alert("Nomor/UID ini sudah ada di database!");
       return;
     }
 
@@ -566,20 +678,28 @@
     if (success) {
       input.value = "";
       filterData();
-      alert("Nomor berhasil ditambahkan!");
+      showToast("Data berhasil ditambahkan!");
     } else {
       database[activeTab].pop();
     }
     btnAdd.disabled = false;
   }
 
-  async function deleteNumber(nomor) {
-    if (confirm(`Hapus ${nomor} dari database online?`)) {
+  async function deleteNumber(nomor, event) {
+    if (event) event.stopPropagation();
+    if (confirm(`Hapus ${nomor} dari database?`)) {
       const index = database[activeTab].indexOf(nomor);
       if (index > -1) {
+        const originalData = [...database[activeTab]];
         database[activeTab].splice(index, 1);
+        
         const success = await saveOnlineDatabase();
-        if (success) filterData();
+        if (success) {
+          filterData();
+          showToast("Data dihapus!");
+        } else {
+          database[activeTab] = originalData;
+        }
       }
     }
   }
@@ -593,7 +713,7 @@
 
     const input = document.getElementById('searchInput');
     input.placeholder = tab === 'rekening' 
-      ? "Cari Payment/ E-Wallet..." 
+      ? "Cari Rekening/ E-Wallet..." 
       : "Cari UID HB Genshin Impact...";
     input.value = "";
 
@@ -601,12 +721,15 @@
   }
 
   function filterData() {
-    const query = document.getElementById('searchInput').value.trim();
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
     const resultList = document.getElementById('resultList');
+    const counter = document.getElementById('dataCounter');
     resultList.innerHTML = "";
 
     const currentData = database[activeTab] || [];
-    const filtered = currentData.filter(nomor => nomor.includes(query));
+    const filtered = currentData.filter(nomor => nomor.toLowerCase().includes(query));
+
+    counter.innerText = `${filtered.length} Data`;
 
     if (filtered.length === 0) {
       resultList.innerHTML = `<li class="empty-msg">Tidak ada data ditemukan.</li>`;
@@ -616,6 +739,8 @@
     filtered.forEach(nomor => {
       const li = document.createElement('li');
       li.className = 'result-item';
+      li.onclick = () => copyToClipboard(nomor);
+      li.title = "Klik untuk menyalin nomor";
 
       const spanNumber = document.createElement('span');
       spanNumber.className = 'number';
@@ -623,13 +748,16 @@
 
       const rightContent = document.createElement('div');
       rightContent.className = 'right-content';
-      rightContent.innerHTML = `<span class="badge">Waspada</span>`;
+      rightContent.innerHTML = `
+        <span class="badge">Waspada</span>
+        <button class="btn-copy-icon" title="Salin">📋</button>
+      `;
 
       if (isAdmin) {
         const btnDelete = document.createElement('button');
         btnDelete.className = 'btn btn-delete';
         btnDelete.textContent = 'Hapus';
-        btnDelete.onclick = () => deleteNumber(nomor);
+        btnDelete.onclick = (e) => deleteNumber(nomor, e);
         rightContent.appendChild(btnDelete);
       }
 
@@ -637,6 +765,23 @@
       li.appendChild(rightContent);
       resultList.appendChild(li);
     });
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(`Disalin: ${text}`);
+    }).catch(() => {
+      showToast("Gagal menyalin teks.");
+    });
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 2200);
   }
 
   function initTheme() {
@@ -662,6 +807,10 @@
   function closeQrisModal() {
     document.getElementById('qrisModal').style.display = 'none';
   }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeQrisModal();
+  });
 
   initTheme();
   fetchOnlineDatabase();
