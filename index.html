@@ -108,15 +108,21 @@
       color: var(--text-main);
     }
 
-   .container {
-  width: 100%;
-  max-width: 500px;
-  height: auto;
-  max-height: 90dvh; /* Maksimal 90% dari tinggi layar */
-  border-radius: 20px; /* Membuat sudut membulat di HP */
-  border: 1px solid var(--card-border);
-  box-shadow: var(--card-shadow);
-}
+    .container {
+      width: 100vw;
+      height: 100dvh;
+      max-width: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: none;
+      border-radius: 0;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
 
     @media (min-width: 640px) {
       body {
