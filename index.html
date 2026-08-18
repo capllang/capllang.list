@@ -25,7 +25,7 @@
       
       --tab-bg: #f1f5f9;
       --tab-active-bg: #ffffff;
-      --tab-active-text: #4f46e5; /* Electric Indigo */
+      --tab-active-text: #4f46e5;
       --tab-active-shadow: 0 4px 12px rgba(79, 70, 229, 0.12);
       
       --input-bg: #ffffff;
@@ -93,7 +93,6 @@
       transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
-    /* Fixed Full Screen Layout */
     html, body {
       width: 100%;
       height: 100%;
@@ -109,7 +108,6 @@
       color: var(--text-main);
     }
 
-    /* App Interface Container */
     .container {
       width: 100vw;
       height: 100dvh;
@@ -141,7 +139,6 @@
       }
     }
 
-    /* Header & Theme Toggle */
     .header-area {
       display: flex;
       justify-content: space-between;
@@ -173,7 +170,6 @@
       transform: translateY(-1px);
     }
 
-    /* Status Bar & Counter */
     .status-bar-container {
       display: flex;
       justify-content: space-between;
@@ -207,7 +203,6 @@
       white-space: nowrap;
     }
 
-    /* Tabs */
     .tabs {
       display: flex;
       background: var(--tab-bg);
@@ -235,7 +230,6 @@
       box-shadow: var(--tab-active-shadow);
     }
 
-    /* Inputs & Admin Panel */
     .search-box, .admin-panel {
       flex-shrink: 0;
     }
@@ -271,7 +265,6 @@
       gap: 8px;
     }
 
-    /* Buttons */
     .btn {
       padding: 10px 16px;
       border: none;
@@ -294,7 +287,6 @@
     .btn-add { background: var(--btn-add); white-space: nowrap; }
     .btn-delete { background: var(--btn-delete); padding: 5px 8px; font-size: 0.7rem; border-radius: 6px; }
 
-    /* Results Scroll Area */
     .result-list {
       list-style: none;
       flex: 1;
@@ -375,7 +367,6 @@
       font-size: 0.85rem;
     }
 
-    /* Card Donasi */
     .donation-section {
       background: var(--donate-bg);
       border: 1px solid var(--donate-border);
@@ -434,7 +425,6 @@
       background: #d97706;
     }
 
-    /* Modal QRIS */
     .qris-modal {
       display: none;
       position: fixed;
@@ -456,7 +446,6 @@
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
 
-    /* Toast Notification */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -484,7 +473,7 @@
 
 <div class="container">
   <div class="header-area">
-    <h2>🛡️ UID HB & SCAMMER</h2>
+    <h2>🛡️ UID HB & REK SCAMMER</h2>
     <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
   </div>
   
@@ -494,8 +483,8 @@
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('rekening')">Rekening Scammer</button>
-    <button class="tab-btn" onclick="switchTab('genshin')">UID HB Genshin</button>
+    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
+    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Genshin</button>
   </div>
 
   <div class="admin-panel">
@@ -508,7 +497,7 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer..." oninput="filterData()">
+    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer...">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -530,7 +519,7 @@
 
 <!-- Modal QRIS -->
 <div id="qrisModal" class="qris-modal" onclick="closeQrisModal()">
-  <img id="modalImg" src="" alt="QRIS Preview">
+  <img id="modalImg" src="" alt="QRIS Preview" onclick="event.stopPropagation()">
 </div>
 
 <!-- Toast Container -->
@@ -538,116 +527,99 @@
 
 <script>
   // ================= KONFIGURASI JSONBIN =================
-  const BIN_ID = "6a82d21cda38895dfeee1ef0"; 
-  const READ_ONLY_API_KEY = "$2a$10$VsDc7DpbRTXnkVt4VQYDsecbPuhhHzwazm.WBDYKaJuSHGclKtBem"; 
-  let masterApiKey = ""; 
-  const HASH_PASSWORD_PEMILIK = "cdf291694fe40299afebc7c4b8796923a8eeff1a88413c9a8185fba3cb69e6de"; 
-  const BASE_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+  const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
+  let adminSecretKey = "";
 
   let database = { rekening: [], genshin: [] };
   let isAdmin = false;
   let activeTab = 'rekening';
+  let searchTimeout = null;
 
-  async function fetchOnlineDatabase() {
-    const status = document.getElementById('statusBar');
-    try {
-      status.innerText = "⏳ Memperbarui server...";
-      const res = await fetch(`${BASE_URL}/latest`, {
-        headers: { 'X-Access-Key': READ_ONLY_API_KEY }
-      });
-      if (!res.ok) throw new Error("Gagal terhubung ke JSONBin");
-      
-      const data = await res.json();
-      if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
-        database = data.record;
-        localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-        status.innerText = "🟢 Terhubung ke database";
-      } else {
-        throw new Error("Format data tidak sesuai");
-      }
-    } catch (err) {
-      console.warn("Menggunakan cache lokal:", err);
-      const cached = localStorage.getItem('cached_scammer_db');
-      if (cached) {
-        try {
-          database = JSON.parse(cached);
-        } catch(e) {
-          database = { rekening: [], genshin: [] };
-        }
-      }
-      status.innerText = "🔴 Mode Offline (Data Lokal)";
+ async function fetchOnlineDatabase() {
+  const status = document.getElementById('statusBar');
+  try {
+    status.innerText = "⏳ Memperbarui server...";
+    const res = await fetch(PROXY_URL);
+    if (!res.ok) throw new Error("Gagal terhubung ke Worker");
+    
+    const data = await res.json();
+    if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
+      database = data.record;
+      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+      status.innerText = "🟢 Terhubung ke database";
+    } else {
+      throw new Error("Format data tidak sesuai");
     }
-    filterData();
+  } catch (err) {
+    console.warn("Menggunakan cache lokal:", err);
+    const cached = localStorage.getItem('cached_scammer_db');
+    if (cached) {
+      try { 
+        database = JSON.parse(cached); 
+      } catch(e) { 
+        database = { rekening: [], genshin: [] }; 
+      }
+    }
+    status.innerText = "🔴 Mode Offline (Data Lokal)";
   }
+  filterData();
+}
 
   async function saveOnlineDatabase() {
-    const status = document.getElementById('statusBar');
-    status.innerText = "⏳ Menyimpan data...";
+  const status = document.getElementById('statusBar');
+  status.innerText = "⏳ Menyimpan data...";
+  
+  if (!adminSecretKey) {
+    alert("Password Admin belum diisi. Silakan login kembali.");
+    return false;
+  }
+
+  try {
+    const res = await fetch(PROXY_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Secret': adminSecretKey // Mengirim secret buatan Anda ke Worker
+      },
+      body: JSON.stringify(database)
+    });
     
-    if (!masterApiKey) {
-      alert("Master Key belum diisi. Silakan login kembali ke Mode Pemilik.");
-      return false;
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Simpan gagal");
     }
+    
+    localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+    status.innerText = "🟢 Tersimpan di server!";
+    return true;
+  } catch (err) {
+    alert("Gagal memperbarui server: " + err.message);
+    status.innerText = "⚠️ Simpan gagal";
+    return false;
+  }
+}
 
-    try {
-      const res = await fetch(BASE_URL, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': masterApiKey
-        },
-        body: JSON.stringify(database)
-      });
-      
-      if (!res.ok) throw new Error("Gagal menyimpan data");
-      
-      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Tersimpan di server!";
-      return true;
-    } catch (err) {
-      alert("Gagal memperbarui server online. Periksa koneksi atau Master Key.");
-      status.innerText = "⚠️ Simpan gagal";
-      return false;
+ function toggleAdmin() {
+  if (!isAdmin) {
+    const inputSecret = prompt("Masukkan Password Admin:");
+    if (inputSecret && inputSecret.trim() !== "") {
+      adminSecretKey = inputSecret.trim();
+      isAdmin = true;
+      document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
+      document.getElementById('addBox').style.display = "flex";
+      showToast("Mode Pemilik Aktif");
+    } else if (inputSecret !== null) {
+      alert("Password Admin wajib diisi!");
     }
+  } else {
+    isAdmin = false;
+    adminSecretKey = "";
+    document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
+    document.getElementById('addBox').style.display = "none";
+    showToast("Keluar Mode Pemilik");
   }
-
-  async function hashString(str) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-
-  async function toggleAdmin() {
-    if (!isAdmin) {
-      const inputPass = prompt("Masukkan Kata Sandi Pemilik:");
-      if (inputPass !== null && inputPass.trim() !== "") {
-        const hashedInput = await hashString(inputPass.trim());
-        if (hashedInput === HASH_PASSWORD_PEMILIK) {
-          const inputMasterKey = prompt("Masukkan Master Key JSONBin:");
-          if (inputMasterKey && inputMasterKey.trim() !== "") {
-            masterApiKey = inputMasterKey.trim();
-            isAdmin = true;
-            document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
-            document.getElementById('addBox').style.display = "flex";
-            showToast("Mode Pemilik Aktif");
-          } else if (inputMasterKey !== null) {
-            alert("Master Key wajib diisi!");
-          }
-        } else {
-          alert("Kata sandi salah!");
-        }
-      }
-    } else {
-      isAdmin = false;
-      masterApiKey = "";
-      document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
-      document.getElementById('addBox').style.display = "none";
-      showToast("Keluar Mode Pemilik");
-    }
-    filterData();
-  }
+  filterData();
+}
 
   function handleInputKeyDown(e) {
     if (e.key === 'Enter') {
@@ -661,7 +633,7 @@
     const val = input.value.trim();
 
     if (!val) {
-      alert("Nomor tidak boleh kosong!");
+      alert("Nomor/UID tidak boleh kosong!");
       return;
     }
 
@@ -672,21 +644,21 @@
     }
 
     btnAdd.disabled = true;
-    database[activeTab].push(val);
+    database[activeTab].unshift(val); // Tambahkan ke urutan paling atas
     
     const success = await saveOnlineDatabase();
     if (success) {
       input.value = "";
+      document.getElementById('searchInput').value = ""; // Reset kolom pencarian
       filterData();
       showToast("Data berhasil ditambahkan!");
     } else {
-      database[activeTab].pop();
+      database[activeTab].shift();
     }
     btnAdd.disabled = false;
   }
 
-  async function deleteNumber(nomor, event) {
-    if (event) event.stopPropagation();
+  async function deleteNumber(nomor) {
     if (confirm(`Hapus ${nomor} dari database?`)) {
       const index = database[activeTab].indexOf(nomor);
       if (index > -1) {
@@ -706,10 +678,8 @@
 
   function switchTab(tab) {
     activeTab = tab;
-    
-    const buttons = document.querySelectorAll('.tab-btn');
-    buttons[0].classList.toggle('active', tab === 'rekening');
-    buttons[1].classList.toggle('active', tab === 'genshin');
+    document.getElementById('tabRekening').classList.toggle('active', tab === 'rekening');
+    document.getElementById('tabGenshin').classList.toggle('active', tab === 'genshin');
 
     const input = document.getElementById('searchInput');
     input.placeholder = tab === 'rekening' 
@@ -718,6 +688,14 @@
     input.value = "";
 
     filterData();
+  }
+
+  // Pencarian dengan Optimasi Debounce (150ms delay)
+  function filterDataDebounced() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      filterData();
+    }, 150);
   }
 
   function filterData() {
@@ -732,15 +710,21 @@
     counter.innerText = `${filtered.length} Data`;
 
     if (filtered.length === 0) {
-      resultList.innerHTML = `<li class="empty-msg">Tidak ada data ditemukan.</li>`;
+      const emptyLi = document.createElement('li');
+      emptyLi.className = 'empty-msg';
+      emptyLi.textContent = 'Tidak ada data ditemukan.';
+      resultList.appendChild(emptyLi);
       return;
     }
+
+    // Menggunakan DocumentFragment untuk perbaikan performa render DOM
+    const fragment = document.createDocumentFragment();
 
     filtered.forEach(nomor => {
       const li = document.createElement('li');
       li.className = 'result-item';
-      li.onclick = () => copyToClipboard(nomor);
       li.title = "Klik untuk menyalin nomor";
+      li.addEventListener('click', () => copyToClipboard(nomor));
 
       const spanNumber = document.createElement('span');
       spanNumber.className = 'number';
@@ -748,31 +732,62 @@
 
       const rightContent = document.createElement('div');
       rightContent.className = 'right-content';
-      rightContent.innerHTML = `
-        <span class="badge">Waspada</span>
-        <button class="btn-copy-icon" title="Salin">📋</button>
-      `;
+      
+      const badgeSpan = document.createElement('span');
+      badgeSpan.className = 'badge';
+      badgeSpan.textContent = 'Waspada';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'btn-copy-icon';
+      copyBtn.title = 'Salin';
+      copyBtn.textContent = '📋';
+
+      rightContent.appendChild(badgeSpan);
+      rightContent.appendChild(copyBtn);
 
       if (isAdmin) {
         const btnDelete = document.createElement('button');
         btnDelete.className = 'btn btn-delete';
         btnDelete.textContent = 'Hapus';
-        btnDelete.onclick = (e) => deleteNumber(nomor, e);
+        btnDelete.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteNumber(nomor);
+        });
         rightContent.appendChild(btnDelete);
       }
 
       li.appendChild(spanNumber);
       li.appendChild(rightContent);
-      resultList.appendChild(li);
+      fragment.appendChild(li);
     });
+
+    resultList.appendChild(fragment);
   }
 
   function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(`Disalin: ${text}`);
+      }).catch(() => {
+        fallbackCopyTextToClipboard(text);
+      });
+    } else {
+      fallbackCopyTextToClipboard(text);
+    }
+  }
+
+  function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
       showToast(`Disalin: ${text}`);
-    }).catch(() => {
+    } catch (err) {
       showToast("Gagal menyalin teks.");
-    });
+    }
+    document.body.removeChild(textArea);
   }
 
   function showToast(message) {
@@ -811,6 +826,9 @@
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeQrisModal();
   });
+
+  // Listener Input Search dengan Debounce
+  document.getElementById('searchInput').addEventListener('input', filterDataDebounced);
 
   initTheme();
   fetchOnlineDatabase();
