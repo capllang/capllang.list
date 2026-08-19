@@ -117,10 +117,10 @@
       -webkit-backdrop-filter: blur(18px);
       border: none;
       border-radius: 0;
-      padding: 10px 18px 18px 18px; /* Diperbarui: Padding atas dipangkas ke 10px */
+      padding: 10px 18px 18px 18px; /* Diperbarui: Padding atas berkurang jadi 10px */
       display: flex;
       flex-direction: column;
-      gap: 10px; /* Diperbarui: Jarak antar elemen diperketat ke 10px */
+      gap: 10px; /* Diperbarui: Jarak antarelemen dipangkas jadi 10px */
       overflow: hidden;
     }
 
@@ -135,7 +135,7 @@
         border-radius: 24px;
         border: 1px solid var(--card-border);
         box-shadow: var(--card-shadow);
-        padding: 24px; /* Tampilan Desktop tetap presisi seperti semula */
+        padding: 24px; /* Menjaga tampilan Desktop tetap sama seperti semula */
         gap: 12px;
       }
     }
@@ -147,7 +147,7 @@
       flex-shrink: 0;
     }
 
-    h1 {
+    h2 {
       font-size: 1.15rem;
       font-weight: 700;
       color: var(--text-title);
@@ -474,8 +474,8 @@
 
 <div class="container">
   <div class="header-area">
-    <h1>🛡️ UID HB & REK SCAMMER</h1>
-    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()" aria-label="Ganti Tema">🌙 Gelap</button>
+    <h2>🛡️ UID HB & REK SCAMMER</h2>
+    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
   </div>
   
   <div class="status-bar-container">
@@ -483,9 +483,9 @@
     <div id="dataCounter" class="data-counter">0 Data</div>
   </div>
 
-  <div class="tabs" role="tablist">
-    <button class="tab-btn active" id="tabRekening" role="tab" onclick="switchTab('rekening')">Rekening Scammer</button>
-    <button class="tab-btn" id="tabGenshin" role="tab" onclick="switchTab('genshin')">UID HB Genshin</button>
+  <div class="tabs">
+    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
+    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Genshin</button>
   </div>
 
   <div class="admin-panel">
@@ -498,7 +498,7 @@
   </div>
 
   <div class="search-box">
-    <input type="search" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer..." aria-label="Kolom Pencarian">
+    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer...">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -510,7 +510,7 @@
       <span class="donation-desc">Bantu server tetap aktif.</span>
     </div>
     <div class="donation-action">
-      <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS Donasi" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
+      <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
       <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">
         Saweria
       </a>
@@ -585,7 +585,7 @@
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Secret': adminSecretKey
+          'X-Admin-Secret': adminSecretKey // Mengirim secret buatan Anda ke Worker
         },
         body: JSON.stringify(database)
       });
@@ -696,7 +696,7 @@
     filterData();
   }
 
-  // Pencarian dengan Debounce (150ms delay)
+  // Pencarian dengan Optimasi Debounce (150ms delay)
   function filterDataDebounced() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
@@ -723,7 +723,7 @@
       return;
     }
 
-    // Menggunakan DocumentFragment untuk efisiensi render
+    // Menggunakan DocumentFragment untuk perbaikan performa render DOM
     const fragment = document.createDocumentFragment();
 
     filtered.forEach(nomor => {
@@ -746,7 +746,6 @@
       const copyBtn = document.createElement('button');
       copyBtn.className = 'btn-copy-icon';
       copyBtn.title = 'Salin';
-      copyBtn.ariaLabel = 'Salin nomor';
       copyBtn.textContent = '📋';
 
       rightContent.appendChild(badgeSpan);
@@ -834,18 +833,8 @@
     if (e.key === 'Escape') closeQrisModal();
   });
 
-  // Event listener pencarian (Mencakup input & klik tombol X / Clear)
-  const searchInput = document.getElementById('searchInput');
-  searchInput.addEventListener('input', filterDataDebounced);
-  searchInput.addEventListener('search', filterData); // Eksekusi langsung jika tombol 'X' ditekan
-
-  // Event listener status jaringan real-time
-  window.addEventListener('offline', () => {
-    document.getElementById('statusBar').innerText = "🔴 Mode Offline (Tidak Ada Internet)";
-  });
-  window.addEventListener('online', () => {
-    fetchOnlineDatabase();
-  });
+  // Listener Input Search dengan Debounce
+  document.getElementById('searchInput').addEventListener('input', filterDataDebounced);
 
   initTheme();
   fetchOnlineDatabase();
