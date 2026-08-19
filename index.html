@@ -551,7 +551,9 @@
 <script>
 // ================= KONFIGURASI JSONBIN =================
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
-let adminSecretKey = "";
+
+// KEAMANAN PASIF: Secret Key dikelola secara ketat dalam scope memori terbatas
+let adminSecretKey = null;
 
 let database = { rekening: [], genshin: [], lastUpdated: null };
 let isAdmin = false;
@@ -620,25 +622,35 @@ async function saveOnlineDatabase() {
   status.innerText = "⏳ Menyimpan data...";
   
   if (!adminSecretKey) {
-    alert("Password Admin belum diisi. Silakan login kembali.");
+    alert("Sesi Admin telah berakhir. Silakan login kembali.");
+    exitAdminMode();
     return false;
   }
 
   database.lastUpdated = new Date().toISOString();
 
   try {
+    // KEAMANAN PASIF: Sanitasi header auth dari whitespace/karakter tak kasat mata
+    const cleanSecret = String(adminSecretKey).trim();
+
     const res = await fetch(PROXY_URL, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Admin-Secret': adminSecretKey
+        'X-Admin-Secret': cleanSecret
       },
       body: JSON.stringify(database)
     });
     
+    if (res.status === 401 || res.status === 403) {
+      alert("🔒 Password Admin Salah atau Sesi Ditolak!");
+      exitAdminMode();
+      status.innerText = "⚠️ Autentikasi Gagal";
+      return false;
+    }
+
     if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Simpan gagal");
+      throw new Error("Gagal menyimpan data ke server");
     }
     
     localStorage.setItem('cached_scammer_db', JSON.stringify(database));
@@ -646,10 +658,18 @@ async function saveOnlineDatabase() {
     updateLastUpdatedUI();
     return true;
   } catch (err) {
-    alert("Gagal memperbarui server: " + err.message);
+    alert("⚠️ Gagal memperbarui server: Akses ditolak atau masalah jaringan.");
     status.innerText = "⚠️ Simpan gagal";
     return false;
   }
+}
+
+function exitAdminMode() {
+  isAdmin = false;
+  adminSecretKey = null; // Purge Secret Key dari memori JavaScript
+  document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
+  document.getElementById('addBox').style.display = "none";
+  filterData();
 }
 
 function toggleAdmin() {
@@ -665,13 +685,9 @@ function toggleAdmin() {
       alert("Password Admin wajib diisi!");
     }
   } else {
-    isAdmin = false;
-    adminSecretKey = "";
-    document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
-    document.getElementById('addBox').style.display = "none";
+    exitAdminMode();
     showToast("Keluar Mode Pemilik");
   }
-  filterData();
 }
 
 function handleInputKeyDown(e) {
@@ -685,20 +701,28 @@ async function addNumber() {
   const btnAdd = document.getElementById('btnAdd');
   const rawVal = input.value.trim();
 
-  const cleanVal = rawVal.replace(/[^\w\s-]/gi, '').trim();
-
-  if (!cleanVal) {
-    alert("Nomor/UID tidak boleh kosong!");
+  if (!rawVal) {
+    alert("⚠️ Nomor/UID tidak boleh kosong!");
     return;
   }
 
-  const normalizedNew = cleanVal.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  const exists = database[activeTab].some(item => 
-    item.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() === normalizedNew
-  );
+  const cleanVal = rawVal.replace(/\D/g, '');
 
+  if (activeTab === 'genshin') {
+    if (!/^\d{9,10}$/.test(cleanVal)) {
+      alert("⚠️ UID Genshin Impact tidak valid!\nUID harus berupa angka dengan panjang 9 atau 10 digit.");
+      return;
+    }
+  } else if (activeTab === 'rekening') {
+    if (!/^\d{5,25}$/.test(cleanVal)) {
+      alert("⚠️ Nomor Rekening/E-Wallet tidak valid!\nHarus berupa angka dengan panjang minimal 5 digit.");
+      return;
+    }
+  }
+
+  const exists = database[activeTab].some(item => item.replace(/\D/g, '') === cleanVal);
   if (exists) {
-    alert("Nomor/UID ini sudah ada di database!");
+    alert("⚠️ Nomor/UID ini sudah ada di dalam database!");
     return;
   }
 
@@ -790,7 +814,6 @@ function updateUrlParam(query) {
   window.history.replaceState({}, '', url.toString());
 }
 
-/* PEMBUAT TEMPLATE LAPORAN OTOMATIS */
 function copyReportTemplate(nomor) {
   const categoryLabel = activeTab === 'rekening' ? 'Rekening Scammer' : 'UID HB Genshin Impact';
   const currentUrl = `${window.location.origin}${window.location.pathname}?search=${encodeURIComponent(nomor)}&tab=${activeTab}`;
@@ -848,11 +871,10 @@ function filterData() {
     badgeSpan.className = 'badge';
     badgeSpan.textContent = 'Waspada';
 
-    /* Tombol Salin Template Laporan */
     const reportBtn = document.createElement('button');
     reportBtn.className = 'btn-icon';
-    reportBtn.title = 'Salin Detail Laporan';
-    reportBtn.setAttribute('aria-label', 'Salin Detail Laporan');
+    reportBtn.title = 'Salin Template Laporan';
+    reportBtn.setAttribute('aria-label', 'Salin Template Laporan');
     reportBtn.textContent = '📢';
     reportBtn.addEventListener('click', (e) => {
       e.stopPropagation();
