@@ -109,9 +109,9 @@
     }
 
     .container {
-      width: 100vw;
-      height: 100dvh;
-      max-width: 100%;
+      width: 92%;
+      height: 92dvh;
+      max-width: 480px;
       background: var(--card-bg);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
@@ -358,15 +358,18 @@
       letter-spacing: 0.5px;
     }
 
-    .btn-copy-icon {
+    .btn-icon {
       font-size: 0.75rem;
       background: transparent;
       border: none;
       cursor: pointer;
       opacity: 0.6;
+      padding: 2px 4px;
+      border-radius: 4px;
     }
-    .btn-copy-icon:hover {
+    .btn-icon:hover {
       opacity: 1;
+      background: rgba(0, 0, 0, 0.05);
     }
 
     .empty-msg, .load-more-container {
@@ -580,6 +583,9 @@ async function fetchOnlineDatabase() {
     }
     status.innerText = "🔴 Mode Offline (Data Lokal)";
   }
+  
+  // PERBAIKAN: Baca URL Parameter saat data selesai dimuat
+  checkUrlParams();
   filterData();
 }
 
@@ -719,7 +725,6 @@ function switchTab(tab) {
   input.placeholder = tab === 'rekening' 
     ? "Cari Rekening/ E-Wallet..." 
     : "Cari UID HB Genshin Impact...";
-  input.value = "";
 
   filterData();
 }
@@ -732,9 +737,47 @@ function filterDataDebounced() {
   }, 150);
 }
 
+// ================= FITUR BARU: URL PARAMETER HANDLING =================
+function checkUrlParams() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const searchQuery = urlParams.get('search') || urlParams.get('q');
+  const tabQuery = urlParams.get('tab');
+
+  if (tabQuery && (tabQuery === 'rekening' || tabQuery === 'genshin')) {
+    activeTab = tabQuery;
+    document.getElementById('tabRekening').classList.toggle('active', activeTab === 'rekening');
+    document.getElementById('tabGenshin').classList.toggle('active', activeTab === 'genshin');
+  }
+
+  if (searchQuery) {
+    document.getElementById('searchInput').value = searchQuery;
+  }
+}
+
+function updateUrlParam(query) {
+  const url = new URL(window.location.href);
+  if (query) {
+    url.searchParams.set('search', query);
+  } else {
+    url.searchParams.delete('search');
+  }
+  // Update URL browser tanpa me-reload halaman
+  window.history.replaceState({}, '', url.toString());
+}
+
+function shareSearchLink(query) {
+  const shareUrl = `${window.location.origin}${window.location.pathname}?search=${encodeURIComponent(query)}&tab=${activeTab}`;
+  copyToClipboard(shareUrl);
+  showToast("Link pencarian disalin!");
+}
+// ======================================================================
+
 function filterData() {
   const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
   const cleanQuery = rawQuery.replace(/[^a-zA-Z0-9]/g, '');
+
+  // Perbarui parameter URL
+  updateUrlParam(rawQuery);
 
   const resultList = document.getElementById('resultList');
   const counter = document.getElementById('dataCounter');
@@ -779,14 +822,27 @@ function filterData() {
     badgeSpan.className = 'badge';
     badgeSpan.textContent = 'Waspada';
 
+    // Tombol Salin Nomor
     const copyBtn = document.createElement('button');
-    copyBtn.className = 'btn-copy-icon';
-    copyBtn.title = 'Salin';
+    copyBtn.className = 'btn-icon';
+    copyBtn.title = 'Salin Nomor';
     copyBtn.setAttribute('aria-label', 'Salin Nomor');
     copyBtn.textContent = '📋';
 
+    // Tombol Bagikan Link Pencarian (Fitur Baru)
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'btn-icon';
+    shareBtn.title = 'Bagikan Link Pencarian';
+    shareBtn.setAttribute('aria-label', 'Bagikan Link Pencarian');
+    shareBtn.textContent = '🔗';
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      shareSearchLink(nomor);
+    });
+
     rightContent.appendChild(badgeSpan);
     rightContent.appendChild(copyBtn);
+    rightContent.appendChild(shareBtn);
 
     if (isAdmin) {
       const btnDelete = document.createElement('button');
