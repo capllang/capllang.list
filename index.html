@@ -790,11 +790,6 @@ function updateUrlParam(query) {
   window.history.replaceState({}, '', url.toString());
 }
 
-function shareSearchLink(query) {
-  const shareUrl = `${window.location.origin}${window.location.pathname}?search=${encodeURIComponent(query)}&tab=${activeTab}`;
-  copyToClipboard(shareUrl, "Link pencarian disalin!");
-}
-
 /* PEMBUAT TEMPLATE LAPORAN OTOMATIS */
 function copyReportTemplate(nomor) {
   const categoryLabel = activeTab === 'rekening' ? 'Rekening Scammer' : 'UID HB Genshin Impact';
@@ -864,19 +859,8 @@ function filterData() {
       copyReportTemplate(nomor);
     });
 
-    const shareBtn = document.createElement('button');
-    shareBtn.className = 'btn-icon';
-    shareBtn.title = 'Bagikan Link Pencarian';
-    shareBtn.setAttribute('aria-label', 'Bagikan Link Pencarian');
-    shareBtn.textContent = '🔗';
-    shareBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      shareSearchLink(nomor);
-    });
-
     rightContent.appendChild(badgeSpan);
     rightContent.appendChild(reportBtn);
-    rightContent.appendChild(shareBtn);
 
     if (isAdmin) {
       const btnDelete = document.createElement('button');
