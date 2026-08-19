@@ -146,7 +146,7 @@
       flex-shrink: 0;
     }
 
-    h2 {
+    h1 {
       font-size: 1.15rem;
       font-weight: 700;
       color: var(--text-title);
@@ -473,8 +473,8 @@
 
 <div class="container">
   <div class="header-area">
-    <h2>🛡️ UID HB & REK SCAMMER</h2>
-    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
+    <h1>🛡️ UID HB & REK SCAMMER</h1>
+    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()" aria-label="Ganti Tema">🌙 Gelap</button>
   </div>
   
   <div class="status-bar-container">
@@ -482,9 +482,9 @@
     <div id="dataCounter" class="data-counter">0 Data</div>
   </div>
 
-  <div class="tabs">
-    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
-    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Genshin</button>
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" id="tabRekening" role="tab" onclick="switchTab('rekening')">Rekening Scammer</button>
+    <button class="tab-btn" id="tabGenshin" role="tab" onclick="switchTab('genshin')">UID HB Genshin</button>
   </div>
 
   <div class="admin-panel">
@@ -497,7 +497,7 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer...">
+    <input type="search" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer..." aria-label="Kolom Pencarian">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -509,7 +509,7 @@
       <span class="donation-desc">Bantu server tetap aktif.</span>
     </div>
     <div class="donation-action">
-      <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
+      <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS Donasi" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
       <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">
         Saweria
       </a>
@@ -535,91 +535,96 @@
   let activeTab = 'rekening';
   let searchTimeout = null;
 
- async function fetchOnlineDatabase() {
-  const status = document.getElementById('statusBar');
-  try {
-    status.innerText = "⏳ Memperbarui server...";
-    const res = await fetch(PROXY_URL);
-    if (!res.ok) throw new Error("Gagal terhubung ke Worker");
-    
-    const data = await res.json();
-    if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
-      database = data.record;
-      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Terhubung ke database";
-    } else {
-      throw new Error("Format data tidak sesuai");
-    }
-  } catch (err) {
-    console.warn("Menggunakan cache lokal:", err);
-    const cached = localStorage.getItem('cached_scammer_db');
-    if (cached) {
-      try { 
-        database = JSON.parse(cached); 
-      } catch(e) { 
-        database = { rekening: [], genshin: [] }; 
+  async function fetchOnlineDatabase() {
+    const status = document.getElementById('statusBar');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik
+
+    try {
+      status.innerText = "⏳ Memperbarui server...";
+      const res = await fetch(PROXY_URL, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error("Gagal terhubung ke Worker");
+      
+      const data = await res.json();
+      if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
+        database = data.record;
+        localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+        status.innerText = "🟢 Terhubung ke database";
+      } else {
+        throw new Error("Format data tidak sesuai");
       }
+    } catch (err) {
+      console.warn("Menggunakan cache lokal:", err);
+      const cached = localStorage.getItem('cached_scammer_db');
+      if (cached) {
+        try { 
+          database = JSON.parse(cached); 
+        } catch(e) { 
+          database = { rekening: [], genshin: [] }; 
+        }
+      }
+      status.innerText = "🔴 Mode Offline (Data Lokal)";
     }
-    status.innerText = "🔴 Mode Offline (Data Lokal)";
+    filterData();
   }
-  filterData();
-}
 
   async function saveOnlineDatabase() {
-  const status = document.getElementById('statusBar');
-  status.innerText = "⏳ Menyimpan data...";
-  
-  if (!adminSecretKey) {
-    alert("Password Admin belum diisi. Silakan login kembali.");
-    return false;
+    const status = document.getElementById('statusBar');
+    status.innerText = "⏳ Menyimpan data...";
+    
+    if (!adminSecretKey) {
+      alert("Password Admin belum diisi. Silakan login kembali.");
+      return false;
+    }
+
+    try {
+      const res = await fetch(PROXY_URL, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Secret': adminSecretKey
+        },
+        body: JSON.stringify(database)
+      });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || "Simpan gagal");
+      }
+      
+      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+      status.innerText = "🟢 Tersimpan di server!";
+      return true;
+    } catch (err) {
+      alert("Gagal memperbarui server: " + err.message);
+      status.innerText = "⚠️ Simpan gagal";
+      return false;
+    }
   }
 
-  try {
-    const res = await fetch(PROXY_URL, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Secret': adminSecretKey // Mengirim secret buatan Anda ke Worker
-      },
-      body: JSON.stringify(database)
-    });
-    
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Simpan gagal");
+  function toggleAdmin() {
+    if (!isAdmin) {
+      const inputSecret = prompt("Masukkan Password Admin:");
+      if (inputSecret && inputSecret.trim() !== "") {
+        adminSecretKey = inputSecret.trim();
+        isAdmin = true;
+        document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
+        document.getElementById('addBox').style.display = "flex";
+        showToast("Mode Pemilik Aktif");
+      } else if (inputSecret !== null) {
+        alert("Password Admin wajib diisi!");
+      }
+    } else {
+      isAdmin = false;
+      adminSecretKey = "";
+      document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
+      document.getElementById('addBox').style.display = "none";
+      showToast("Keluar Mode Pemilik");
     }
-    
-    localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-    status.innerText = "🟢 Tersimpan di server!";
-    return true;
-  } catch (err) {
-    alert("Gagal memperbarui server: " + err.message);
-    status.innerText = "⚠️ Simpan gagal";
-    return false;
+    filterData();
   }
-}
-
- function toggleAdmin() {
-  if (!isAdmin) {
-    const inputSecret = prompt("Masukkan Password Admin:");
-    if (inputSecret && inputSecret.trim() !== "") {
-      adminSecretKey = inputSecret.trim();
-      isAdmin = true;
-      document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
-      document.getElementById('addBox').style.display = "flex";
-      showToast("Mode Pemilik Aktif");
-    } else if (inputSecret !== null) {
-      alert("Password Admin wajib diisi!");
-    }
-  } else {
-    isAdmin = false;
-    adminSecretKey = "";
-    document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
-    document.getElementById('addBox').style.display = "none";
-    showToast("Keluar Mode Pemilik");
-  }
-  filterData();
-}
 
   function handleInputKeyDown(e) {
     if (e.key === 'Enter') {
@@ -690,7 +695,7 @@
     filterData();
   }
 
-  // Pencarian dengan Optimasi Debounce (150ms delay)
+  // Pencarian dengan Debounce (150ms delay)
   function filterDataDebounced() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
@@ -717,7 +722,7 @@
       return;
     }
 
-    // Menggunakan DocumentFragment untuk perbaikan performa render DOM
+    // Menggunakan DocumentFragment untuk efisiensi render
     const fragment = document.createDocumentFragment();
 
     filtered.forEach(nomor => {
@@ -740,6 +745,7 @@
       const copyBtn = document.createElement('button');
       copyBtn.className = 'btn-copy-icon';
       copyBtn.title = 'Salin';
+      copyBtn.ariaLabel = 'Salin nomor';
       copyBtn.textContent = '📋';
 
       rightContent.appendChild(badgeSpan);
@@ -827,8 +833,18 @@
     if (e.key === 'Escape') closeQrisModal();
   });
 
-  // Listener Input Search dengan Debounce
-  document.getElementById('searchInput').addEventListener('input', filterDataDebounced);
+  // Event listener pencarian (Mencakup input & klik tombol X / Clear)
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', filterDataDebounced);
+  searchInput.addEventListener('search', filterData); // Eksekusi langsung jika tombol 'X' ditekan
+
+  // Event listener status jaringan real-time
+  window.addEventListener('offline', () => {
+    document.getElementById('statusBar').innerText = "🔴 Mode Offline (Tidak Ada Internet)";
+  });
+  window.addEventListener('online', () => {
+    fetchOnlineDatabase();
+  });
 
   initTheme();
   fetchOnlineDatabase();
