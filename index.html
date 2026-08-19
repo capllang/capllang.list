@@ -552,14 +552,11 @@
 // ================= KONFIGURASI JSONBIN =================
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
 
-// KEAMANAN PASIF: Secret Key dikelola secara ketat dalam scope memori terbatas
 let adminSecretKey = null;
-
 let database = { rekening: [], genshin: [], lastUpdated: null };
 let isAdmin = false;
 let activeTab = 'rekening';
 let searchTimeout = null;
-
 let renderLimit = 50;
 
 function formatLastUpdated(timestamp) {
@@ -630,7 +627,6 @@ async function saveOnlineDatabase() {
   database.lastUpdated = new Date().toISOString();
 
   try {
-    // KEAMANAN PASIF: Sanitasi header auth dari whitespace/karakter tak kasat mata
     const cleanSecret = String(adminSecretKey).trim();
 
     const res = await fetch(PROXY_URL, {
@@ -666,7 +662,7 @@ async function saveOnlineDatabase() {
 
 function exitAdminMode() {
   isAdmin = false;
-  adminSecretKey = null; // Purge Secret Key dari memori JavaScript
+  adminSecretKey = null;
   document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
   document.getElementById('addBox').style.display = "none";
   filterData();
