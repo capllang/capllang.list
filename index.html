@@ -117,10 +117,10 @@
       -webkit-backdrop-filter: blur(18px);
       border: none;
       border-radius: 0;
-      padding: 10px 18px 18px 18px; /* Diperbarui: Padding atas berkurang jadi 10px */
+      padding: 10px 18px 18px 18px;
       display: flex;
       flex-direction: column;
-      gap: 10px; /* Diperbarui: Jarak antarelemen dipangkas jadi 10px */
+      gap: 10px;
       overflow: hidden;
     }
 
@@ -135,7 +135,7 @@
         border-radius: 24px;
         border: 1px solid var(--card-border);
         box-shadow: var(--card-shadow);
-        padding: 24px; /* Menjaga tampilan Desktop tetap sama seperti semula */
+        padding: 24px;
         gap: 12px;
       }
     }
@@ -287,6 +287,14 @@
     .btn-admin { background: var(--btn-admin); width: 100%; }
     .btn-add { background: var(--btn-add); white-space: nowrap; }
     .btn-delete { background: var(--btn-delete); padding: 5px 8px; font-size: 0.7rem; border-radius: 6px; }
+    
+    .btn-load-more {
+      background: var(--btn-admin);
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
 
     .result-list {
       list-style: none;
@@ -361,11 +369,12 @@
       opacity: 1;
     }
 
-    .empty-msg {
+    .empty-msg, .load-more-container {
       text-align: center;
       color: var(--text-muted);
-      padding: 24px 12px;
+      padding: 12px;
       font-size: 0.85rem;
+      list-style: none;
     }
 
     .donation-section {
@@ -492,13 +501,13 @@
     <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
     
     <div id="addBox" class="admin-box" style="display: none;">
-      <input type="text" id="newNumberInput" placeholder="Masukkan nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
+      <input type="text" id="newNumberInput" placeholder="Masukkan nomor/UID baru..." aria-label="Input Nomor Baru" onkeydown="handleInputKeyDown(event)">
       <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Tambah</button>
     </div>
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Cari Rekening/ E-Wallet Scammer...">
+    <input type="text" id="searchInput" aria-label="Cari Rekening atau UID" placeholder="Cari Rekening/ E-Wallet Scammer...">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -527,317 +536,361 @@
 <div id="toast" class="toast">Berhasil disalin!</div>
 
 <script>
-  // ================= KONFIGURASI JSONBIN =================
-  const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
-  let adminSecretKey = "";
+// ================= KONFIGURASI JSONBIN =================
+const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
+let adminSecretKey = "";
 
-  let database = { rekening: [], genshin: [] };
-  let isAdmin = false;
-  let activeTab = 'rekening';
-  let searchTimeout = null;
+let database = { rekening: [], genshin: [] };
+let isAdmin = false;
+let activeTab = 'rekening';
+let searchTimeout = null;
 
-  async function fetchOnlineDatabase() {
-    const status = document.getElementById('statusBar');
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik
+// OPTIMASI: Batasi jumlah tampilan item awal untuk menghindari lag rendering
+let renderLimit = 50;
 
-    try {
-      status.innerText = "⏳ Memperbarui server...";
-      const res = await fetch(PROXY_URL, { signal: controller.signal });
-      clearTimeout(timeoutId);
+async function fetchOnlineDatabase() {
+  const status = document.getElementById('statusBar');
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik
 
-      if (!res.ok) throw new Error("Gagal terhubung ke Worker");
-      
-      const data = await res.json();
-      if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
-        database = data.record;
-        localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-        status.innerText = "🟢 Terhubung ke database";
-      } else {
-        throw new Error("Format data tidak sesuai");
-      }
-    } catch (err) {
-      console.warn("Menggunakan cache lokal:", err);
-      const cached = localStorage.getItem('cached_scammer_db');
-      if (cached) {
-        try { 
-          database = JSON.parse(cached); 
-        } catch(e) { 
-          database = { rekening: [], genshin: [] }; 
-        }
-      }
-      status.innerText = "🔴 Mode Offline (Data Lokal)";
-    }
-    filterData();
-  }
+  try {
+    status.innerText = "⏳ Memperbarui server...";
+    const res = await fetch(PROXY_URL, { signal: controller.signal });
+    clearTimeout(timeoutId);
 
-  async function saveOnlineDatabase() {
-    const status = document.getElementById('statusBar');
-    status.innerText = "⏳ Menyimpan data...";
+    if (!res.ok) throw new Error("Gagal terhubung ke Worker");
     
-    if (!adminSecretKey) {
-      alert("Password Admin belum diisi. Silakan login kembali.");
-      return false;
-    }
-
-    try {
-      const res = await fetch(PROXY_URL, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Secret': adminSecretKey // Mengirim secret buatan Anda ke Worker
-        },
-        body: JSON.stringify(database)
-      });
-      
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || "Simpan gagal");
-      }
-      
+    const data = await res.json();
+    if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
+      database = data.record;
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Tersimpan di server!";
-      return true;
-    } catch (err) {
-      alert("Gagal memperbarui server: " + err.message);
-      status.innerText = "⚠️ Simpan gagal";
-      return false;
-    }
-  }
-
-  function toggleAdmin() {
-    if (!isAdmin) {
-      const inputSecret = prompt("Masukkan Password Admin:");
-      if (inputSecret && inputSecret.trim() !== "") {
-        adminSecretKey = inputSecret.trim();
-        isAdmin = true;
-        document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
-        document.getElementById('addBox').style.display = "flex";
-        showToast("Mode Pemilik Aktif");
-      } else if (inputSecret !== null) {
-        alert("Password Admin wajib diisi!");
-      }
+      status.innerText = "🟢 Terhubung ke database";
     } else {
-      isAdmin = false;
-      adminSecretKey = "";
-      document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
-      document.getElementById('addBox').style.display = "none";
-      showToast("Keluar Mode Pemilik");
+      throw new Error("Format data tidak sesuai");
     }
-    filterData();
-  }
-
-  function handleInputKeyDown(e) {
-    if (e.key === 'Enter') {
-      addNumber();
-    }
-  }
-
-  async function addNumber() {
-    const input = document.getElementById('newNumberInput');
-    const btnAdd = document.getElementById('btnAdd');
-    const val = input.value.trim();
-
-    if (!val) {
-      alert("Nomor/UID tidak boleh kosong!");
-      return;
-    }
-
-    const exists = database[activeTab].some(item => item.toLowerCase() === val.toLowerCase());
-    if (exists) {
-      alert("Nomor/UID ini sudah ada di database!");
-      return;
-    }
-
-    btnAdd.disabled = true;
-    database[activeTab].unshift(val); // Tambahkan ke urutan paling atas
-    
-    const success = await saveOnlineDatabase();
-    if (success) {
-      input.value = "";
-      document.getElementById('searchInput').value = ""; // Reset kolom pencarian
-      filterData();
-      showToast("Data berhasil ditambahkan!");
-    } else {
-      database[activeTab].shift();
-    }
-    btnAdd.disabled = false;
-  }
-
-  async function deleteNumber(nomor) {
-    if (confirm(`Hapus ${nomor} dari database?`)) {
-      const index = database[activeTab].indexOf(nomor);
-      if (index > -1) {
-        const originalData = [...database[activeTab]];
-        database[activeTab].splice(index, 1);
-        
-        const success = await saveOnlineDatabase();
-        if (success) {
-          filterData();
-          showToast("Data dihapus!");
-        } else {
-          database[activeTab] = originalData;
-        }
+  } catch (err) {
+    console.warn("Menggunakan cache lokal:", err);
+    const cached = localStorage.getItem('cached_scammer_db');
+    if (cached) {
+      try { 
+        database = JSON.parse(cached); 
+      } catch(e) { 
+        database = { rekening: [], genshin: [] }; 
       }
     }
+    status.innerText = "🔴 Mode Offline (Data Lokal)";
+  }
+  filterData();
+}
+
+async function saveOnlineDatabase() {
+  const status = document.getElementById('statusBar');
+  status.innerText = "⏳ Menyimpan data...";
+  
+  if (!adminSecretKey) {
+    alert("Password Admin belum diisi. Silakan login kembali.");
+    return false;
   }
 
-  function switchTab(tab) {
-    activeTab = tab;
-    document.getElementById('tabRekening').classList.toggle('active', tab === 'rekening');
-    document.getElementById('tabGenshin').classList.toggle('active', tab === 'genshin');
-
-    const input = document.getElementById('searchInput');
-    input.placeholder = tab === 'rekening' 
-      ? "Cari Rekening/ E-Wallet..." 
-      : "Cari UID HB Genshin Impact...";
-    input.value = "";
-
-    filterData();
-  }
-
-  // Pencarian dengan Optimasi Debounce (150ms delay)
-  function filterDataDebounced() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      filterData();
-    }, 150);
-  }
-
-  function filterData() {
-    const query = document.getElementById('searchInput').value.trim().toLowerCase();
-    const resultList = document.getElementById('resultList');
-    const counter = document.getElementById('dataCounter');
-    resultList.innerHTML = "";
-
-    const currentData = database[activeTab] || [];
-    const filtered = currentData.filter(nomor => nomor.toLowerCase().includes(query));
-
-    counter.innerText = `${filtered.length} Data`;
-
-    if (filtered.length === 0) {
-      const emptyLi = document.createElement('li');
-      emptyLi.className = 'empty-msg';
-      emptyLi.textContent = 'Tidak ada data ditemukan.';
-      resultList.appendChild(emptyLi);
-      return;
-    }
-
-    // Menggunakan DocumentFragment untuk perbaikan performa render DOM
-    const fragment = document.createDocumentFragment();
-
-    filtered.forEach(nomor => {
-      const li = document.createElement('li');
-      li.className = 'result-item';
-      li.title = "Klik untuk menyalin nomor";
-      li.addEventListener('click', () => copyToClipboard(nomor));
-
-      const spanNumber = document.createElement('span');
-      spanNumber.className = 'number';
-      spanNumber.textContent = nomor;
-
-      const rightContent = document.createElement('div');
-      rightContent.className = 'right-content';
-      
-      const badgeSpan = document.createElement('span');
-      badgeSpan.className = 'badge';
-      badgeSpan.textContent = 'Waspada';
-
-      const copyBtn = document.createElement('button');
-      copyBtn.className = 'btn-copy-icon';
-      copyBtn.title = 'Salin';
-      copyBtn.textContent = '📋';
-
-      rightContent.appendChild(badgeSpan);
-      rightContent.appendChild(copyBtn);
-
-      if (isAdmin) {
-        const btnDelete = document.createElement('button');
-        btnDelete.className = 'btn btn-delete';
-        btnDelete.textContent = 'Hapus';
-        btnDelete.addEventListener('click', (e) => {
-          e.stopPropagation();
-          deleteNumber(nomor);
-        });
-        rightContent.appendChild(btnDelete);
-      }
-
-      li.appendChild(spanNumber);
-      li.appendChild(rightContent);
-      fragment.appendChild(li);
+  try {
+    const res = await fetch(PROXY_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Secret': adminSecretKey
+      },
+      body: JSON.stringify(database)
     });
+    
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Simpan gagal");
+    }
+    
+    localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+    status.innerText = "🟢 Tersimpan di server!";
+    return true;
+  } catch (err) {
+    alert("Gagal memperbarui server: " + err.message);
+    status.innerText = "⚠️ Simpan gagal";
+    return false;
+  }
+}
 
-    resultList.appendChild(fragment);
+function toggleAdmin() {
+  if (!isAdmin) {
+    const inputSecret = prompt("Masukkan Password Admin:");
+    if (inputSecret && inputSecret.trim() !== "") {
+      adminSecretKey = inputSecret.trim();
+      isAdmin = true;
+      document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
+      document.getElementById('addBox').style.display = "flex";
+      showToast("Mode Pemilik Aktif");
+    } else if (inputSecret !== null) {
+      alert("Password Admin wajib diisi!");
+    }
+  } else {
+    isAdmin = false;
+    adminSecretKey = "";
+    document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
+    document.getElementById('addBox').style.display = "none";
+    showToast("Keluar Mode Pemilik");
+  }
+  filterData();
+}
+
+function handleInputKeyDown(e) {
+  if (e.key === 'Enter') {
+    addNumber();
+  }
+}
+
+async function addNumber() {
+  const input = document.getElementById('newNumberInput');
+  const btnAdd = document.getElementById('btnAdd');
+  const rawVal = input.value.trim();
+
+  // Clean value (hapus spasi berlebih & karakter kontrol)
+  const cleanVal = rawVal.replace(/[^\w\s-]/gi, '').trim();
+
+  if (!cleanVal) {
+    alert("Nomor/UID tidak boleh kosong!");
+    return;
   }
 
-  function copyToClipboard(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(() => {
-        showToast(`Disalin: ${text}`);
-      }).catch(() => {
-        fallbackCopyTextToClipboard(text);
-      });
-    } else {
-      fallbackCopyTextToClipboard(text);
+  // Cek duplikasi tanpa sensitifitas karakter khusus
+  const normalizedNew = cleanVal.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  const exists = database[activeTab].some(item => 
+    item.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() === normalizedNew
+  );
+
+  if (exists) {
+    alert("Nomor/UID ini sudah ada di database!");
+    return;
+  }
+
+  btnAdd.disabled = true;
+  btnAdd.innerText = "⏳ Menyimpan...";
+  database[activeTab].unshift(cleanVal);
+  
+  const success = await saveOnlineDatabase();
+  if (success) {
+    input.value = "";
+    document.getElementById('searchInput').value = "";
+    renderLimit = 50; // Reset limit tampilan
+    filterData();
+    showToast("Data berhasil ditambahkan!");
+  } else {
+    database[activeTab].shift(); // Rollback jika gagal
+  }
+  
+  btnAdd.disabled = false;
+  btnAdd.innerText = "+ Tambah";
+}
+
+async function deleteNumber(nomor, btnEl) {
+  if (confirm(`Hapus ${nomor} dari database?`)) {
+    const index = database[activeTab].indexOf(nomor);
+    if (index > -1) {
+      if (btnEl) btnEl.disabled = true;
+      
+      const originalData = [...database[activeTab]];
+      database[activeTab].splice(index, 1);
+      
+      const success = await saveOnlineDatabase();
+      if (success) {
+        filterData();
+        showToast("Data dihapus!");
+      } else {
+        database[activeTab] = originalData; // Rollback
+        if (btnEl) btnEl.disabled = false;
+      }
     }
   }
+}
 
-  function fallbackCopyTextToClipboard(text) {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      showToast(`Disalin: ${text}`);
-    } catch (err) {
-      showToast("Gagal menyalin teks.");
-    }
-    document.body.removeChild(textArea);
-  }
+function switchTab(tab) {
+  activeTab = tab;
+  renderLimit = 50; // Reset limit saat pindah tab
+  document.getElementById('tabRekening').classList.toggle('active', tab === 'rekening');
+  document.getElementById('tabGenshin').classList.toggle('active', tab === 'genshin');
 
-  function showToast(message) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 2200);
-  }
+  const input = document.getElementById('searchInput');
+  input.placeholder = tab === 'rekening' 
+    ? "Cari Rekening/ E-Wallet..." 
+    : "Cari UID HB Genshin Impact...";
+  input.value = "";
 
-  function initTheme() {
-    const savedTheme = localStorage.getItem('theme_preference');
-    if (savedTheme === 'dark') {
-      document.body.classList.add('dark-mode');
-      document.getElementById('themeToggleBtn').innerHTML = "☀️ Terang";
-    }
-  }
+  filterData();
+}
 
-  function toggleTheme() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    document.getElementById('themeToggleBtn').innerHTML = isDark ? "☀️ Terang" : "🌙 Gelap";
-    localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
-  }
+function filterDataDebounced() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    renderLimit = 50; // Reset limit saat pencarian baru
+    filterData();
+  }, 150);
+}
 
-  function openQrisModal(src) {
-    document.getElementById('modalImg').src = src;
-    document.getElementById('qrisModal').style.display = 'flex';
-  }
+function filterData() {
+  const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+  const cleanQuery = rawQuery.replace(/[^a-zA-Z0-9]/g, '');
 
-  function closeQrisModal() {
-    document.getElementById('qrisModal').style.display = 'none';
-  }
+  const resultList = document.getElementById('resultList');
+  const counter = document.getElementById('dataCounter');
+  resultList.innerHTML = "";
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeQrisModal();
+  const currentData = database[activeTab] || [];
+  const filtered = currentData.filter(nomor => {
+    const rawNomor = nomor.toLowerCase();
+    const cleanNomor = rawNomor.replace(/[^a-zA-Z0-9]/g, '');
+
+    return rawNomor.includes(rawQuery) || (cleanQuery !== '' && cleanNomor.includes(cleanQuery));
   });
 
-  // Listener Input Search dengan Debounce
-  document.getElementById('searchInput').addEventListener('input', filterDataDebounced);
+  counter.innerText = `${filtered.length} Data`;
 
-  initTheme();
-  fetchOnlineDatabase();
+  if (filtered.length === 0) {
+    const emptyLi = document.createElement('li');
+    emptyLi.className = 'empty-msg';
+    emptyLi.textContent = 'Tidak ada data ditemukan.';
+    resultList.appendChild(emptyLi);
+    return;
+  }
+
+  // OPTIMASI: Slice array agar tidak merender ribuan elemen sekaligus ke DOM
+  const visibleData = filtered.slice(0, renderLimit);
+  const fragment = document.createDocumentFragment();
+
+  visibleData.forEach(nomor => {
+    const li = document.createElement('li');
+    li.className = 'result-item';
+    li.title = "Klik untuk menyalin nomor";
+    li.addEventListener('click', () => copyToClipboard(nomor));
+
+    const spanNumber = document.createElement('span');
+    spanNumber.className = 'number';
+    spanNumber.textContent = nomor; // Aman dari XSS (menggunakan textContent)
+
+    const rightContent = document.createElement('div');
+    rightContent.className = 'right-content';
+    
+    const badgeSpan = document.createElement('span');
+    badgeSpan.className = 'badge';
+    badgeSpan.textContent = 'Waspada';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'btn-copy-icon';
+    copyBtn.title = 'Salin';
+    copyBtn.setAttribute('aria-label', 'Salin Nomor');
+    copyBtn.textContent = '📋';
+
+    rightContent.appendChild(badgeSpan);
+    rightContent.appendChild(copyBtn);
+
+    if (isAdmin) {
+      const btnDelete = document.createElement('button');
+      btnDelete.className = 'btn btn-delete';
+      btnDelete.textContent = 'Hapus';
+      btnDelete.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteNumber(nomor, btnDelete);
+      });
+      rightContent.appendChild(btnDelete);
+    }
+
+    li.appendChild(spanNumber);
+    li.appendChild(rightContent);
+    fragment.appendChild(li);
+  });
+
+  // Tampilkan tombol "Tampilkan Lebih Banyak" jika ada sisa data
+  if (filtered.length > renderLimit) {
+    const loadMoreLi = document.createElement('li');
+    loadMoreLi.className = 'load-more-container';
+
+    const loadMoreBtn = document.createElement('button');
+    loadMoreBtn.className = 'btn btn-load-more';
+    loadMoreBtn.textContent = `Tampilkan ${filtered.length - renderLimit} Data Lagi...`;
+    loadMoreBtn.addEventListener('click', () => {
+      renderLimit += 50;
+      filterData();
+    });
+
+    loadMoreLi.appendChild(loadMoreBtn);
+    fragment.appendChild(loadMoreLi);
+  }
+
+  resultList.appendChild(fragment);
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(`Disalin: ${text}`);
+    }).catch(() => {
+      fallbackCopyTextToClipboard(text);
+    });
+  } else {
+    fallbackCopyTextToClipboard(text);
+  }
+}
+
+function fallbackCopyTextToClipboard(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    showToast(`Disalin: ${text}`);
+  } catch (err) {
+    showToast("Gagal menyalin teks.");
+  }
+  document.body.removeChild(textArea);
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2200);
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme_preference');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.getElementById('themeToggleBtn').innerHTML = "☀️ Terang";
+  }
+}
+
+function toggleTheme() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  document.getElementById('themeToggleBtn').innerHTML = isDark ? "☀️ Terang" : "🌙 Gelap";
+  localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
+}
+
+function openQrisModal(src) {
+  document.getElementById('modalImg').src = src;
+  document.getElementById('qrisModal').style.display = 'flex';
+}
+
+function closeQrisModal() {
+  document.getElementById('qrisModal').style.display = 'none';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeQrisModal();
+});
+
+document.getElementById('searchInput').addEventListener('input', filterDataDebounced);
+
+initTheme();
+fetchOnlineDatabase();
 </script>
 
 </body>
