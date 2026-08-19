@@ -100,44 +100,44 @@
       overflow: hidden;
     }
 
-    /* Update pada selector body */
-body {
-  background: var(--bg-gradient);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-main);
-  padding: 16px; /* Memberikan ruang aman di sekeliling layar HP */
-}
+    body {
+      background: var(--bg-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      padding: 12px;
+    }
 
-/* Update pada selector .container */
-.container {
-  width: 100%;
-  max-width: 480px; /* Lebar maksimal di HP agar tidak terlalu melebar */
-  height: 92dvh;    /* Tinggi 92% dari viewport layar HP */
-  max-height: 850px;
-  background: var(--card-bg);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--card-border); /* Memberikan garis tepi tipis */
-  border-radius: 20px;                 /* Sudut melengkung halus */
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow: hidden;
-  box-shadow: var(--card-shadow);     /* Efek bayangan agar melayang */
-}
+    .container {
+      width: 100%;
+      max-width: 480px;
+      height: 92dvh;
+      max-height: 850px;
+      background: var(--card-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
 
-/* Media query untuk layar komputer/tablet */
-@media (min-width: 640px) {
-  .container {
-    max-width: 540px;
-    height: 88dvh;
-    border-radius: 24px;
-    padding: 24px;
-  }
-}
+    @media (min-width: 640px) {
+      body {
+        padding: 24px;
+      }
+      .container {
+        max-width: 540px;
+        height: 88dvh;
+        border-radius: 24px;
+        padding: 24px;
+      }
+    }
 
     .header-area {
       display: flex;
@@ -201,6 +201,15 @@ body {
       border-radius: 10px;
       border: 1px solid var(--input-border);
       white-space: nowrap;
+    }
+
+    .last-updated {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: -4px;
+      flex-shrink: 0;
+      padding-right: 2px;
     }
 
     .tabs {
@@ -343,7 +352,7 @@ body {
     .right-content {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .badge {
@@ -494,6 +503,8 @@ body {
     <div id="dataCounter" class="data-counter">0 Data</div>
   </div>
 
+  <div id="lastUpdated" class="last-updated">Diperbarui: -</div>
+
   <div class="tabs">
     <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
     <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Genshin</button>
@@ -542,18 +553,34 @@ body {
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
 let adminSecretKey = "";
 
-let database = { rekening: [], genshin: [] };
+let database = { rekening: [], genshin: [], lastUpdated: null };
 let isAdmin = false;
 let activeTab = 'rekening';
 let searchTimeout = null;
 
-// OPTIMASI: Batasi jumlah tampilan item awal untuk menghindari lag rendering
 let renderLimit = 50;
+
+function formatLastUpdated(timestamp) {
+  if (!timestamp) return "Diperbarui: -";
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) return `Diperbarui: ${timestamp}`;
+
+  return `Diperbarui: ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+function updateLastUpdatedUI() {
+  const el = document.getElementById('lastUpdated');
+  if (database.lastUpdated) {
+    el.innerText = formatLastUpdated(database.lastUpdated);
+  } else {
+    el.innerText = "Diperbarui: -";
+  }
+}
 
 async function fetchOnlineDatabase() {
   const status = document.getElementById('statusBar');
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
 
   try {
     status.innerText = "⏳ Memperbarui server...";
@@ -577,13 +604,13 @@ async function fetchOnlineDatabase() {
       try { 
         database = JSON.parse(cached); 
       } catch(e) { 
-        database = { rekening: [], genshin: [] }; 
+        database = { rekening: [], genshin: [], lastUpdated: null }; 
       }
     }
     status.innerText = "🔴 Mode Offline (Data Lokal)";
   }
   
-  // PERBAIKAN: Baca URL Parameter saat data selesai dimuat
+  updateLastUpdatedUI();
   checkUrlParams();
   filterData();
 }
@@ -596,6 +623,8 @@ async function saveOnlineDatabase() {
     alert("Password Admin belum diisi. Silakan login kembali.");
     return false;
   }
+
+  database.lastUpdated = new Date().toISOString();
 
   try {
     const res = await fetch(PROXY_URL, {
@@ -614,6 +643,7 @@ async function saveOnlineDatabase() {
     
     localStorage.setItem('cached_scammer_db', JSON.stringify(database));
     status.innerText = "🟢 Tersimpan di server!";
+    updateLastUpdatedUI();
     return true;
   } catch (err) {
     alert("Gagal memperbarui server: " + err.message);
@@ -655,7 +685,6 @@ async function addNumber() {
   const btnAdd = document.getElementById('btnAdd');
   const rawVal = input.value.trim();
 
-  // Clean value (hapus spasi berlebih & karakter kontrol)
   const cleanVal = rawVal.replace(/[^\w\s-]/gi, '').trim();
 
   if (!cleanVal) {
@@ -663,7 +692,6 @@ async function addNumber() {
     return;
   }
 
-  // Cek duplikasi tanpa sensitifitas karakter khusus
   const normalizedNew = cleanVal.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
   const exists = database[activeTab].some(item => 
     item.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() === normalizedNew
@@ -682,11 +710,11 @@ async function addNumber() {
   if (success) {
     input.value = "";
     document.getElementById('searchInput').value = "";
-    renderLimit = 50; // Reset limit tampilan
+    renderLimit = 50;
     filterData();
     showToast("Data berhasil ditambahkan!");
   } else {
-    database[activeTab].shift(); // Rollback jika gagal
+    database[activeTab].shift();
   }
   
   btnAdd.disabled = false;
@@ -707,7 +735,7 @@ async function deleteNumber(nomor, btnEl) {
         filterData();
         showToast("Data dihapus!");
       } else {
-        database[activeTab] = originalData; // Rollback
+        database[activeTab] = originalData;
         if (btnEl) btnEl.disabled = false;
       }
     }
@@ -716,7 +744,7 @@ async function deleteNumber(nomor, btnEl) {
 
 function switchTab(tab) {
   activeTab = tab;
-  renderLimit = 50; // Reset limit saat pindah tab
+  renderLimit = 50;
   document.getElementById('tabRekening').classList.toggle('active', tab === 'rekening');
   document.getElementById('tabGenshin').classList.toggle('active', tab === 'genshin');
 
@@ -731,12 +759,11 @@ function switchTab(tab) {
 function filterDataDebounced() {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
-    renderLimit = 50; // Reset limit saat pencarian baru
+    renderLimit = 50;
     filterData();
   }, 150);
 }
 
-// ================= FITUR BARU: URL PARAMETER HANDLING =================
 function checkUrlParams() {
   const urlParams = new URLSearchParams(window.location.search);
   const searchQuery = urlParams.get('search') || urlParams.get('q');
@@ -760,22 +787,28 @@ function updateUrlParam(query) {
   } else {
     url.searchParams.delete('search');
   }
-  // Update URL browser tanpa me-reload halaman
   window.history.replaceState({}, '', url.toString());
 }
 
 function shareSearchLink(query) {
   const shareUrl = `${window.location.origin}${window.location.pathname}?search=${encodeURIComponent(query)}&tab=${activeTab}`;
-  copyToClipboard(shareUrl);
-  showToast("Link pencarian disalin!");
+  copyToClipboard(shareUrl, "Link pencarian disalin!");
 }
-// ======================================================================
+
+/* PEMBUAT TEMPLATE LAPORAN OTOMATIS */
+function copyReportTemplate(nomor) {
+  const categoryLabel = activeTab === 'rekening' ? 'Rekening Scammer' : 'UID HB Genshin Impact';
+  const currentUrl = `${window.location.origin}${window.location.pathname}?search=${encodeURIComponent(nomor)}&tab=${activeTab}`;
+  
+  const template = `⚠️ LAPORAN SCAMMER / UID HB ⚠️\n\nKategori : ${categoryLabel}\nNomor/UID: ${nomor}\nStatus   : WASPADA / TERINDIKASI PENIPUAN\n\nCek data selengkapnya di:\n${currentUrl}`;
+
+  copyToClipboard(template, "Template Laporan disalin!");
+}
 
 function filterData() {
   const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
   const cleanQuery = rawQuery.replace(/[^a-zA-Z0-9]/g, '');
 
-  // Perbarui parameter URL
   updateUrlParam(rawQuery);
 
   const resultList = document.getElementById('resultList');
@@ -800,7 +833,6 @@ function filterData() {
     return;
   }
 
-  // OPTIMASI: Slice array agar tidak merender ribuan elemen sekaligus ke DOM
   const visibleData = filtered.slice(0, renderLimit);
   const fragment = document.createDocumentFragment();
 
@@ -808,11 +840,11 @@ function filterData() {
     const li = document.createElement('li');
     li.className = 'result-item';
     li.title = "Klik untuk menyalin nomor";
-    li.addEventListener('click', () => copyToClipboard(nomor));
+    li.addEventListener('click', () => copyToClipboard(nomor, `Disalin: ${nomor}`));
 
     const spanNumber = document.createElement('span');
     spanNumber.className = 'number';
-    spanNumber.textContent = nomor; // Aman dari XSS (menggunakan textContent)
+    spanNumber.textContent = nomor;
 
     const rightContent = document.createElement('div');
     rightContent.className = 'right-content';
@@ -821,14 +853,17 @@ function filterData() {
     badgeSpan.className = 'badge';
     badgeSpan.textContent = 'Waspada';
 
-    // Tombol Salin Nomor
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'btn-icon';
-    copyBtn.title = 'Salin Nomor';
-    copyBtn.setAttribute('aria-label', 'Salin Nomor');
-    copyBtn.textContent = '📋';
+    /* Tombol Salin Template Laporan */
+    const reportBtn = document.createElement('button');
+    reportBtn.className = 'btn-icon';
+    reportBtn.title = 'Salin Template Laporan';
+    reportBtn.setAttribute('aria-label', 'Salin Template Laporan');
+    reportBtn.textContent = '📢';
+    reportBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      copyReportTemplate(nomor);
+    });
 
-    // Tombol Bagikan Link Pencarian (Fitur Baru)
     const shareBtn = document.createElement('button');
     shareBtn.className = 'btn-icon';
     shareBtn.title = 'Bagikan Link Pencarian';
@@ -840,7 +875,7 @@ function filterData() {
     });
 
     rightContent.appendChild(badgeSpan);
-    rightContent.appendChild(copyBtn);
+    rightContent.appendChild(reportBtn);
     rightContent.appendChild(shareBtn);
 
     if (isAdmin) {
@@ -859,7 +894,6 @@ function filterData() {
     fragment.appendChild(li);
   });
 
-  // Tampilkan tombol "Tampilkan Lebih Banyak" jika ada sisa data
   if (filtered.length > renderLimit) {
     const loadMoreLi = document.createElement('li');
     loadMoreLi.className = 'load-more-container';
@@ -879,26 +913,27 @@ function filterData() {
   resultList.appendChild(fragment);
 }
 
-function copyToClipboard(text) {
+function copyToClipboard(text, customMessage) {
+  const message = customMessage || `Disalin: ${text}`;
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(() => {
-      showToast(`Disalin: ${text}`);
+      showToast(message);
     }).catch(() => {
-      fallbackCopyTextToClipboard(text);
+      fallbackCopyTextToClipboard(text, message);
     });
   } else {
-    fallbackCopyTextToClipboard(text);
+    fallbackCopyTextToClipboard(text, message);
   }
 }
 
-function fallbackCopyTextToClipboard(text) {
+function fallbackCopyTextToClipboard(text, customMessage) {
   const textArea = document.createElement("textarea");
   textArea.value = text;
   document.body.appendChild(textArea);
   textArea.select();
   try {
     document.execCommand('copy');
-    showToast(`Disalin: ${text}`);
+    showToast(customMessage || `Disalin: ${text}`);
   } catch (err) {
     showToast("Gagal menyalin teks.");
   }
