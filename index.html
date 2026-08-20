@@ -156,13 +156,13 @@
     }
 
     h2 {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 800;
       color: var(--text-title);
       letter-spacing: -0.02em;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
       transition: opacity 0.2s;
     }
@@ -171,20 +171,27 @@
       opacity: 0.75;
     }
 
-    .btn-theme {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-theme, .btn-header-admin {
       background: transparent;
       color: var(--text-muted);
       border: 1px solid var(--input-border);
-      padding: 5px 12px;
+      padding: 5px 10px;
       border-radius: 20px;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       cursor: pointer;
+      white-space: nowrap;
     }
 
-    .btn-theme:hover {
+    .btn-theme:hover, .btn-header-admin:hover {
       background: var(--input-border);
       color: var(--text-title);
     }
@@ -241,7 +248,7 @@
     .marquee-track {
       display: inline-block;
       white-space: nowrap;
-      animation: scrollLoop 25s linear infinite;
+      animation: scrollLoop 30s linear infinite;
     }
 
     .last-updated-wrapper:hover .marquee-track {
@@ -253,7 +260,7 @@
       font-size: 0.75rem;
       font-weight: 500;
       color: var(--text-main);
-      padding-right: 50px; /* Jarak pisah antar putaran */
+      padding-right: 50px;
     }
 
     @keyframes scrollLoop {
@@ -303,7 +310,7 @@
       outline: none;
     }
 
-    /* Mode Pemilik yang Lebih Ringkas & Efisien */
+    /* Mode Pemilik dengan 5 Input Pesan */
     .admin-panel {
       display: flex;
       flex-direction: column;
@@ -319,14 +326,16 @@
       border: 1px dashed var(--input-focus);
       padding: 8px 10px;
       border-radius: 12px;
+      max-height: 220px;
+      overflow-y: auto;
     }
 
     .admin-box textarea {
       resize: none;
-      height: 38px;
-      min-height: 38px;
-      padding: 6px 10px;
-      font-size: 0.78rem;
+      height: 32px;
+      min-height: 32px;
+      padding: 5px 8px;
+      font-size: 0.75rem;
     }
 
     .admin-inputs {
@@ -359,7 +368,6 @@
       gap: 6px;
     }
 
-    .btn-admin { background: var(--btn-admin); width: 100%; padding: 8px 16px; }
     .btn-add { background: var(--btn-add); width: 100%; padding: 8px 16px; }
     .btn-delete { background: var(--btn-delete); padding: 5px 8px; font-size: 0.7rem; border-radius: 6px; }
     
@@ -514,7 +522,10 @@
 <div class="container">
   <div class="header-area">
     <h2 onclick="resetToHome()" title="Kembali ke Halaman Utama">🛡️ UID HB & REK SCAMMER</h2>
-    <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">Dark</button>
+    <div class="header-actions">
+      <button id="authBtn" class="btn-header-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
+      <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">Dark</button>
+    </div>
   </div>
   
   <div class="status-bar-container">
@@ -536,10 +547,12 @@
   </div>
 
   <div class="admin-panel">
-    <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
-    
     <div id="addBox" class="admin-box" style="display: none;">
-      <textarea id="infoTambahanInput" placeholder="Info tambahan / pengumuman singkat..."></textarea>
+      <textarea id="infoTambahan1" placeholder="Pesan Pengumuman 1..."></textarea>
+      <textarea id="infoTambahan2" placeholder="Pesan Pengumuman 2..."></textarea>
+      <textarea id="infoTambahan3" placeholder="Pesan Pengumuman 3..."></textarea>
+      <textarea id="infoTambahan4" placeholder="Pesan Pengumuman 4..."></textarea>
+      <textarea id="infoTambahan5" placeholder="Pesan Pengumuman 5..."></textarea>
       <div class="admin-inputs">
         <input type="text" id="newNumberInput" style="flex: 1.5;" placeholder="Nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
         <input type="date" id="newDateInput" style="flex: 1;" title="Tanggal Dilaporkan">
@@ -576,20 +589,28 @@
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
 
 let adminSecretKey = null;
-let database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: "" };
+let database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: [] };
 let isAdmin = false;
 let activeTab = 'rekening';
 let searchTimeout = null;
 let renderLimit = 50;
 
-function formatLastUpdated(timestamp, infoTambahan) {
+function formatLastUpdated(timestamp, infoTambahanArr) {
   if (!timestamp) return "Diperbarui: -";
   const date = new Date(timestamp);
   const timeStr = isNaN(date.getTime()) ? timestamp : `${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
   
   let resultText = `🕒 Terakhir Update: ${timeStr}`;
-  if (infoTambahan && infoTambahan.trim() !== "") {
-    resultText += `  |  📢 Info: ${infoTambahan.trim()}`;
+  
+  let validInfos = [];
+  if (Array.isArray(infoTambahanArr)) {
+    validInfos = infoTambahanArr.map(i => i ? i.trim() : "").filter(i => i !== "");
+  } else if (typeof infoTambahanArr === 'string' && infoTambahanArr.trim() !== "") {
+    validInfos = [infoTambahanArr.trim()];
+  }
+
+  if (validInfos.length > 0) {
+    resultText += `  |  📢 Info: ${validInfos.join("  •  ")}`;
   }
   return resultText;
 }
@@ -635,7 +656,9 @@ async function fetchOnlineDatabase() {
       database = data.record;
       database.rekening = migrateData(database.rekening);
       database.genshin = migrateData(database.genshin);
-      if (database.infoTambahan === undefined) database.infoTambahan = "";
+      if (!Array.isArray(database.infoTambahan)) {
+        database.infoTambahan = database.infoTambahan ? [database.infoTambahan] : [];
+      }
       
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
       status.innerText = "🟢 Koneksi aman: Database optimal.";
@@ -650,9 +673,11 @@ async function fetchOnlineDatabase() {
         database = JSON.parse(cached); 
         database.rekening = migrateData(database.rekening || []);
         database.genshin = migrateData(database.genshin || []);
-        if (database.infoTambahan === undefined) database.infoTambahan = "";
+        if (!Array.isArray(database.infoTambahan)) {
+          database.infoTambahan = database.infoTambahan ? [database.infoTambahan] : [];
+        }
       } catch(e) { 
-        database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: "" }; 
+        database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: [] }; 
       }
     }
     status.innerText = "🔴 Mode Offline (Data Lokal)";
@@ -721,11 +746,16 @@ function toggleAdmin() {
     if (inputSecret && inputSecret.trim() !== "") {
       adminSecretKey = inputSecret.trim();
       isAdmin = true;
-      document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
+      document.getElementById('authBtn').innerText = "🔓 Keluar Mode";
       document.getElementById('addBox').style.display = "flex";
       document.getElementById('runningTextWrapper').style.display = "none";
       document.getElementById('newDateInput').valueAsDate = new Date();
-      document.getElementById('infoTambahanInput').value = database.infoTambahan || "";
+      
+      for (let i = 1; i <= 5; i++) {
+        const val = (database.infoTambahan && database.infoTambahan[i - 1]) ? database.infoTambahan[i - 1] : "";
+        document.getElementById(`infoTambahan${i}`).value = val;
+      }
+      
       showToast("Mode Pemilik Aktif");
     } else if (inputSecret !== null) {
       alert("Password Admin wajib diisi!");
@@ -743,18 +773,21 @@ function handleInputKeyDown(e) {
 async function addNumber() {
   const input = document.getElementById('newNumberInput');
   const dateInput = document.getElementById('newDateInput');
-  const infoInput = document.getElementById('infoTambahanInput');
   const btnAdd = document.getElementById('btnAdd');
   
+  let newInfoArr = [];
+  for (let i = 1; i <= 5; i++) {
+    newInfoArr.push(document.getElementById(`infoTambahan${i}`).value.trim());
+  }
+  database.infoTambahan = newInfoArr;
+
   const rawVal = input.value.trim();
   const dateVal = dateInput.value;
-  const infoVal = infoInput.value.trim();
-
-  database.infoTambahan = infoVal;
+  const hasInfo = newInfoArr.some(inf => inf !== "");
 
   if (!rawVal) {
-    if (!infoVal) {
-      alert("⚠️ Masukkan nomor/UID baru atau isi info tambahan!");
+    if (!hasInfo) {
+      alert("⚠️ Masukkan nomor/UID baru atau isi setidaknya satu info tambahan!");
       return;
     }
     btnAdd.disabled = true;
