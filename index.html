@@ -152,7 +152,6 @@
       flex-shrink: 0;
     }
 
-    /* Penambahan pointer dan hover pada judul */
     h2 {
       font-size: 1.15rem;
       font-weight: 700;
@@ -213,22 +212,24 @@
       white-space: nowrap;
     }
 
-    /* Animasi Running Text */
+    /* Animasi Running Text Diperbarui */
     .last-updated-wrapper {
       width: 100%;
       overflow: hidden;
       white-space: nowrap;
-      margin-top: -4px;
+      margin-top: -2px;
       flex-shrink: 0;
       border-radius: 4px;
     }
 
     .last-updated {
       display: inline-block;
-      font-size: 0.65rem;
-      color: var(--text-muted);
+      font-size: 0.75rem; /* Ukuran diperbesar sedikit */
+      font-weight: 500; /* Tulisan dipertebal */
+      color: var(--text-main); /* Warna lebih tegas */
+      letter-spacing: 0.3px; /* Jarak huruf agar tidak terlalu rapat */
       padding-left: 100%;
-      animation: running-text 12s linear infinite;
+      animation: running-text 20s linear infinite; /* Kecepatan diperlambat menjadi 20 detik */
     }
     
     .last-updated-wrapper:hover .last-updated {
@@ -473,7 +474,6 @@
 
 <div class="container">
   <div class="header-area">
-    <!-- Judul sekarang memiliki onclick untuk reset ke halaman utama -->
     <h2 onclick="resetToHome()" title="Kembali ke Halaman Utama">🛡️ UID HB & REK SCAMMER</h2>
     <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
   </div>
@@ -562,22 +562,12 @@ function migrateData(dataArray) {
   });
 }
 
-// Fungsi Baru: Kembali ke Halaman Utama
 function resetToHome() {
-  // 1. Hapus parameter URL (seperti search= atau tab=)
   window.history.replaceState({}, '', window.location.pathname);
-  
-  // 2. Kosongkan input pencarian
   document.getElementById('searchInput').value = '';
-  
-  // 3. Kembalikan ke tab default (Rekening)
   switchTab('rekening');
-  
-  // 4. Scroll daftar hasil kembali ke posisi atas
   const resultList = document.getElementById('resultList');
   if(resultList) resultList.scrollTop = 0;
-  
-  // 5. Tampilkan pesan berhasil
   showToast("Kembali ke Halaman Utama");
 }
 
