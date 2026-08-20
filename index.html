@@ -590,7 +590,7 @@ async function fetchOnlineDatabase() {
       database.genshin = migrateData(database.genshin);
       
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Terhubung ke database";
+      status.innerText = "🟢 Terhubung ke database dan berjalan normal";
     } else {
       throw new Error("Format data tidak sesuai");
     }
