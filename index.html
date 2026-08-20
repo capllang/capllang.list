@@ -13,7 +13,8 @@
     :root {
       --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       
-      /* Mode Terang */
+      /* Mode Terang (Default) */
+      --outer-bg: #1e293b; /* Background luar saat mode terang: Gelap arang profesional */
       --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
       --card-bg: rgba(255, 255, 255, 0.88);
       --card-border: rgba(255, 255, 255, 0.9);
@@ -52,6 +53,7 @@
 
     body.dark-mode {
       /* Mode Gelap */
+      --outer-bg: #e2e8f0; /* Background luar saat mode gelap: Terang minimalis yang lembut */
       --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
       --card-bg: rgba(17, 24, 39, 0.82);
       --card-border: rgba(255, 255, 255, 0.08);
@@ -107,7 +109,7 @@
     }
 
     body {
-      background: var(--bg-gradient);
+      background: var(--outer-bg); /* Menggunakan variabel warna luar yang dinamis */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -120,7 +122,7 @@
       max-width: 480px;
       height: 92dvh;
       max-height: 850px;
-      background: var(--card-bg);
+      background: var(--bg-gradient); /* Konten utama menggunakan gradien web Anda */
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       border: 1px solid var(--card-border);
@@ -595,6 +597,20 @@ let activeTab = 'rekening';
 let searchTimeout = null;
 let renderLimit = 50;
 
+// Fungsi Toggle Tema (Dark/Light)
+function toggleTheme() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeToggleBtn').textContent = isDark ? 'Light' : 'Dark';
+}
+
+// Cek Preferensi Tema Tersimpan
+if (localStorage.getItem('theme') === 'dark') {
+  document.body.classList.add('dark-mode');
+  document.getElementById('themeToggleBtn').textContent = 'Light';
+}
+
 function formatLastUpdated(timestamp, infoTambahanArr) {
   if (!timestamp) return "Diperbarui: -";
   const date = new Date(timestamp);
@@ -1047,13 +1063,15 @@ function copyToClipboard(text, customMessage) {
 function fallbackCopyTextToClipboard(text, customMessage) {
   const textArea = document.createElement("textarea");
   textArea.value = text;
+  textArea.style.position = "fixed";
   document.body.appendChild(textArea);
+  textArea.focus();
   textArea.select();
   try {
     document.execCommand('copy');
-    showToast(customMessage || `Disalin: ${text}`);
+    showToast(customMessage);
   } catch (err) {
-    showToast("Gagal menyalin teks.");
+    alert("Gagal menyalin teks.");
   }
   document.body.removeChild(textArea);
 }
@@ -1062,55 +1080,36 @@ function showToast(message) {
   const toast = document.getElementById('toast');
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2000);
 }
 
-function initTheme() {
-  const savedTheme = localStorage.getItem('theme_preference');
-  if (savedTheme === 'dark') {
-    document.body.classList.add('dark-mode');
-    document.getElementById('themeToggleBtn').innerHTML = "Light";
-  }
-}
-
-function toggleTheme() {
-  document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  document.getElementById('themeToggleBtn').innerHTML = isDark ? "Light" : "Dark";
-  localStorage.setItem('theme_preference', isDark ? 'dark' : 'light');
-}
-
-function openQrisModal(src) {
-  document.getElementById('modalImg').src = src;
-  document.getElementById('qrisModal').style.display = 'flex';
+function openQrisModal(imgSrc) {
+  const modal = document.getElementById('qrisModal');
+  const modalImg = document.getElementById('modalImg');
+  modalImg.src = imgSrc;
+  modal.style.display = 'flex';
 }
 
 function closeQrisModal() {
   document.getElementById('qrisModal').style.display = 'none';
 }
 
-// Event Listeners Awal
-document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-  fetchOnlineDatabase();
-
-  const searchInput = document.getElementById('searchInput');
-  searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-      renderLimit = 50;
-      filterData();
-    }, 150);
-  });
-
-  // Shortcut '/' untuk fokus pencarian
-  window.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement !== searchInput && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
-      e.preventDefault();
-      searchInput.focus();
-    }
-  });
+document.addEventListener('keydown', function(e) {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    const searchInput = document.getElementById('searchInput');
+    searchInput.focus();
+    searchInput.select();
+  }
+  if (e.key === 'Escape') {
+    closeQrisModal();
+  }
 });
+
+window.onload = fetchOnlineDatabase;
 </script>
+
 </body>
 </html>
