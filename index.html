@@ -13,7 +13,7 @@
     :root {
       --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       
-      /* Mode Terang (Clean Slate Light) */
+      /* Mode Terang */
       --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
       --card-bg: rgba(255, 255, 255, 0.88);
       --card-border: rgba(255, 255, 255, 0.9);
@@ -51,7 +51,7 @@
     }
 
     body.dark-mode {
-      /* Mode Gelap (Comfortable Midnight Dark) */
+      /* Mode Gelap */
       --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
       --card-bg: rgba(17, 24, 39, 0.82);
       --card-border: rgba(255, 255, 255, 0.08);
@@ -206,14 +206,34 @@
       white-space: nowrap;
     }
 
-    .last-updated {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      text-align: right;
+    /* === ANIMASI RUNNING TEXT UNTUK TANGGAL UPDATE === */
+    .last-updated-wrapper {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
       margin-top: -4px;
       flex-shrink: 0;
-      padding-right: 2px;
+      border-radius: 4px;
     }
+
+    .last-updated {
+      display: inline-block;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      padding-left: 100%;
+      animation: running-text 12s linear infinite;
+    }
+    
+    /* Jeda animasi saat disentuh/di-hover */
+    .last-updated-wrapper:hover .last-updated {
+      animation-play-state: paused;
+    }
+
+    @keyframes running-text {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    /* ================================================= */
 
     .tabs {
       display: flex;
@@ -257,7 +277,6 @@
       outline: none;
     }
 
-    /* Penyesuaian agar input tanggal sejajar */
     .admin-inputs {
       display: flex;
       gap: 8px;
@@ -457,7 +476,10 @@
     <div id="dataCounter" class="data-counter">0 Data</div>
   </div>
 
-  <div id="lastUpdated" class="last-updated">Diperbarui: -</div>
+  <!-- WRAPPER UNTUK RUNNING TEXT -->
+  <div class="last-updated-wrapper">
+    <div id="lastUpdated" class="last-updated">Diperbarui: -</div>
+  </div>
 
   <div class="tabs">
     <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
@@ -518,7 +540,7 @@ function formatLastUpdated(timestamp) {
   if (!timestamp) return "Diperbarui: -";
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) return `Diperbarui: ${timestamp}`;
-  return `Diperbarui: ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
+  return `🕒 Status Data Terakhir Diperbarui Pada: ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB 🟢 Sistem Berjalan Normal`;
 }
 
 function updateLastUpdatedUI() {
@@ -551,7 +573,6 @@ async function fetchOnlineDatabase() {
     const data = await res.json();
     if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
       database = data.record;
-      // Migrasi struktur data lama
       database.rekening = migrateData(database.rekening);
       database.genshin = migrateData(database.genshin);
       
@@ -639,7 +660,6 @@ function toggleAdmin() {
       isAdmin = true;
       document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
       document.getElementById('addBox').style.display = "flex";
-      // Set otomatis tanggal hari ini saat mode admin dibuka
       document.getElementById('newDateInput').valueAsDate = new Date();
       showToast("Mode Pemilik Aktif");
     } else if (inputSecret !== null) {
@@ -682,7 +702,6 @@ async function addNumber() {
     }
   }
 
-  // Cek jika nomor sudah ada (mendukung format string lama dan object baru)
   const exists = database[activeTab].some(item => {
     const num = typeof item === 'object' ? item.nomor : item;
     return num === cleanVal;
@@ -696,7 +715,6 @@ async function addNumber() {
   btnAdd.disabled = true;
   btnAdd.innerText = "⏳ Menyimpan...";
   
-  // Masukkan sebagai object
   const newItem = { nomor: cleanVal, tanggal: dateVal };
   database[activeTab].unshift(newItem);
   
@@ -708,7 +726,7 @@ async function addNumber() {
     filterData();
     showToast("Data berhasil ditambahkan!");
   } else {
-    database[activeTab].shift(); // Hapus item terakhir ditambahkan jika gagal
+    database[activeTab].shift();
   }
   
   btnAdd.disabled = false;
@@ -807,7 +825,6 @@ function filterData() {
   const currentData = database[activeTab] || [];
   
   const filtered = currentData.filter(item => {
-    // Ekstrak string nomor untuk difilter
     const nomorStr = typeof item === 'object' ? item.nomor : item;
     const rawNomor = nomorStr.toLowerCase();
     const cleanNomor = rawNomor.replace(/[^a-zA-Z0-9]/g, '');
@@ -843,7 +860,6 @@ function filterData() {
     const rightContent = document.createElement('div');
     rightContent.className = 'right-content';
     
-    // Tampilkan Tanggal jika ada (Format dari YYYY-MM-DD ke DD/MM/YYYY)
     if (tanggalStr && tanggalStr !== '-') {
       const dateBadge = document.createElement('span');
       dateBadge.className = 'badge-date';
@@ -879,7 +895,7 @@ function filterData() {
       btnDelete.textContent = 'Hapus';
       btnDelete.addEventListener('click', (e) => {
         e.stopPropagation();
-        deleteNumber(item, btnDelete); // Kirim full item untuk dihapus
+        deleteNumber(item, btnDelete);
       });
       rightContent.appendChild(btnDelete);
     }
