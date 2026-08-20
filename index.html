@@ -222,7 +222,7 @@
       white-space: nowrap;
     }
 
-    /* Running Text Seamless Loop dengan Jarak Kiri-Kanan yang Indah */
+    /* Running Text Seamless Loop (Tanpa Jeda) */
     .last-updated-wrapper {
       width: 100%;
       overflow: hidden;
@@ -238,24 +238,27 @@
       -webkit-mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
     }
 
-    .last-updated {
+    .marquee-track {
       display: inline-block;
       white-space: nowrap;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--text-main);
-      padding-left: 100%;
-      padding-right: 40px;
-      animation: marquee 30s linear infinite;
+      animation: scrollLoop 25s linear infinite;
     }
-    
-    .last-updated-wrapper:hover .last-updated {
+
+    .last-updated-wrapper:hover .marquee-track {
       animation-play-state: paused;
     }
 
-    @keyframes marquee {
+    .marquee-content {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-main);
+      padding-right: 50px; /* Jarak pisah antar putaran */
+    }
+
+    @keyframes scrollLoop {
       0% { transform: translateX(0); }
-      100% { transform: translateX(-100%); }
+      100% { transform: translateX(-50%); }
     }
 
     .tabs {
@@ -519,9 +522,12 @@
     <div id="dataCounter" class="data-counter">0 Data</div>
   </div>
 
-  <!-- Running Text (Disembunyikan otomatis saat mode pemilik aktif) -->
+  <!-- Running Text Seamless Loop (Tanpa Jeda) -->
   <div id="runningTextWrapper" class="last-updated-wrapper">
-    <div id="lastUpdated" class="last-updated">Diperbarui: -</div>
+    <div class="marquee-track">
+      <div id="lastUpdated1" class="marquee-content">Diperbarui: -</div>
+      <div id="lastUpdated2" class="marquee-content">Diperbarui: -</div>
+    </div>
   </div>
 
   <div class="tabs">
@@ -589,9 +595,9 @@ function formatLastUpdated(timestamp, infoTambahan) {
 }
 
 function updateLastUpdatedUI() {
-  const el = document.getElementById('lastUpdated');
   const baseText = database.lastUpdated ? formatLastUpdated(database.lastUpdated, database.infoTambahan) : "Diperbarui: -";
-  el.textContent = baseText;
+  document.getElementById('lastUpdated1').textContent = baseText;
+  document.getElementById('lastUpdated2').textContent = baseText;
 }
 
 function migrateData(dataArray) {
@@ -705,7 +711,7 @@ function exitAdminMode() {
   adminSecretKey = null;
   document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
   document.getElementById('addBox').style.display = "none";
-  document.getElementById('runningTextWrapper').style.display = "flex"; // Munculkan kembali running text
+  document.getElementById('runningTextWrapper').style.display = "flex";
   filterData();
 }
 
@@ -717,7 +723,7 @@ function toggleAdmin() {
       isAdmin = true;
       document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
       document.getElementById('addBox').style.display = "flex";
-      document.getElementById('runningTextWrapper').style.display = "none"; // Sembunyikan running text
+      document.getElementById('runningTextWrapper').style.display = "none";
       document.getElementById('newDateInput').valueAsDate = new Date();
       document.getElementById('infoTambahanInput').value = database.infoTambahan || "";
       showToast("Mode Pemilik Aktif");
@@ -848,14 +854,6 @@ function switchTab(tab) {
     : "Cari UID HB Genshin Impact...";
 
   filterData();
-}
-
-function filterDataDebounced() {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    renderLimit = 50;
-    filterData();
-  }, 150);
 }
 
 function checkUrlParams() {
@@ -1053,26 +1051,33 @@ function openQrisModal(src) {
   document.getElementById('modalImg').src = src;
   document.getElementById('qrisModal').style.display = 'flex';
 }
+
 function closeQrisModal() {
   document.getElementById('qrisModal').style.display = 'none';
 }
 
-// Keyboard shortcuts: Esc untuk tutup modal, '/' untuk fokus pencarian
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeQrisModal();
-  }
-  if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-    e.preventDefault();
-    document.getElementById('searchInput').focus();
-  }
+// Event Listeners Awal
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  fetchOnlineDatabase();
+
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      renderLimit = 50;
+      filterData();
+    }, 150);
+  });
+
+  // Shortcut '/' untuk fokus pencarian
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
 });
-
-document.getElementById('searchInput').addEventListener('input', filterDataDebounced);
-
-initTheme();
-fetchOnlineDatabase();
 </script>
-
 </body>
 </html>
