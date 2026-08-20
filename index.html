@@ -509,6 +509,19 @@
       padding: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
 
+    /* Style untuk Custom Admin Modal */
+    .admin-modal-content {
+      background: var(--card-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--card-border);
+      padding: 20px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 320px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
       background: rgba(15, 23, 42, 0.95); color: #ffffff; padding: 8px 18px; border-radius: 20px;
@@ -575,6 +588,19 @@
     <div class="donation-action">
       <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
       <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">Saweria</a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Login Admin Kustom -->
+<div id="adminModal" class="qris-modal" style="display: none;" onclick="closeAdminModal()">
+  <div class="admin-modal-content" onclick="event.stopPropagation()">
+    <h3 style="color: var(--text-title); font-size: 0.95rem; margin-bottom: 10px;">🔑 Autentikasi Pemilik</h3>
+    <p style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 12px;">Masukkan password admin untuk mengakses panel kontrol.</p>
+    <input type="password" id="adminPasswordInput" placeholder="Password admin..." style="width: 100%; padding: 10px 14px; font-size: 0.825rem; background: var(--input-bg); color: var(--text-title); border: 1px solid var(--input-border); border-radius: 10px; outline: none; margin-bottom: 12px;" onkeydown="handleAdminModalKeyDown(event)">
+    <div style="display: flex; gap: 8px;">
+      <button class="btn" style="background: var(--input-border); color: var(--text-main); flex: 1;" onclick="closeAdminModal()">Batal</button>
+      <button class="btn btn-add" style="flex: 1;" onclick="submitAdminLogin()">Masuk</button>
     </div>
   </div>
 </div>
@@ -754,27 +780,45 @@ function exitAdminMode() {
 
 function toggleAdmin() {
   if (!isAdmin) {
-    const inputSecret = prompt("Masukkan Password Admin:");
-    if (inputSecret && inputSecret.trim() !== "") {
-      adminSecretKey = inputSecret.trim();
-      isAdmin = true;
-      document.getElementById('authBtn').innerText = "🔓 Keluar Mode";
-      document.getElementById('addBox').style.display = "flex";
-      document.getElementById('runningTextWrapper').style.display = "none";
-      document.getElementById('newDateInput').valueAsDate = new Date();
-      
-      for (let i = 1; i <= 5; i++) {
-        const val = (database.infoTambahan && database.infoTambahan[i - 1]) ? database.infoTambahan[i - 1] : "";
-        document.getElementById(`infoTambahan${i}`).value = val;
-      }
-      
-      showToast("Mode Pemilik Aktif");
-    } else if (inputSecret !== null) {
-      alert("Password Admin wajib diisi!");
-    }
+    document.getElementById('adminModal').style.display = 'flex';
+    const pwdInput = document.getElementById('adminPasswordInput');
+    pwdInput.value = '';
+    pwdInput.focus();
   } else {
     exitAdminMode();
     showToast("Keluar Mode Pemilik");
+  }
+}
+
+function closeAdminModal() {
+  document.getElementById('adminModal').style.display = 'none';
+}
+
+function handleAdminModalKeyDown(e) {
+  if (e.key === 'Enter') {
+    submitAdminLogin();
+  }
+}
+
+function submitAdminLogin() {
+  const inputSecret = document.getElementById('adminPasswordInput').value;
+  if (inputSecret && inputSecret.trim() !== "") {
+    adminSecretKey = inputSecret.trim();
+    isAdmin = true;
+    document.getElementById('authBtn').innerText = "🔓 Keluar Mode";
+    document.getElementById('addBox').style.display = "flex";
+    document.getElementById('runningTextWrapper').style.display = "none";
+    document.getElementById('newDateInput').valueAsDate = new Date();
+    
+    for (let i = 1; i <= 5; i++) {
+      const val = (database.infoTambahan && database.infoTambahan[i - 1]) ? database.infoTambahan[i - 1] : "";
+      document.getElementById(`infoTambahan${i}`).value = val;
+    }
+    
+    closeAdminModal();
+    showToast("Mode Pemilik Aktif");
+  } else {
+    alert("Password Admin wajib diisi!");
   }
 }
 
@@ -895,8 +939,8 @@ function switchTab(tab) {
 
   const input = document.getElementById('searchInput');
   input.placeholder = tab === 'rekening' 
-    ? "Cari Rekening/ E-Wallet Scammer... (Tekan '/' untuk fokus)" 
-    : "Cari UID HB Genshin Impact... (Tekan '/' untuk fokus)";
+    ? "Cari Rekening/ E-Wallet Scammer..." 
+    : "Cari UID HB Genshin Impact...";
 
   filterData();
 }
@@ -948,12 +992,10 @@ function filterData() {
   const currentData = database[activeTab] || [];
   
   const filtered = currentData.filter(item => {
-    // FIX: Pastikan item.nomor atau item terbaca sebagai string, bukan number
     const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
     const rawNomor = nomorStr.toLowerCase();
     const cleanNomor = rawNomor.replace(/[^a-zA-Z0-9]/g, '');
     
-    // Tampilkan semua jika kolom pencarian kosong
     if (rawQuery === '') return true;
 
     return rawNomor.includes(rawQuery) || (cleanQuery !== '' && cleanNomor.includes(cleanQuery));
