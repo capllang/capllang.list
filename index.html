@@ -37,6 +37,9 @@
       --item-badge: #e11d48;
       --item-badge-bg: #fff1f2;
       
+      --date-badge: #64748b;
+      --date-badge-bg: #f1f5f9;
+      
       --btn-primary: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
       --btn-add: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -71,6 +74,9 @@
       --item-border: #881337;
       --item-badge: #fda4af;
       --item-badge-bg: rgba(225, 29, 72, 0.18);
+      
+      --date-badge: #cbd5e1;
+      --date-badge-bg: rgba(15, 23, 42, 0.5);
       
       --btn-primary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
@@ -166,9 +172,6 @@
       font-weight: 600;
       cursor: pointer;
     }
-    .btn-theme:hover {
-      transform: translateY(-1px);
-    }
 
     .status-bar-container {
       display: flex;
@@ -254,13 +257,16 @@
       outline: none;
     }
 
+    /* Penyesuaian agar input tanggal sejajar */
+    .admin-inputs {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
     .search-box input:focus, .admin-box input:focus {
       border-color: var(--input-focus);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-    }
-
-    .search-box input::placeholder, .admin-box input::placeholder {
-      color: var(--text-muted);
     }
 
     .admin-panel {
@@ -271,6 +277,7 @@
 
     .admin-box {
       display: flex;
+      flex-direction: column;
       gap: 8px;
     }
 
@@ -288,12 +295,8 @@
       gap: 6px;
     }
 
-    .btn:hover {
-      opacity: 0.95;
-    }
-
     .btn-admin { background: var(--btn-admin); width: 100%; }
-    .btn-add { background: var(--btn-add); white-space: nowrap; }
+    .btn-add { background: var(--btn-add); width: 100%; }
     .btn-delete { background: var(--btn-delete); padding: 5px 8px; font-size: 0.7rem; border-radius: 6px; }
     
     .btn-load-more {
@@ -337,10 +340,6 @@
       cursor: pointer;
     }
 
-    .result-item:hover {
-      transform: scale(0.995);
-    }
-
     .result-item .number {
       font-weight: 600;
       font-size: 0.9rem;
@@ -364,6 +363,18 @@
       border-radius: 20px;
       font-weight: 700;
       letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .badge-date {
+      background: var(--date-badge-bg);
+      color: var(--date-badge);
+      border: 1px solid var(--input-border);
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
     }
 
     .btn-icon {
@@ -400,94 +411,37 @@
       gap: 12px;
     }
 
-    .donation-text {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .donation-title {
-      font-weight: 700;
-      font-size: 0.8rem;
-      color: var(--text-title);
-    }
-
-    .donation-desc {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    .donation-action {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .donation-title { font-weight: 700; font-size: 0.8rem; color: var(--text-title); }
+    .donation-desc { font-size: 0.7rem; color: var(--text-muted); }
+    .donation-action { display: flex; align-items: center; gap: 10px; }
+    
     .qris-img {
-      width: 36px;
-      height: 36px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid var(--card-border);
-      cursor: pointer;
+      width: 36px; height: 36px; object-fit: cover;
+      border-radius: 8px; border: 1px solid var(--card-border); cursor: pointer;
     }
-
     .btn-donate-link {
-      background: #f59e0b;
-      color: #ffffff;
-      padding: 6px 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-decoration: none;
-      border-radius: 10px;
-      white-space: nowrap;
-    }
-
-    .btn-donate-link:hover {
-      background: #d97706;
+      background: #f59e0b; color: #ffffff; padding: 6px 12px;
+      font-size: 0.75rem; font-weight: 600; text-decoration: none;
+      border-radius: 10px; white-space: nowrap;
     }
 
     .qris-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100dvh;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000;
     }
-
     .qris-modal img {
-      max-width: 85%;
-      max-height: 75%;
-      border-radius: 16px;
-      background: #ffffff;
-      padding: 12px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      max-width: 85%; max-height: 75%; border-radius: 16px; background: #ffffff;
+      padding: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
 
     .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: rgba(15, 23, 42, 0.95);
-      color: #ffffff;
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      pointer-events: none;
-      z-index: 2000;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95); color: #ffffff; padding: 8px 18px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 500; opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; z-index: 2000;
     }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
@@ -514,8 +468,11 @@
     <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
     
     <div id="addBox" class="admin-box" style="display: none;">
-      <input type="text" id="newNumberInput" placeholder="Masukkan nomor/UID baru..." aria-label="Input Nomor Baru" onkeydown="handleInputKeyDown(event)">
-      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Tambah</button>
+      <div class="admin-inputs">
+        <input type="text" id="newNumberInput" style="flex: 2;" placeholder="Masukkan nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
+        <input type="date" id="newDateInput" style="flex: 1;" title="Tanggal Dilaporkan">
+      </div>
+      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Tambah Data</button>
     </div>
   </div>
 
@@ -533,9 +490,7 @@
     </div>
     <div class="donation-action">
       <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
-      <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">
-        Saweria
-      </a>
+      <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">Saweria</a>
     </div>
   </div>
 </div>
@@ -563,17 +518,22 @@ function formatLastUpdated(timestamp) {
   if (!timestamp) return "Diperbarui: -";
   const date = new Date(timestamp);
   if (isNaN(date.getTime())) return `Diperbarui: ${timestamp}`;
-
   return `Diperbarui: ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`;
 }
 
 function updateLastUpdatedUI() {
   const el = document.getElementById('lastUpdated');
-  if (database.lastUpdated) {
-    el.innerText = formatLastUpdated(database.lastUpdated);
-  } else {
-    el.innerText = "Diperbarui: -";
-  }
+  el.innerText = database.lastUpdated ? formatLastUpdated(database.lastUpdated) : "Diperbarui: -";
+}
+
+// FUNGSI MIGRASI: Mengubah format string lama menjadi format object {nomor, tanggal}
+function migrateData(dataArray) {
+  return dataArray.map(item => {
+    if (typeof item === 'string') {
+      return { nomor: item, tanggal: "-" }; // Berikan tanda '-' jika tidak ada tanggal dari data lama
+    }
+    return item;
+  });
 }
 
 async function fetchOnlineDatabase() {
@@ -591,6 +551,10 @@ async function fetchOnlineDatabase() {
     const data = await res.json();
     if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
       database = data.record;
+      // Migrasi struktur data lama
+      database.rekening = migrateData(database.rekening);
+      database.genshin = migrateData(database.genshin);
+      
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
       status.innerText = "🟢 Terhubung ke database";
     } else {
@@ -602,6 +566,8 @@ async function fetchOnlineDatabase() {
     if (cached) {
       try { 
         database = JSON.parse(cached); 
+        database.rekening = migrateData(database.rekening || []);
+        database.genshin = migrateData(database.genshin || []);
       } catch(e) { 
         database = { rekening: [], genshin: [], lastUpdated: null }; 
       }
@@ -628,7 +594,6 @@ async function saveOnlineDatabase() {
 
   try {
     const cleanSecret = String(adminSecretKey).trim();
-
     const res = await fetch(PROXY_URL, {
       method: 'PUT',
       headers: {
@@ -645,9 +610,7 @@ async function saveOnlineDatabase() {
       return false;
     }
 
-    if (!res.ok) {
-      throw new Error("Gagal menyimpan data ke server");
-    }
+    if (!res.ok) throw new Error("Gagal menyimpan data ke server");
     
     localStorage.setItem('cached_scammer_db', JSON.stringify(database));
     status.innerText = "🟢 Tersimpan di server!";
@@ -676,6 +639,8 @@ function toggleAdmin() {
       isAdmin = true;
       document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
       document.getElementById('addBox').style.display = "flex";
+      // Set otomatis tanggal hari ini saat mode admin dibuka
+      document.getElementById('newDateInput').valueAsDate = new Date();
       showToast("Mode Pemilik Aktif");
     } else if (inputSecret !== null) {
       alert("Password Admin wajib diisi!");
@@ -687,18 +652,19 @@ function toggleAdmin() {
 }
 
 function handleInputKeyDown(e) {
-  if (e.key === 'Enter') {
-    addNumber();
-  }
+  if (e.key === 'Enter') addNumber();
 }
 
 async function addNumber() {
   const input = document.getElementById('newNumberInput');
+  const dateInput = document.getElementById('newDateInput');
   const btnAdd = document.getElementById('btnAdd');
+  
   const rawVal = input.value.trim();
+  const dateVal = dateInput.value;
 
-  if (!rawVal) {
-    alert("⚠️ Nomor/UID tidak boleh kosong!");
+  if (!rawVal || !dateVal) {
+    alert("⚠️ Nomor/UID dan Tanggal wajib diisi!");
     return;
   }
 
@@ -716,7 +682,12 @@ async function addNumber() {
     }
   }
 
-  const exists = database[activeTab].some(item => item.replace(/\D/g, '') === cleanVal);
+  // Cek jika nomor sudah ada (mendukung format string lama dan object baru)
+  const exists = database[activeTab].some(item => {
+    const num = typeof item === 'object' ? item.nomor : item;
+    return num === cleanVal;
+  });
+
   if (exists) {
     alert("⚠️ Nomor/UID ini sudah ada di dalam database!");
     return;
@@ -724,7 +695,10 @@ async function addNumber() {
 
   btnAdd.disabled = true;
   btnAdd.innerText = "⏳ Menyimpan...";
-  database[activeTab].unshift(cleanVal);
+  
+  // Masukkan sebagai object
+  const newItem = { nomor: cleanVal, tanggal: dateVal };
+  database[activeTab].unshift(newItem);
   
   const success = await saveOnlineDatabase();
   if (success) {
@@ -734,16 +708,18 @@ async function addNumber() {
     filterData();
     showToast("Data berhasil ditambahkan!");
   } else {
-    database[activeTab].shift();
+    database[activeTab].shift(); // Hapus item terakhir ditambahkan jika gagal
   }
   
   btnAdd.disabled = false;
-  btnAdd.innerText = "+ Tambah";
+  btnAdd.innerText = "+ Tambah Data";
 }
 
-async function deleteNumber(nomor, btnEl) {
-  if (confirm(`Hapus ${nomor} dari database?`)) {
-    const index = database[activeTab].indexOf(nomor);
+async function deleteNumber(itemObj, btnEl) {
+  const nomorStr = typeof itemObj === 'object' ? itemObj.nomor : itemObj;
+  
+  if (confirm(`Hapus ${nomorStr} dari database?`)) {
+    const index = database[activeTab].indexOf(itemObj);
     if (index > -1) {
       if (btnEl) btnEl.disabled = true;
       
@@ -794,7 +770,6 @@ function checkUrlParams() {
     document.getElementById('tabRekening').classList.toggle('active', activeTab === 'rekening');
     document.getElementById('tabGenshin').classList.toggle('active', activeTab === 'genshin');
   }
-
   if (searchQuery) {
     document.getElementById('searchInput').value = searchQuery;
   }
@@ -830,10 +805,12 @@ function filterData() {
   resultList.innerHTML = "";
 
   const currentData = database[activeTab] || [];
-  const filtered = currentData.filter(nomor => {
-    const rawNomor = nomor.toLowerCase();
+  
+  const filtered = currentData.filter(item => {
+    // Ekstrak string nomor untuk difilter
+    const nomorStr = typeof item === 'object' ? item.nomor : item;
+    const rawNomor = nomorStr.toLowerCase();
     const cleanNomor = rawNomor.replace(/[^a-zA-Z0-9]/g, '');
-
     return rawNomor.includes(rawQuery) || (cleanQuery !== '' && cleanNomor.includes(cleanQuery));
   });
 
@@ -850,19 +827,35 @@ function filterData() {
   const visibleData = filtered.slice(0, renderLimit);
   const fragment = document.createDocumentFragment();
 
-  visibleData.forEach(nomor => {
+  visibleData.forEach(item => {
+    const nomorStr = typeof item === 'object' ? item.nomor : item;
+    const tanggalStr = typeof item === 'object' ? item.tanggal : '-';
+
     const li = document.createElement('li');
     li.className = 'result-item';
     li.title = "Klik untuk menyalin nomor";
-    li.addEventListener('click', () => copyToClipboard(nomor, `Disalin: ${nomor}`));
+    li.addEventListener('click', () => copyToClipboard(nomorStr, `Disalin: ${nomorStr}`));
 
     const spanNumber = document.createElement('span');
     spanNumber.className = 'number';
-    spanNumber.textContent = nomor;
+    spanNumber.textContent = nomorStr;
 
     const rightContent = document.createElement('div');
     rightContent.className = 'right-content';
     
+    // Tampilkan Tanggal jika ada (Format dari YYYY-MM-DD ke DD/MM/YYYY)
+    if (tanggalStr && tanggalStr !== '-') {
+      const dateBadge = document.createElement('span');
+      dateBadge.className = 'badge-date';
+      const dParts = tanggalStr.split('-');
+      if (dParts.length === 3) {
+        dateBadge.textContent = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+      } else {
+        dateBadge.textContent = tanggalStr;
+      }
+      rightContent.appendChild(dateBadge);
+    }
+
     const badgeSpan = document.createElement('span');
     badgeSpan.className = 'badge';
     badgeSpan.textContent = 'Waspada';
@@ -874,7 +867,7 @@ function filterData() {
     reportBtn.textContent = '📢';
     reportBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      copyReportTemplate(nomor);
+      copyReportTemplate(nomorStr);
     });
 
     rightContent.appendChild(badgeSpan);
@@ -886,7 +879,7 @@ function filterData() {
       btnDelete.textContent = 'Hapus';
       btnDelete.addEventListener('click', (e) => {
         e.stopPropagation();
-        deleteNumber(nomor, btnDelete);
+        deleteNumber(item, btnDelete); // Kirim full item untuk dihapus
       });
       rightContent.appendChild(btnDelete);
     }
@@ -899,7 +892,6 @@ function filterData() {
   if (filtered.length > renderLimit) {
     const loadMoreLi = document.createElement('li');
     loadMoreLi.className = 'load-more-container';
-
     const loadMoreBtn = document.createElement('button');
     loadMoreBtn.className = 'btn btn-load-more';
     loadMoreBtn.textContent = `Tampilkan ${filtered.length - renderLimit} Data Lagi...`;
@@ -907,7 +899,6 @@ function filterData() {
       renderLimit += 50;
       filterData();
     });
-
     loadMoreLi.appendChild(loadMoreBtn);
     fragment.appendChild(loadMoreLi);
   }
@@ -920,9 +911,7 @@ function copyToClipboard(text, customMessage) {
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(() => {
       showToast(message);
-    }).catch(() => {
-      fallbackCopyTextToClipboard(text, message);
-    });
+    }).catch(() => fallbackCopyTextToClipboard(text, message));
   } else {
     fallbackCopyTextToClipboard(text, message);
   }
@@ -946,9 +935,7 @@ function showToast(message) {
   const toast = document.getElementById('toast');
   toast.textContent = message;
   toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 2200);
+  setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
 function initTheme() {
@@ -970,11 +957,9 @@ function openQrisModal(src) {
   document.getElementById('modalImg').src = src;
   document.getElementById('qrisModal').style.display = 'flex';
 }
-
 function closeQrisModal() {
   document.getElementById('qrisModal').style.display = 'none';
 }
-
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeQrisModal();
 });
