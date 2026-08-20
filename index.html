@@ -152,6 +152,7 @@
       flex-shrink: 0;
     }
 
+    /* Penambahan pointer dan hover pada judul */
     h2 {
       font-size: 1.15rem;
       font-weight: 700;
@@ -160,6 +161,12 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    h2:hover {
+      opacity: 0.75;
     }
 
     .btn-theme {
@@ -206,7 +213,7 @@
       white-space: nowrap;
     }
 
-    /* === ANIMASI RUNNING TEXT UNTUK TANGGAL UPDATE === */
+    /* Animasi Running Text */
     .last-updated-wrapper {
       width: 100%;
       overflow: hidden;
@@ -224,7 +231,6 @@
       animation: running-text 12s linear infinite;
     }
     
-    /* Jeda animasi saat disentuh/di-hover */
     .last-updated-wrapper:hover .last-updated {
       animation-play-state: paused;
     }
@@ -233,7 +239,6 @@
       0% { transform: translateX(0); }
       100% { transform: translateX(-100%); }
     }
-    /* ================================================= */
 
     .tabs {
       display: flex;
@@ -335,6 +340,7 @@
       flex-direction: column;
       gap: 8px;
       padding-right: 2px;
+      scroll-behavior: smooth;
     }
 
     .result-list::-webkit-scrollbar {
@@ -467,7 +473,8 @@
 
 <div class="container">
   <div class="header-area">
-    <h2>🛡️ UID HB & REK SCAMMER</h2>
+    <!-- Judul sekarang memiliki onclick untuk reset ke halaman utama -->
+    <h2 onclick="resetToHome()" title="Kembali ke Halaman Utama">🛡️ UID HB & REK SCAMMER</h2>
     <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">🌙 Gelap</button>
   </div>
   
@@ -476,7 +483,6 @@
     <div id="dataCounter" class="data-counter">0 Data</div>
   </div>
 
-  <!-- WRAPPER UNTUK RUNNING TEXT -->
   <div class="last-updated-wrapper">
     <div id="lastUpdated" class="last-updated">Diperbarui: -</div>
   </div>
@@ -526,7 +532,6 @@
 <div id="toast" class="toast">Berhasil disalin!</div>
 
 <script>
-// ================= KONFIGURASI JSONBIN =================
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
 
 let adminSecretKey = null;
@@ -548,14 +553,32 @@ function updateLastUpdatedUI() {
   el.innerText = database.lastUpdated ? formatLastUpdated(database.lastUpdated) : "Diperbarui: -";
 }
 
-// FUNGSI MIGRASI: Mengubah format string lama menjadi format object {nomor, tanggal}
 function migrateData(dataArray) {
   return dataArray.map(item => {
     if (typeof item === 'string') {
-      return { nomor: item, tanggal: "-" }; // Berikan tanda '-' jika tidak ada tanggal dari data lama
+      return { nomor: item, tanggal: "-" };
     }
     return item;
   });
+}
+
+// Fungsi Baru: Kembali ke Halaman Utama
+function resetToHome() {
+  // 1. Hapus parameter URL (seperti search= atau tab=)
+  window.history.replaceState({}, '', window.location.pathname);
+  
+  // 2. Kosongkan input pencarian
+  document.getElementById('searchInput').value = '';
+  
+  // 3. Kembalikan ke tab default (Rekening)
+  switchTab('rekening');
+  
+  // 4. Scroll daftar hasil kembali ke posisi atas
+  const resultList = document.getElementById('resultList');
+  if(resultList) resultList.scrollTop = 0;
+  
+  // 5. Tampilkan pesan berhasil
+  showToast("Kembali ke Halaman Utama");
 }
 
 async function fetchOnlineDatabase() {
