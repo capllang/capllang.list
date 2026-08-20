@@ -554,7 +554,7 @@ function formatLastUpdated(timestamp, infoTambahan) {
   const date = new Date(timestamp);
   const timeStr = isNaN(date.getTime()) ? timestamp : `${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
   
-  let resultText = `🕒 Terakhir Update: ${timeStr} 🟢 Sistem Berjalan Normal`;
+  let resultText = `🕒 Terakhir Update: ${timeStr}`;
   if (infoTambahan && infoTambahan.trim() !== "") {
     resultText += ` | 📢 Info: ${infoTambahan.trim()}`;
   }
@@ -604,7 +604,7 @@ async function fetchOnlineDatabase() {
       if (database.infoTambahan === undefined) database.infoTambahan = "";
       
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Koneksi aman: Database beroperasi optimal.";
+      status.innerText = "🟢 Koneksi aman: Database optimal.";
     } else {
       throw new Error("Format data tidak sesuai");
     }
