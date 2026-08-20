@@ -95,7 +95,7 @@
       padding: 0;
     }
 
-    body, .container, .tab-btn, .btn, .result-item, input {
+    body, .container, .tab-btn, .btn, .result-item, input, textarea {
       transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
@@ -212,7 +212,7 @@
       white-space: nowrap;
     }
 
-    /* Animasi Running Text Diperbarui */
+    /* Running Text */
     .last-updated-wrapper {
       width: 100%;
       overflow: hidden;
@@ -224,12 +224,12 @@
 
     .last-updated {
       display: inline-block;
-      font-size: 0.75rem; /* Ukuran diperbesar sedikit */
-      font-weight: 500; /* Tulisan dipertebal */
-      color: var(--text-main); /* Warna lebih tegas */
-      letter-spacing: 0.3px; /* Jarak huruf agar tidak terlalu rapat */
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-main);
+      letter-spacing: 0.3px;
       padding-left: 100%;
-      animation: running-text 20s linear infinite; /* Kecepatan diperlambat menjadi 20 detik */
+      animation: running-text 20s linear infinite;
     }
     
     .last-updated-wrapper:hover .last-updated {
@@ -272,7 +272,7 @@
       flex-shrink: 0;
     }
 
-    .search-box input, .admin-box input {
+    .search-box input, .admin-box input, .admin-box textarea {
       width: 100%;
       padding: 12px 16px;
       font-size: 0.875rem;
@@ -283,13 +283,19 @@
       outline: none;
     }
 
+    .admin-box textarea {
+      resize: vertical;
+      min-height: 60px;
+      font-family: var(--font-family);
+    }
+
     .admin-inputs {
       display: flex;
       gap: 8px;
       width: 100%;
     }
 
-    .search-box input:focus, .admin-box input:focus {
+    .search-box input:focus, .admin-box input:focus, .admin-box textarea:focus {
       border-color: var(--input-focus);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
@@ -495,12 +501,14 @@
   <div class="admin-panel">
     <button id="authBtn" class="btn btn-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
     
+    <!-- Bagian Tambah Data & Info Tambahan (Hanya muncul saat mode pemilik aktif) -->
     <div id="addBox" class="admin-box" style="display: none;">
+      <textarea id="infoTambahanInput" placeholder="Masukkan info tambahan / pengumuman manual..."></textarea>
       <div class="admin-inputs">
         <input type="text" id="newNumberInput" style="flex: 2;" placeholder="Masukkan nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
         <input type="date" id="newDateInput" style="flex: 1;" title="Tanggal Dilaporkan">
       </div>
-      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Tambah Data</button>
+      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Simpan Data & Info</button>
     </div>
   </div>
 
@@ -535,22 +543,27 @@
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
 
 let adminSecretKey = null;
-let database = { rekening: [], genshin: [], lastUpdated: null };
+let database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: "" };
 let isAdmin = false;
 let activeTab = 'rekening';
 let searchTimeout = null;
 let renderLimit = 50;
 
-function formatLastUpdated(timestamp) {
+function formatLastUpdated(timestamp, infoTambahan) {
   if (!timestamp) return "Diperbarui: -";
   const date = new Date(timestamp);
-  if (isNaN(date.getTime())) return `Diperbarui: ${timestamp}`;
-  return `🕒 Status Data Terakhir Diperbarui Pada: ${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB 🟢 Sistem Berjalan Normal`;
+  const timeStr = isNaN(date.getTime()) ? timestamp : `${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
+  
+  let resultText = `🕒 Terakhir Update: ${timeStr} 🟢 Sistem Berjalan Normal`;
+  if (infoTambahan && infoTambahan.trim() !== "") {
+    resultText += ` | 📢 Info: ${infoTambahan.trim()}`;
+  }
+  return resultText;
 }
 
 function updateLastUpdatedUI() {
   const el = document.getElementById('lastUpdated');
-  el.innerText = database.lastUpdated ? formatLastUpdated(database.lastUpdated) : "Diperbarui: -";
+  el.innerText = database.lastUpdated ? formatLastUpdated(database.lastUpdated, database.infoTambahan) : "Diperbarui: -";
 }
 
 function migrateData(dataArray) {
@@ -588,9 +601,10 @@ async function fetchOnlineDatabase() {
       database = data.record;
       database.rekening = migrateData(database.rekening);
       database.genshin = migrateData(database.genshin);
+      if (database.infoTambahan === undefined) database.infoTambahan = "";
       
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Terhubung ke database dan berjalan normal";
+      status.innerText = "🟢 Koneksi aman: Database beroperasi optimal.";
     } else {
       throw new Error("Format data tidak sesuai");
     }
@@ -602,8 +616,9 @@ async function fetchOnlineDatabase() {
         database = JSON.parse(cached); 
         database.rekening = migrateData(database.rekening || []);
         database.genshin = migrateData(database.genshin || []);
+        if (database.infoTambahan === undefined) database.infoTambahan = "";
       } catch(e) { 
-        database = { rekening: [], genshin: [], lastUpdated: null }; 
+        database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: "" }; 
       }
     }
     status.innerText = "🔴 Mode Offline (Data Lokal)";
@@ -674,6 +689,7 @@ function toggleAdmin() {
       document.getElementById('authBtn').innerText = "🔓 Keluar Mode Pemilik";
       document.getElementById('addBox').style.display = "flex";
       document.getElementById('newDateInput').valueAsDate = new Date();
+      document.getElementById('infoTambahanInput').value = database.infoTambahan || "";
       showToast("Mode Pemilik Aktif");
     } else if (inputSecret !== null) {
       alert("Password Admin wajib diisi!");
@@ -691,13 +707,36 @@ function handleInputKeyDown(e) {
 async function addNumber() {
   const input = document.getElementById('newNumberInput');
   const dateInput = document.getElementById('newDateInput');
+  const infoInput = document.getElementById('infoTambahanInput');
   const btnAdd = document.getElementById('btnAdd');
   
   const rawVal = input.value.trim();
   const dateVal = dateInput.value;
+  const infoVal = infoInput.value.trim();
 
-  if (!rawVal || !dateVal) {
-    alert("⚠️ Nomor/UID dan Tanggal wajib diisi!");
+  // Ambil/Perbarui info tambahan manual terlebih dahulu
+  database.infoTambahan = infoVal;
+
+  // Jika input nomor kosong, artinya pemilik hanya ingin memperbarui info tambahan saja
+  if (!rawVal) {
+    if (!infoVal) {
+      alert("⚠️ Masukkan nomor/UID baru atau isi info tambahan!");
+      return;
+    }
+    btnAdd.disabled = true;
+    btnAdd.innerText = "⏳ Menyimpan Info...";
+    
+    const success = await saveOnlineDatabase();
+    if (success) {
+      showToast("Info tambahan berhasil diperbarui!");
+    }
+    btnAdd.disabled = false;
+    btnAdd.innerText = "+ Simpan Data & Info";
+    return;
+  }
+
+  if (!dateVal) {
+    alert("⚠️ Tanggal wajib diisi jika menambahkan nomor!");
     return;
   }
 
@@ -737,13 +776,13 @@ async function addNumber() {
     document.getElementById('searchInput').value = "";
     renderLimit = 50;
     filterData();
-    showToast("Data berhasil ditambahkan!");
+    showToast("Data & info berhasil ditambahkan!");
   } else {
     database[activeTab].shift();
   }
   
   btnAdd.disabled = false;
-  btnAdd.innerText = "+ Tambah Data";
+  btnAdd.innerText = "+ Simpan Data & Info";
 }
 
 async function deleteNumber(itemObj, btnEl) {
