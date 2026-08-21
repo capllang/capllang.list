@@ -40,6 +40,10 @@
       
       --date-badge: #64748b;
       --date-badge-bg: #f1f5f9;
+
+      --meta-badge: #4338ca;
+      --meta-badge-bg: #eef2ff;
+      --meta-badge-border: #c7d2fe;
       
       --btn-primary: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
@@ -79,6 +83,10 @@
       
       --date-badge: #cbd5e1;
       --date-badge-bg: rgba(15, 23, 42, 0.5);
+
+      --meta-badge: #a5b4fc;
+      --meta-badge-bg: rgba(99, 102, 241, 0.18);
+      --meta-badge-border: #4338ca;
       
       --btn-primary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
@@ -97,7 +105,7 @@
       padding: 0;
     }
 
-    body, .container, .tab-btn, .btn, .result-item, input, textarea {
+    body, .container, .tab-btn, .btn, .result-item, input, textarea, select {
       transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
@@ -250,6 +258,7 @@
     .marquee-track {
       display: inline-block;
       white-space: nowrap;
+      will-change: transform;
       animation: scrollLoop 30s linear infinite;
     }
 
@@ -301,7 +310,7 @@
       flex-shrink: 0;
     }
 
-    .search-box input, .admin-box input, .admin-box textarea {
+    .search-box input, .admin-box input, .admin-box textarea, .admin-box select {
       width: 100%;
       padding: 10px 14px;
       font-size: 0.825rem;
@@ -327,7 +336,7 @@
       border: 1px dashed var(--input-focus);
       padding: 8px 10px;
       border-radius: 12px;
-      max-height: 220px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
@@ -343,14 +352,15 @@
       display: flex;
       gap: 6px;
       width: 100%;
+      flex-wrap: wrap;
     }
 
-    .admin-inputs input {
+    .admin-inputs input, .admin-inputs select {
       padding: 7px 10px;
       font-size: 0.78rem;
     }
 
-    .search-box input:focus, .admin-box input:focus, .admin-box textarea:focus {
+    .search-box input:focus, .admin-box input:focus, .admin-box textarea:focus, .admin-box select:focus {
       border-color: var(--input-focus);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
@@ -426,6 +436,8 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .badge {
@@ -449,6 +461,18 @@
       border-radius: 20px;
       font-weight: 600;
       white-space: nowrap;
+    }
+
+    .badge-meta {
+      background: var(--meta-badge-bg);
+      color: var(--meta-badge);
+      border: 1px solid var(--meta-badge-border);
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-transform: uppercase;
     }
 
     .btn-icon {
@@ -556,7 +580,7 @@
 
   <div class="tabs">
     <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
-    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Genshin</button>
+    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Game</button>
   </div>
 
   <div class="admin-panel">
@@ -567,6 +591,10 @@
       <textarea id="infoTambahan4" placeholder="Pesan Pengumuman 4..."></textarea>
       <textarea id="infoTambahan5" placeholder="Pesan Pengumuman 5..."></textarea>
       <div class="admin-inputs">
+        <select id="metaSelectInput" style="flex: 1.2;" onchange="handleMetaSelectChange(this)">
+          <!-- Dynamic options populated via script -->
+        </select>
+        <input type="text" id="metaCustomInput" style="flex: 1; display: none;" placeholder="Nama Bank/Game Lain...">
         <input type="text" id="newNumberInput" style="flex: 1.5;" placeholder="Nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
         <input type="date" id="newDateInput" style="flex: 1;" title="Tanggal Dilaporkan">
       </div>
@@ -621,6 +649,39 @@ let activeTab = 'rekening';
 let searchTimeout = null;
 let renderLimit = 50;
 
+const BANK_OPTIONS = ["BCA", "BRI", "Mandiri", "BNI", "BSI", "DANA", "OVO", "GoPay", "ShopeePay", "Seabank", "Jago", "Blu", "Lainnya..."];
+const GAME_OPTIONS = ["Genshin Impact", "Honkai: Star Rail", "Zenless Zone Zero", "Mobile Legends", "Free Fire", "PUBG Mobile", "Roblox", "Valorant", "Lainnya..."];
+
+function updateMetaSelectOptions() {
+  const select = document.getElementById('metaSelectInput');
+  const customInput = document.getElementById('metaCustomInput');
+  if (!select) return;
+  
+  select.innerHTML = '';
+  const options = activeTab === 'rekening' ? BANK_OPTIONS : GAME_OPTIONS;
+  
+  options.forEach(opt => {
+    const el = document.createElement('option');
+    el.value = opt;
+    el.textContent = opt;
+    select.appendChild(el);
+  });
+  
+  customInput.style.display = 'none';
+  customInput.value = '';
+}
+
+function handleMetaSelectChange(selectEl) {
+  const customInput = document.getElementById('metaCustomInput');
+  if (selectEl.value === 'Lainnya...') {
+    customInput.style.display = 'block';
+    customInput.focus();
+  } else {
+    customInput.style.display = 'none';
+    customInput.value = '';
+  }
+}
+
 function toggleTheme() {
   document.body.classList.toggle('dark-mode');
   const isDark = document.body.classList.contains('dark-mode');
@@ -662,9 +723,13 @@ function updateLastUpdatedUI() {
 function migrateData(dataArray) {
   return dataArray.map(item => {
     if (typeof item === 'string') {
-      return { nomor: item, tanggal: "-" };
+      return { nomor: item, tanggal: "-", meta: "-" };
     }
-    return item;
+    return {
+      nomor: item.nomor || "",
+      tanggal: item.tanggal || "-",
+      meta: item.meta || item.bank || item.game || "-"
+    };
   });
 }
 
@@ -723,6 +788,7 @@ async function fetchOnlineDatabase() {
   
   updateLastUpdatedUI();
   checkUrlParams();
+  updateMetaSelectOptions();
   filterData();
 }
 
@@ -810,6 +876,8 @@ function submitAdminLogin() {
     document.getElementById('runningTextWrapper').style.display = "none";
     document.getElementById('newDateInput').valueAsDate = new Date();
     
+    updateMetaSelectOptions();
+
     for (let i = 1; i <= 5; i++) {
       const val = (database.infoTambahan && database.infoTambahan[i - 1]) ? database.infoTambahan[i - 1] : "";
       document.getElementById(`infoTambahan${i}`).value = val;
@@ -830,7 +898,14 @@ async function addNumber() {
   const input = document.getElementById('newNumberInput');
   const dateInput = document.getElementById('newDateInput');
   const btnAdd = document.getElementById('btnAdd');
+  const selectMeta = document.getElementById('metaSelectInput');
+  const customMetaInput = document.getElementById('metaCustomInput');
   
+  let selectedMeta = selectMeta.value;
+  if (selectedMeta === 'Lainnya...') {
+    selectedMeta = customMetaInput.value.trim() || "-";
+  }
+
   let newInfoArr = [];
   for (let i = 1; i <= 5; i++) {
     newInfoArr.push(document.getElementById(`infoTambahan${i}`).value.trim());
@@ -866,8 +941,8 @@ async function addNumber() {
   const cleanVal = rawVal.replace(/\D/g, '');
 
   if (activeTab === 'genshin') {
-    if (!/^\d{9,10}$/.test(cleanVal)) {
-      alert("⚠️ UID Genshin Impact tidak valid!\nUID harus berupa angka dengan panjang 9 atau 10 digit.");
+    if (!/^\d{5,12}$/.test(cleanVal)) {
+      alert("⚠️ UID Game tidak valid!\nUID harus berupa angka dengan panjang 5 - 12 digit.");
       return;
     }
   } else if (activeTab === 'rekening') {
@@ -890,12 +965,13 @@ async function addNumber() {
   btnAdd.disabled = true;
   btnAdd.innerText = "⏳ Menyimpan...";
   
-  const newItem = { nomor: cleanVal, tanggal: dateVal };
+  const newItem = { nomor: cleanVal, tanggal: dateVal, meta: selectedMeta };
   database[activeTab].unshift(newItem);
   
   const success = await saveOnlineDatabase();
   if (success) {
     input.value = "";
+    customMetaInput.value = "";
     document.getElementById('searchInput').value = "";
     renderLimit = 50;
     filterData();
@@ -939,9 +1015,10 @@ function switchTab(tab) {
 
   const input = document.getElementById('searchInput');
   input.placeholder = tab === 'rekening' 
-    ? "Cari Rekening/ E-Wallet Scammer..." 
-    : "Cari UID HB Genshin Impact...";
+    ? "Cari Rekening/ Bank/ E-Wallet Scammer..." 
+    : "Cari UID / Game HB...";
 
+  updateMetaSelectOptions();
   filterData();
 }
 
@@ -970,14 +1047,58 @@ function updateUrlParam(query) {
   window.history.replaceState({}, '', url.toString());
 }
 
-function copyReportTemplate(nomor) {
-  const categoryLabel = activeTab === 'rekening' ? 'Rekening Scammer' : 'UID HB Genshin Impact';
+function copyReportTemplate(itemObj) {
+  const nomor = typeof itemObj === 'object' ? itemObj.nomor : itemObj;
+  const meta = (typeof itemObj === 'object' && itemObj.meta && itemObj.meta !== '-') ? itemObj.meta : null;
+  const categoryLabel = activeTab === 'rekening' ? 'Rekening Scammer' : 'UID HB Game';
+  const metaLabel = activeTab === 'rekening' ? 'Bank / E-Wallet' : 'Nama Game';
+  
   const currentUrl = `${window.location.origin}${window.location.pathname}?search=${encodeURIComponent(nomor)}&tab=${activeTab}`;
   
-  const template = `⚠️ LAPORAN SCAMMER / UID HB ⚠️\n\nKategori : ${categoryLabel}\nNomor/UID: ${nomor}\nStatus   : WASPADA / TERINDIKASI PENIPUAN\n\nCek data selengkapnya di:\n${currentUrl}`;
+  let template = `⚠️ LAPORAN SCAMMER / UID HB ⚠️\n\nKategori : ${categoryLabel}\n`;
+  if (meta) {
+    template += `${metaLabel} : ${meta}\n`;
+  }
+  template += `Nomor/UID: ${nomor}\nStatus   : WASPADA / TERINDIKASI PENIPUAN\n\nCek data selengkapnya di:\n${currentUrl}`;
 
   copyToClipboard(template, "Template Laporan disalin!");
 }
+
+/* =========================================================
+   FUNGSI FILTER DATA & EVENT DELEGATION (DIOPTIMALKAN)
+   ========================================================= */
+
+// Event Delegation tunggal pada kontainer #resultList
+document.getElementById('resultList').addEventListener('click', (e) => {
+  const target = e.target;
+  const itemEl = target.closest('.result-item');
+  
+  // Handling Tombol Muat Lebih Banyak
+  if (target.classList.contains('btn-load-more')) {
+    renderLimit += 50;
+    filterData();
+    return;
+  }
+
+  if (!itemEl) return;
+  const nomorStr = itemEl.dataset.nomor;
+  const itemObj = database[activeTab].find(i => (typeof i === 'object' ? i.nomor : i) === nomorStr);
+
+  // Handling Tombol Hapus (Mode Admin)
+  if (target.classList.contains('btn-delete')) {
+    e.stopPropagation();
+    deleteNumber(itemObj, target);
+  } 
+  // Handling Tombol Laporan
+  else if (target.classList.contains('btn-icon')) {
+    e.stopPropagation();
+    copyReportTemplate(itemObj || nomorStr);
+  } 
+  // Handling Salin Item
+  else {
+    copyToClipboard(nomorStr, `Disalin: ${nomorStr}`);
+  }
+});
 
 function filterData() {
   const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -991,23 +1112,24 @@ function filterData() {
 
   const currentData = database[activeTab] || [];
   
+  // Filter ringan mendukung pencarian Nomor, Tanggal, Bank / Game Meta
   const filtered = currentData.filter(item => {
-    const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
-    const rawNomor = nomorStr.toLowerCase();
-    const cleanNomor = rawNomor.replace(/[^a-zA-Z0-9]/g, '');
-    
     if (rawQuery === '') return true;
 
-    return rawNomor.includes(rawQuery) || (cleanQuery !== '' && cleanNomor.includes(cleanQuery));
+    const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
+    const tanggalStr = typeof item === 'object' ? String(item.tanggal || '').toLowerCase() : '';
+    const metaStr = typeof item === 'object' ? String(item.meta || item.bank || item.game || '').toLowerCase() : '';
+
+    return nomorStr.toLowerCase().includes(rawQuery) || 
+           (cleanQuery !== '' && nomorStr.includes(cleanQuery)) ||
+           tanggalStr.includes(rawQuery) ||
+           metaStr.includes(rawQuery);
   });
 
   counter.innerText = `${filtered.length} Data`;
 
   if (filtered.length === 0) {
-    const emptyLi = document.createElement('li');
-    emptyLi.className = 'empty-msg';
-    emptyLi.textContent = 'Tidak ada data ditemukan.';
-    resultList.appendChild(emptyLi);
+    resultList.innerHTML = '<li class="empty-msg">Tidak ada data ditemukan.</li>';
     return;
   }
 
@@ -1017,75 +1139,44 @@ function filterData() {
   visibleData.forEach(item => {
     const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
     const tanggalStr = typeof item === 'object' ? item.tanggal : '-';
+    const metaStr = typeof item === 'object' ? (item.meta || item.bank || item.game || '-') : '-';
 
     const li = document.createElement('li');
     li.className = 'result-item';
+    li.dataset.nomor = nomorStr;
     li.title = "Klik untuk menyalin nomor";
-    li.addEventListener('click', () => copyToClipboard(nomorStr, `Disalin: ${nomorStr}`));
 
-    const spanNumber = document.createElement('span');
-    spanNumber.className = 'number';
-    spanNumber.textContent = nomorStr;
-
-    const rightContent = document.createElement('div');
-    rightContent.className = 'right-content';
-    
+    let dateHtml = '';
     if (tanggalStr && tanggalStr !== '-') {
-      const dateBadge = document.createElement('span');
-      dateBadge.className = 'badge-date';
       const dParts = tanggalStr.split('-');
-      if (dParts.length === 3) {
-        dateBadge.textContent = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-      } else {
-        dateBadge.textContent = tanggalStr;
-      }
-      rightContent.appendChild(dateBadge);
+      const formattedDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : tanggalStr;
+      dateHtml = `<span class="badge-date">${formattedDate}</span>`;
     }
 
-    const badgeSpan = document.createElement('span');
-    badgeSpan.className = 'badge';
-    badgeSpan.textContent = 'Waspada';
-
-    const reportBtn = document.createElement('button');
-    reportBtn.className = 'btn-icon';
-    reportBtn.title = 'Salin Template Laporan';
-    reportBtn.setAttribute('aria-label', 'Salin Template Laporan');
-    reportBtn.textContent = '📢';
-    reportBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      copyReportTemplate(nomorStr);
-    });
-
-    rightContent.appendChild(badgeSpan);
-    rightContent.appendChild(reportBtn);
-
-    if (isAdmin) {
-      const btnDelete = document.createElement('button');
-      btnDelete.className = 'btn btn-delete';
-      btnDelete.textContent = 'Hapus';
-      btnDelete.addEventListener('click', (e) => {
-        e.stopPropagation();
-        deleteNumber(item, btnDelete);
-      });
-      rightContent.appendChild(btnDelete);
+    let metaHtml = '';
+    if (metaStr && metaStr !== '-') {
+      metaHtml = `<span class="badge-meta">${metaStr}</span>`;
     }
 
-    li.appendChild(spanNumber);
-    li.appendChild(rightContent);
+    const deleteBtnHtml = isAdmin ? `<button class="btn btn-delete">Hapus</button>` : '';
+
+    li.innerHTML = `
+      <span class="number">${nomorStr}</span>
+      <div class="right-content">
+        ${metaHtml}
+        ${dateHtml}
+        <span class="badge">Waspada</span>
+        <button class="btn-icon" title="Salin Template Laporan" aria-label="Salin Template Laporan">📢</button>
+        ${deleteBtnHtml}
+      </div>
+    `;
     fragment.appendChild(li);
   });
 
   if (filtered.length > renderLimit) {
     const loadMoreLi = document.createElement('li');
     loadMoreLi.className = 'load-more-container';
-    const loadMoreBtn = document.createElement('button');
-    loadMoreBtn.className = 'btn btn-load-more';
-    loadMoreBtn.textContent = 'Muat Lebih Banyak';
-    loadMoreBtn.addEventListener('click', () => {
-      renderLimit += 50;
-      filterData();
-    });
-    loadMoreLi.appendChild(loadMoreBtn);
+    loadMoreLi.innerHTML = `<button class="btn btn-load-more">Muat Lebih Banyak</button>`;
     fragment.appendChild(loadMoreLi);
   }
 
