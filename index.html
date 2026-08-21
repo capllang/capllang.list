@@ -654,8 +654,16 @@ function updateMetaSelectOptions() {
   if (!select) return;
   
   select.innerHTML = '';
-  const options = activeTab === 'rekening' ? BANK_OPTIONS : GAME_OPTIONS;
   
+  // Opsi Kosong (Default Placeholder)
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = "";
+  defaultOpt.textContent = activeTab === 'rekening' ? "-- Pilih Bank/E-Wallet --" : "-- Pilih Game --";
+  defaultOpt.disabled = true;
+  defaultOpt.selected = true;
+  select.appendChild(defaultOpt);
+
+  const options = activeTab === 'rekening' ? BANK_OPTIONS : GAME_OPTIONS;
   options.forEach(opt => {
     const el = document.createElement('option');
     el.value = opt;
@@ -888,10 +896,7 @@ async function addNumber() {
   const customMetaInput = document.getElementById('metaCustomInput');
   
   let selectedMeta = selectMeta.value;
-  if (selectedMeta === 'Lainnya...') {
-    selectedMeta = customMetaInput.value.trim() || "-";
-  }
-
+  
   let newInfoArr = [];
   for (let i = 1; i <= 5; i++) {
     newInfoArr.push(document.getElementById(`infoTambahan${i}`).value.trim());
@@ -917,6 +922,21 @@ async function addNumber() {
     btnAdd.disabled = false;
     btnAdd.innerText = "+ Simpan Data";
     return;
+  }
+
+  if (!selectedMeta || selectedMeta === "") {
+    alert("⚠️ Silakan pilih Bank atau Game terlebih dahulu!");
+    selectMeta.focus();
+    return;
+  }
+
+  if (selectedMeta === 'Lainnya...') {
+    selectedMeta = customMetaInput.value.trim();
+    if (!selectedMeta) {
+      alert("⚠️ Harap tuliskan nama Bank/Game lainnya!");
+      customMetaInput.focus();
+      return;
+    }
   }
 
   if (!dateVal) {
@@ -958,6 +978,7 @@ async function addNumber() {
   if (success) {
     input.value = "";
     customMetaInput.value = "";
+    updateMetaSelectOptions();
     document.getElementById('searchInput').value = "";
     renderLimit = 50;
     filterData();
