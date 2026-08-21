@@ -35,8 +35,6 @@
       
       --item-bg: #ffffff;
       --item-border: #fecdd3;
-      --item-badge: #e11d48;
-      --item-badge-bg: #fff1f2;
       
       --date-badge: #64748b;
       --date-badge-bg: #f1f5f9;
@@ -78,8 +76,6 @@
       
       --item-bg: #1e293b;
       --item-border: #881337;
-      --item-badge: #fda4af;
-      --item-badge-bg: rgba(225, 29, 72, 0.18);
       
       --date-badge: #cbd5e1;
       --date-badge-bg: rgba(15, 23, 42, 0.5);
@@ -155,7 +151,6 @@
       }
     }
 
-    /* Header Minimalis & Profesional */
     .header-area {
       display: flex;
       justify-content: space-between;
@@ -239,7 +234,6 @@
       white-space: nowrap;
     }
 
-    /* Running Text Seamless Loop */
     .last-updated-wrapper {
       width: 100%;
       overflow: hidden;
@@ -440,18 +434,6 @@
       justify-content: flex-end;
     }
 
-    .badge {
-      background: var(--item-badge-bg);
-      color: var(--item-badge);
-      border: 1px solid var(--item-border);
-      font-size: 0.65rem;
-      padding: 3px 8px;
-      border-radius: 20px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
     .badge-date {
       background: var(--date-badge-bg);
       color: var(--date-badge);
@@ -476,17 +458,21 @@
     }
 
     .btn-icon {
-      font-size: 0.75rem;
       background: transparent;
-      border: none;
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
       cursor: pointer;
-      opacity: 0.6;
-      padding: 2px 4px;
-      border-radius: 4px;
+      color: var(--text-muted);
     }
     .btn-icon:hover {
-      opacity: 1;
-      background: rgba(0, 0, 0, 0.05);
+      background: var(--input-border);
+      color: var(--text-title);
     }
 
     .empty-msg, .load-more-container {
@@ -533,7 +519,6 @@
       padding: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
 
-    /* Style untuk Custom Admin Modal */
     .admin-modal-content {
       background: var(--card-bg);
       backdrop-filter: blur(18px);
@@ -592,7 +577,6 @@
       <textarea id="infoTambahan5" placeholder="Pesan Pengumuman 5..."></textarea>
       <div class="admin-inputs">
         <select id="metaSelectInput" style="flex: 1.2;" onchange="handleMetaSelectChange(this)">
-          <!-- Dynamic options populated via script -->
         </select>
         <input type="text" id="metaCustomInput" style="flex: 1; display: none;" placeholder="Nama Bank/Game Lain...">
         <input type="text" id="newNumberInput" style="flex: 1.5;" placeholder="Nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
@@ -620,7 +604,6 @@
   </div>
 </div>
 
-<!-- Modal Login Admin Kustom -->
 <div id="adminModal" class="qris-modal" style="display: none;" onclick="closeAdminModal()">
   <div class="admin-modal-content" onclick="event.stopPropagation()">
     <h3 style="color: var(--text-title); font-size: 0.95rem; margin-bottom: 10px;">🔑 Autentikasi Pemilik</h3>
@@ -651,6 +634,19 @@ let renderLimit = 50;
 
 const BANK_OPTIONS = ["BCA", "BRI", "Mandiri", "BNI", "BSI", "DANA", "OVO", "GoPay", "ShopeePay", "Seabank", "Jago", "Blu", "Lainnya..."];
 const GAME_OPTIONS = ["Genshin Impact", "Honkai: Star Rail", "Zenless Zone Zero", "Mobile Legends", "Free Fire", "PUBG Mobile", "Roblox", "Valorant", "Lainnya..."];
+
+function migrateData(dataArray) {
+  if (!Array.isArray(dataArray)) return [];
+  return dataArray.map(item => {
+    if (item === null || item === undefined) return { nomor: "-", tanggal: "-", meta: "-" };
+    if (typeof item !== 'object') return { nomor: String(item), tanggal: "-", meta: "-" };
+    return {
+      nomor: item.nomor ? String(item.nomor) : "",
+      tanggal: item.tanggal ? String(item.tanggal) : "-",
+      meta: (item.meta || item.bank || item.game) ? String(item.meta || item.bank || item.game) : "-"
+    };
+  });
+}
 
 function updateMetaSelectOptions() {
   const select = document.getElementById('metaSelectInput');
@@ -703,7 +699,7 @@ function formatLastUpdated(timestamp, infoTambahanArr) {
   
   let validInfos = [];
   if (Array.isArray(infoTambahanArr)) {
-    validInfos = infoTambahanArr.map(i => i ? i.trim() : "").filter(i => i !== "");
+    validInfos = infoTambahanArr.map(i => i ? String(i).trim() : "").filter(i => i !== "");
   } else if (typeof infoTambahanArr === 'string' && infoTambahanArr.trim() !== "") {
     validInfos = [infoTambahanArr.trim()];
   }
@@ -718,19 +714,6 @@ function updateLastUpdatedUI() {
   const baseText = database.lastUpdated ? formatLastUpdated(database.lastUpdated, database.infoTambahan) : "Diperbarui: -";
   document.getElementById('lastUpdated1').textContent = baseText;
   document.getElementById('lastUpdated2').textContent = baseText;
-}
-
-function migrateData(dataArray) {
-  return dataArray.map(item => {
-    if (typeof item === 'string') {
-      return { nomor: item, tanggal: "-", meta: "-" };
-    }
-    return {
-      nomor: item.nomor || "",
-      tanggal: item.tanggal || "-",
-      meta: item.meta || item.bank || item.game || "-"
-    };
-  });
 }
 
 function resetToHome() {
@@ -755,8 +738,10 @@ async function fetchOnlineDatabase() {
     if (!res.ok) throw new Error("Gagal terhubung ke Worker");
     
     const data = await res.json();
-    if (data.record && Array.isArray(data.record.rekening) && Array.isArray(data.record.genshin)) {
-      database = data.record;
+    const actualData = data.record ? data.record : data;
+
+    if (actualData && Array.isArray(actualData.rekening) && Array.isArray(actualData.genshin)) {
+      database = actualData;
       database.rekening = migrateData(database.rekening);
       database.genshin = migrateData(database.genshin);
       if (!Array.isArray(database.infoTambahan)) {
@@ -766,7 +751,7 @@ async function fetchOnlineDatabase() {
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
       status.innerText = "🟢 Koneksi aman: Database optimal.";
     } else {
-      throw new Error("Format data tidak sesuai");
+      throw new Error("Format struktur data tidak sesuai");
     }
   } catch (err) {
     console.warn("Menggunakan cache lokal:", err);
@@ -885,6 +870,7 @@ function submitAdminLogin() {
     
     closeAdminModal();
     showToast("Mode Pemilik Aktif");
+    filterData();
   } else {
     alert("Password Admin wajib diisi!");
   }
@@ -954,7 +940,7 @@ async function addNumber() {
 
   const exists = database[activeTab].some(item => {
     const num = typeof item === 'object' ? item.nomor : item;
-    return num === cleanVal;
+    return String(num) === cleanVal;
   });
 
   if (exists) {
@@ -985,7 +971,7 @@ async function addNumber() {
 }
 
 async function deleteNumber(itemObj, btnEl) {
-  const nomorStr = typeof itemObj === 'object' ? itemObj.nomor : itemObj;
+  const nomorStr = typeof itemObj === 'object' ? String(itemObj.nomor) : String(itemObj);
   
   if (confirm(`Hapus ${nomorStr} dari database?`)) {
     const index = database[activeTab].indexOf(itemObj);
@@ -1047,33 +1033,10 @@ function updateUrlParam(query) {
   window.history.replaceState({}, '', url.toString());
 }
 
-function copyReportTemplate(itemObj) {
-  const nomor = typeof itemObj === 'object' ? itemObj.nomor : itemObj;
-  const meta = (typeof itemObj === 'object' && itemObj.meta && itemObj.meta !== '-') ? itemObj.meta : null;
-  const categoryLabel = activeTab === 'rekening' ? 'Rekening Scammer' : 'UID HB Game';
-  const metaLabel = activeTab === 'rekening' ? 'Bank / E-Wallet' : 'Nama Game';
-  
-  const currentUrl = `${window.location.origin}${window.location.pathname}?search=${encodeURIComponent(nomor)}&tab=${activeTab}`;
-  
-  let template = `⚠️ LAPORAN SCAMMER / UID HB ⚠️\n\nKategori : ${categoryLabel}\n`;
-  if (meta) {
-    template += `${metaLabel} : ${meta}\n`;
-  }
-  template += `Nomor/UID: ${nomor}\nStatus   : WASPADA / TERINDIKASI PENIPUAN\n\nCek data selengkapnya di:\n${currentUrl}`;
-
-  copyToClipboard(template, "Template Laporan disalin!");
-}
-
-/* =========================================================
-   FUNGSI FILTER DATA & EVENT DELEGATION (DIOPTIMALKAN)
-   ========================================================= */
-
-// Event Delegation tunggal pada kontainer #resultList
 document.getElementById('resultList').addEventListener('click', (e) => {
   const target = e.target;
   const itemEl = target.closest('.result-item');
   
-  // Handling Tombol Muat Lebih Banyak
   if (target.classList.contains('btn-load-more')) {
     renderLimit += 50;
     filterData();
@@ -1082,108 +1045,115 @@ document.getElementById('resultList').addEventListener('click', (e) => {
 
   if (!itemEl) return;
   const nomorStr = itemEl.dataset.nomor;
-  const itemObj = database[activeTab].find(i => (typeof i === 'object' ? i.nomor : i) === nomorStr);
+  const itemObj = database[activeTab].find(i => (typeof i === 'object' ? String(i.nomor) : String(i)) === nomorStr);
 
-  // Handling Tombol Hapus (Mode Admin)
   if (target.classList.contains('btn-delete')) {
     e.stopPropagation();
     deleteNumber(itemObj, target);
-  } 
-  // Handling Tombol Laporan
-  else if (target.classList.contains('btn-icon')) {
+  } else if (target.classList.contains('btn-icon')) {
     e.stopPropagation();
     copyReportTemplate(itemObj || nomorStr);
-  } 
-  // Handling Salin Item
-  else {
+  } else {
     copyToClipboard(nomorStr, `Disalin: ${nomorStr}`);
   }
 });
 
-function filterData() {
-  const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-  const cleanQuery = rawQuery.replace(/[^a-zA-Z0-9]/g, '');
+function copyReportTemplate(itemObj) {
+  const nomorStr = typeof itemObj === 'object' ? itemObj.nomor : itemObj;
+  const metaStr = typeof itemObj === 'object' ? (itemObj.meta || itemObj.bank || itemObj.game || '-') : '-';
+  const tanggalStr = typeof itemObj === 'object' ? itemObj.tanggal : '-';
 
-  updateUrlParam(rawQuery);
-
-  const resultList = document.getElementById('resultList');
-  const counter = document.getElementById('dataCounter');
-  resultList.innerHTML = "";
-
-  const currentData = database[activeTab] || [];
-  
-  // Filter ringan mendukung pencarian Nomor, Tanggal, Bank / Game Meta
-  const filtered = currentData.filter(item => {
-    if (rawQuery === '') return true;
-
-    const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
-    const tanggalStr = typeof item === 'object' ? String(item.tanggal || '').toLowerCase() : '';
-    const metaStr = typeof item === 'object' ? String(item.meta || item.bank || item.game || '').toLowerCase() : '';
-
-    return nomorStr.toLowerCase().includes(rawQuery) || 
-           (cleanQuery !== '' && nomorStr.includes(cleanQuery)) ||
-           tanggalStr.includes(rawQuery) ||
-           metaStr.includes(rawQuery);
-  });
-
-  counter.innerText = `${filtered.length} Data`;
-
-  if (filtered.length === 0) {
-    resultList.innerHTML = '<li class="empty-msg">Tidak ada data ditemukan.</li>';
-    return;
-  }
-
-  const visibleData = filtered.slice(0, renderLimit);
-  const fragment = document.createDocumentFragment();
-
-  visibleData.forEach(item => {
-    const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
-    const tanggalStr = typeof item === 'object' ? item.tanggal : '-';
-    const metaStr = typeof item === 'object' ? (item.meta || item.bank || item.game || '-') : '-';
-
-    const li = document.createElement('li');
-    li.className = 'result-item';
-    li.dataset.nomor = nomorStr;
-    li.title = "Klik untuk menyalin nomor";
-
-    let dateHtml = '';
-    if (tanggalStr && tanggalStr !== '-') {
-      const dParts = tanggalStr.split('-');
-      const formattedDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : tanggalStr;
-      dateHtml = `<span class="badge-date">${formattedDate}</span>`;
-    }
-
-    let metaHtml = '';
-    if (metaStr && metaStr !== '-') {
-      metaHtml = `<span class="badge-meta">${metaStr}</span>`;
-    }
-
-    const deleteBtnHtml = isAdmin ? `<button class="btn btn-delete">Hapus</button>` : '';
-
-    li.innerHTML = `
-      <span class="number">${nomorStr}</span>
-      <div class="right-content">
-        ${metaHtml}
-        ${dateHtml}
-        <span class="badge">Waspada</span>
-        <button class="btn-icon" title="Salin Template Laporan" aria-label="Salin Template Laporan">📢</button>
-        ${deleteBtnHtml}
-      </div>
-    `;
-    fragment.appendChild(li);
-  });
-
-  if (filtered.length > renderLimit) {
-    const loadMoreLi = document.createElement('li');
-    loadMoreLi.className = 'load-more-container';
-    loadMoreLi.innerHTML = `<button class="btn btn-load-more">Muat Lebih Banyak</button>`;
-    fragment.appendChild(loadMoreLi);
-  }
-
-  resultList.appendChild(fragment);
+  const template = `🚨 LAPORAN PENIPUAN 🚨\n\nNomor/UID: ${nomorStr}\nPlatform/Bank: ${metaStr}\nTanggal Terdata: ${tanggalStr}\n\nHati-hati terhadap modus penipuan dengan informasi di atas!`;
+  copyToClipboard(template, 'Template laporan disalin!');
 }
 
-// Event Listeners & Utility Functions
+function filterData() {
+  try {
+    const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+    const cleanQuery = rawQuery.replace(/[^a-zA-Z0-9]/g, '');
+
+    updateUrlParam(rawQuery);
+
+    const resultList = document.getElementById('resultList');
+    const counter = document.getElementById('dataCounter');
+    resultList.innerHTML = "";
+
+    const currentData = database[activeTab] || [];
+    
+    const filtered = currentData.filter(item => {
+      if (rawQuery === '') return true;
+
+      const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
+      const tanggalStr = typeof item === 'object' ? String(item.tanggal || '').toLowerCase() : '';
+      const metaStr = typeof item === 'object' ? String(item.meta || item.bank || item.game || '').toLowerCase() : '';
+
+      return nomorStr.toLowerCase().includes(rawQuery) || 
+             (cleanQuery !== '' && nomorStr.includes(cleanQuery)) ||
+             tanggalStr.includes(rawQuery) ||
+             metaStr.includes(rawQuery);
+    });
+
+    counter.innerText = `${filtered.length} Data`;
+
+    if (filtered.length === 0) {
+      resultList.innerHTML = '<li class="empty-msg">Tidak ada data ditemukan.</li>';
+      return;
+    }
+
+    const visibleData = filtered.slice(0, renderLimit);
+    const fragment = document.createDocumentFragment();
+
+    visibleData.forEach(item => {
+      const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
+      const tanggalStr = typeof item === 'object' ? String(item.tanggal || '-') : '-';
+      const metaStr = typeof item === 'object' ? String(item.meta || item.bank || item.game || '-') : '-';
+
+      const li = document.createElement('li');
+      li.className = 'result-item';
+      li.dataset.nomor = nomorStr;
+      li.title = "Klik untuk menyalin nomor";
+
+      let dateHtml = '';
+      if (tanggalStr !== '-' && tanggalStr.length > 0) {
+        const dParts = tanggalStr.includes('-') ? tanggalStr.split('-') : [tanggalStr];
+        const formattedDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : tanggalStr;
+        dateHtml = `<span class="badge-date">${formattedDate}</span>`;
+      }
+
+      let metaHtml = '';
+      if (metaStr && metaStr !== '-') {
+        metaHtml = `<span class="badge-meta">${metaStr}</span>`;
+      }
+
+      const deleteBtnHtml = isAdmin ? `<button class="btn btn-delete">Hapus</button>` : '';
+
+      li.innerHTML = `
+        <span class="number">${nomorStr}</span>
+        <div class="right-content">
+          ${metaHtml}
+          ${dateHtml}
+          <button class="btn-icon" title="Salin Template Laporan" aria-label="Salin Template Laporan">📢</button>
+          ${deleteBtnHtml}
+        </div>
+      `;
+      fragment.appendChild(li);
+    });
+
+    if (filtered.length > renderLimit) {
+      const loadMoreLi = document.createElement('li');
+      loadMoreLi.className = 'load-more-container';
+      loadMoreLi.innerHTML = `<button class="btn btn-load-more">Muat Lebih Banyak</button>`;
+      fragment.appendChild(loadMoreLi);
+    }
+
+    resultList.appendChild(fragment);
+
+  } catch (error) {
+    console.error("Terjadi masalah saat merender list:", error);
+    document.getElementById('resultList').innerHTML = '<li class="empty-msg" style="color:#e11d48;">Terjadi kendala saat membaca data. Coba muat ulang halaman.</li>';
+  }
+}
+
 document.getElementById('searchInput').addEventListener('input', () => {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(() => {
