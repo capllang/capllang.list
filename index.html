@@ -655,11 +655,10 @@ function updateMetaSelectOptions() {
   
   select.innerHTML = '';
   
-  // Opsi Kosong (Default Placeholder)
+  // Opsi Kosong (Default Placeholder yang bisa dipilih atau dibiarkan kosong)
   const defaultOpt = document.createElement('option');
   defaultOpt.value = "";
-  defaultOpt.textContent = activeTab === 'rekening' ? "-- Pilih Bank/E-Wallet --" : "-- Pilih Game --";
-  defaultOpt.disabled = true;
+  defaultOpt.textContent = activeTab === 'rekening' ? "-- Pilih Bank (Opsional) --" : "-- Pilih Game (Opsional) --";
   defaultOpt.selected = true;
   select.appendChild(defaultOpt);
 
@@ -924,18 +923,13 @@ async function addNumber() {
     return;
   }
 
+  // Jika opsi dropdown bernilai kosong, set meta menjadi "-"
   if (!selectedMeta || selectedMeta === "") {
-    alert("⚠️ Silakan pilih Bank atau Game terlebih dahulu!");
-    selectMeta.focus();
-    return;
-  }
-
-  if (selectedMeta === 'Lainnya...') {
+    selectedMeta = "-";
+  } else if (selectedMeta === 'Lainnya...') {
     selectedMeta = customMetaInput.value.trim();
     if (!selectedMeta) {
-      alert("⚠️ Harap tuliskan nama Bank/Game lainnya!");
-      customMetaInput.focus();
-      return;
+      selectedMeta = "-";
     }
   }
 
