@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Database UID HB & Scammer</title>
-  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -623,7 +622,6 @@
 
 <script>
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
-
 let adminSecretKey = null;
 let database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: [] };
 let isAdmin = false;
@@ -654,7 +652,7 @@ function updateMetaSelectOptions() {
   
   select.innerHTML = '';
   
-  // Opsi Kosong (Default Placeholder yang bisa dipilih atau dibiarkan kosong)
+  // Opsi Kosong (Default Placeholder)
   const defaultOpt = document.createElement('option');
   defaultOpt.value = "";
   defaultOpt.textContent = activeTab === 'rekening' ? "-- Pilih Bank (Opsional) --" : "-- Pilih Game (Opsional) --";
@@ -701,7 +699,7 @@ function formatLastUpdated(timestamp, infoTambahanArr) {
   const date = new Date(timestamp);
   const timeStr = isNaN(date.getTime()) ? timestamp : `${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
   
-  let resultText = `🕒 Terakhir Update: ${timeStr}`;
+  let resultText = `🕒 Database Update: ${timeStr}`;
   
   let validInfos = [];
   if (Array.isArray(infoTambahanArr)) {
@@ -857,28 +855,65 @@ function handleAdminModalKeyDown(e) {
   }
 }
 
-function submitAdminLogin() {
+async function submitAdminLogin() {
   const inputSecret = document.getElementById('adminPasswordInput').value;
-  if (inputSecret && inputSecret.trim() !== "") {
-    adminSecretKey = inputSecret.trim();
+
+  if (!inputSecret || inputSecret.trim() === "") {
+    alert("⚠️ Password Admin wajib diisi!");
+    return;
+  }
+
+  const cleanSecret = inputSecret.trim();
+
+  // Tampilkan indikator loading pada tombol masuk Modal
+  const submitBtn = document.querySelector('#adminModal .btn-add');
+  const originalBtnText = submitBtn.innerText;
+  submitBtn.disabled = true;
+  submitBtn.innerText = "Verifikasi...";
+
+  try {
+    // Verifikasi password langsung ke server Cloudflare Worker
+    const res = await fetch(PROXY_URL, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Secret': cleanSecret
+      },
+      body: JSON.stringify(database)
+    });
+
+    if (res.status === 401 || res.status === 403) {
+      alert("❌ Password Admin Salah! Akses ditolak.");
+      return;
+    }
+
+    if (!res.ok) throw new Error("Gagal verifikasi ke server");
+
+    // Jika verifikasi sukses (password benar):
+    adminSecretKey = cleanSecret;
     isAdmin = true;
+
     document.getElementById('authBtn').innerText = "🔓 Keluar Mode";
     document.getElementById('addBox').style.display = "flex";
     document.getElementById('runningTextWrapper').style.display = "none";
     document.getElementById('newDateInput').valueAsDate = new Date();
-    
+
     updateMetaSelectOptions();
 
     for (let i = 1; i <= 5; i++) {
       const val = (database.infoTambahan && database.infoTambahan[i - 1]) ? database.infoTambahan[i - 1] : "";
       document.getElementById(`infoTambahan${i}`).value = val;
     }
-    
+
     closeAdminModal();
     showToast("Mode Pemilik Aktif");
     filterData();
-  } else {
-    alert("Password Admin wajib diisi!");
+
+  } catch (err) {
+    alert("⚠️ Gagal verifikasi: Terjadi kesalahan jaringan atau server.");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerText = originalBtnText;
   }
 }
 
@@ -922,7 +957,6 @@ async function addNumber() {
     return;
   }
 
-  // Jika opsi dropdown bernilai kosong, set meta menjadi "-"
   if (!selectedMeta || selectedMeta === "") {
     selectedMeta = "-";
   } else if (selectedMeta === 'Lainnya...') {
