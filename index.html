@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Database UID HB & Scammer</title>
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -495,7 +496,6 @@
     }
 
     .donation-title { font-weight: 700; font-size: 0.8rem; color: var(--text-title); }
-    .donation-desc { font-size: 0.7rem; color: var(--text-muted); }
     .donation-action { display: flex; align-items: center; gap: 10px; }
     
     .qris-img {
@@ -652,7 +652,6 @@ function updateMetaSelectOptions() {
   
   select.innerHTML = '';
   
-  // Opsi Kosong (Default Placeholder)
   const defaultOpt = document.createElement('option');
   defaultOpt.value = "";
   defaultOpt.textContent = activeTab === 'rekening' ? "-- Pilih Bank (Opsional) --" : "-- Pilih Game (Opsional) --";
@@ -865,14 +864,12 @@ async function submitAdminLogin() {
 
   const cleanSecret = inputSecret.trim();
 
-  // Tampilkan indikator loading pada tombol masuk Modal
   const submitBtn = document.querySelector('#adminModal .btn-add');
   const originalBtnText = submitBtn.innerText;
   submitBtn.disabled = true;
   submitBtn.innerText = "Verifikasi...";
 
   try {
-    // Verifikasi password langsung ke server Cloudflare Worker
     const res = await fetch(PROXY_URL, {
       method: 'PUT',
       headers: {
@@ -889,7 +886,6 @@ async function submitAdminLogin() {
 
     if (!res.ok) throw new Error("Gagal verifikasi ke server");
 
-    // Jika verifikasi sukses (password benar):
     adminSecretKey = cleanSecret;
     isAdmin = true;
 
@@ -1115,6 +1111,7 @@ function copyReportTemplate(itemObj) {
   copyToClipboard(template, 'Template laporan disalin!');
 }
 
+/* KODE DENGAN PEMBUATAN ELEMEN DOM AMAN DARI CHATGPT */
 function filterData() {
   try {
     const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -1124,7 +1121,10 @@ function filterData() {
 
     const resultList = document.getElementById('resultList');
     const counter = document.getElementById('dataCounter');
-    resultList.innerHTML = "";
+    
+    while (resultList.firstChild) {
+      resultList.removeChild(resultList.firstChild);
+    }
 
     const currentData = database[activeTab] || [];
     
@@ -1141,10 +1141,13 @@ function filterData() {
              metaStr.includes(rawQuery);
     });
 
-    counter.innerText = `${filtered.length} Data`;
+    counter.textContent = `${filtered.length} Data`;
 
     if (filtered.length === 0) {
-      resultList.innerHTML = '<li class="empty-msg">Tidak ada data ditemukan.</li>';
+      const emptyLi = document.createElement('li');
+      emptyLi.className = 'empty-msg';
+      emptyLi.textContent = 'Tidak ada data ditemukan.';
+      resultList.appendChild(emptyLi);
       return;
     }
 
@@ -1161,44 +1164,83 @@ function filterData() {
       li.dataset.nomor = nomorStr;
       li.title = "Klik untuk menyalin nomor";
 
-      let dateHtml = '';
-      if (tanggalStr !== '-' && tanggalStr.length > 0) {
-        const dParts = tanggalStr.includes('-') ? tanggalStr.split('-') : [tanggalStr];
-        const formattedDate = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : tanggalStr;
-        dateHtml = `<span class="badge-date">${formattedDate}</span>`;
-      }
+      // --- POTONGAN KODE DARI CHATGPT DIINTEGRASIKAN ---
+      const numberSpan = document.createElement('span');
+      numberSpan.className = 'number';
+      numberSpan.textContent = nomorStr;
 
-      let metaHtml = '';
+      const rightContent = document.createElement('div');
+      rightContent.className = 'right-content';
+
       if (metaStr && metaStr !== '-') {
-        metaHtml = `<span class="badge-meta">${metaStr}</span>`;
+        const metaSpan = document.createElement('span');
+        metaSpan.className = 'badge-meta';
+        metaSpan.textContent = metaStr;
+        rightContent.appendChild(metaSpan);
       }
 
-      const deleteBtnHtml = isAdmin ? `<button class="btn btn-delete">Hapus</button>` : '';
+      if (tanggalStr !== '-' && tanggalStr.length > 0) {
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'badge-date';
 
-      li.innerHTML = `
-        <span class="number">${nomorStr}</span>
-        <div class="right-content">
-          ${metaHtml}
-          ${dateHtml}
-          <button class="btn-icon" title="Salin Template Laporan" aria-label="Salin Template Laporan">📢</button>
-          ${deleteBtnHtml}
-        </div>
-      `;
+        const dParts = tanggalStr.includes('-')
+          ? tanggalStr.split('-')
+          : [tanggalStr];
+
+        const formattedDate = dParts.length === 3
+          ? `${dParts[2]}/${dParts[1]}/${dParts[0]}`
+          : tanggalStr;
+
+        dateSpan.textContent = formattedDate;
+        rightContent.appendChild(dateSpan);
+      }
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'btn-icon';
+      copyBtn.title = 'Salin Template Laporan';
+      copyBtn.setAttribute('aria-label', 'Salin Template Laporan');
+      copyBtn.textContent = '📢';
+
+      rightContent.appendChild(copyBtn);
+
+      if (isAdmin) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-delete';
+        deleteBtn.textContent = 'Hapus';
+
+        rightContent.appendChild(deleteBtn);
+      }
+
+      li.appendChild(numberSpan);
+      li.appendChild(rightContent);
+      // --- AKHIR INTEGRASI POTONGAN KODE ---
+
       fragment.appendChild(li);
     });
 
     if (filtered.length > renderLimit) {
       const loadMoreLi = document.createElement('li');
       loadMoreLi.className = 'load-more-container';
-      loadMoreLi.innerHTML = `<button class="btn btn-load-more">Muat Lebih Banyak</button>`;
-      fragment.appendChild(loadMoreLi);
+      
+      const loadMoreBtn = document.createElement('button');
+loadMoreBtn.className = 'btn btn-load-more';
+loadMoreBtn.textContent = 'Muat Lebih Banyak';
+
+loadMoreLi.appendChild(loadMoreBtn);
     }
 
     resultList.appendChild(fragment);
 
   } catch (error) {
     console.error("Terjadi masalah saat merender list:", error);
-    document.getElementById('resultList').innerHTML = '<li class="empty-msg" style="color:#e11d48;">Terjadi kendala saat membaca data. Coba muat ulang halaman.</li>';
+    const resultList = document.getElementById('resultList');
+    while (resultList.firstChild) resultList.removeChild(resultList.firstChild);
+    
+    const errLi = document.createElement('li');
+    errLi.className = 'empty-msg';
+    errLi.style.color = '#e11d48';
+    errLi.textContent = 'Terjadi kendala saat membaca data. Coba muat ulang halaman.';
+    resultList.appendChild(errLi);
   }
 }
 
