@@ -507,8 +507,8 @@
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
-    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Game</button>
+    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">LIST REK SCAMMER</button>
+    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">LIST UID HB</button>
   </div>
 
   <div class="admin-panel">
@@ -525,7 +525,7 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" aria-label="Cari Rekening atau UID" placeholder="Cari Rekening/ E-Wallet Scammer...">
+    <input type="text" id="searchInput" aria-label="Cari Rekening atau UID" placeholder="Tulis nomor rekening di sini...">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -923,8 +923,8 @@ function switchTab(tab) {
 
   const input = document.getElementById('searchInput');
   input.placeholder = tab === 'rekening' 
-    ? "Cari Rekening/ Bank/ E-Wallet Scammer..." 
-    : "Cari UID / Game HB...";
+    ? "Tulis nomor rekening di sini..." 
+    : "Tulis UID game di sini...";
 
   updateMetaSelectOptions();
   filterData();
