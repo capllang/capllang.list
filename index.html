@@ -101,7 +101,7 @@
       padding: 0;
     }
 
-    body, .container, .tab-btn, .btn, .result-item, input, textarea, select {
+    body, .container, .tab-btn, .btn, .result-item, input, select {
       transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
@@ -234,45 +234,6 @@
       white-space: nowrap;
     }
 
-    .last-updated-wrapper {
-      width: 100%;
-      overflow: hidden;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 12px;
-      padding: 8px 16px;
-      flex-shrink: 0;
-      display: flex;
-      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
-      position: relative;
-      mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
-      -webkit-mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
-    }
-
-    .marquee-track {
-      display: inline-block;
-      white-space: nowrap;
-      will-change: transform;
-      animation: scrollLoop 30s linear infinite;
-    }
-
-    .last-updated-wrapper:hover .marquee-track {
-      animation-play-state: paused;
-    }
-
-    .marquee-content {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--text-main);
-      padding-right: 50px;
-    }
-
-    @keyframes scrollLoop {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-
     .tabs {
       display: flex;
       background: var(--tab-bg);
@@ -304,7 +265,7 @@
       flex-shrink: 0;
     }
 
-    .search-box input, .admin-box input, .admin-box textarea, .admin-box select {
+    .search-box input, .admin-box input, .admin-box select {
       width: 100%;
       padding: 10px 14px;
       font-size: 0.825rem;
@@ -330,16 +291,6 @@
       border: 1px dashed var(--input-focus);
       padding: 8px 10px;
       border-radius: 12px;
-      max-height: 250px;
-      overflow-y: auto;
-    }
-
-    .admin-box textarea {
-      resize: none;
-      height: 32px;
-      min-height: 32px;
-      padding: 5px 8px;
-      font-size: 0.75rem;
     }
 
     .admin-inputs {
@@ -354,7 +305,7 @@
       font-size: 0.78rem;
     }
 
-    .search-box input:focus, .admin-box input:focus, .admin-box textarea:focus, .admin-box select:focus {
+    .search-box input:focus, .admin-box input:focus, .admin-box select:focus {
       border-color: var(--input-focus);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
@@ -555,13 +506,6 @@
     <div id="dataCounter" class="data-counter">0 Data</div>
   </div>
 
-  <div id="runningTextWrapper" class="last-updated-wrapper">
-    <div class="marquee-track">
-      <div id="lastUpdated1" class="marquee-content">Diperbarui: -</div>
-      <div id="lastUpdated2" class="marquee-content">Diperbarui: -</div>
-    </div>
-  </div>
-
   <div class="tabs">
     <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">Rekening Scammer</button>
     <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">UID HB Game</button>
@@ -569,11 +513,6 @@
 
   <div class="admin-panel">
     <div id="addBox" class="admin-box" style="display: none;">
-      <textarea id="infoTambahan1" placeholder="Pesan Pengumuman 1..."></textarea>
-      <textarea id="infoTambahan2" placeholder="Pesan Pengumuman 2..."></textarea>
-      <textarea id="infoTambahan3" placeholder="Pesan Pengumuman 3..."></textarea>
-      <textarea id="infoTambahan4" placeholder="Pesan Pengumuman 4..."></textarea>
-      <textarea id="infoTambahan5" placeholder="Pesan Pengumuman 5..."></textarea>
       <div class="admin-inputs">
         <select id="metaSelectInput" style="flex: 1.2;" onchange="handleMetaSelectChange(this)">
         </select>
@@ -693,32 +632,6 @@ if (localStorage.getItem('theme') === 'dark') {
   document.getElementById('themeToggleBtn').textContent = 'Light';
 }
 
-function formatLastUpdated(timestamp, infoTambahanArr) {
-  if (!timestamp) return "Diperbarui: -";
-  const date = new Date(timestamp);
-  const timeStr = isNaN(date.getTime()) ? timestamp : `${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} pukul ${date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
-  
-  let resultText = `🕒 Database Update: ${timeStr}`;
-  
-  let validInfos = [];
-  if (Array.isArray(infoTambahanArr)) {
-    validInfos = infoTambahanArr.map(i => i ? String(i).trim() : "").filter(i => i !== "");
-  } else if (typeof infoTambahanArr === 'string' && infoTambahanArr.trim() !== "") {
-    validInfos = [infoTambahanArr.trim()];
-  }
-
-  if (validInfos.length > 0) {
-    resultText += `  |  📢 Info: ${validInfos.join("  •  ")}`;
-  }
-  return resultText;
-}
-
-function updateLastUpdatedUI() {
-  const baseText = database.lastUpdated ? formatLastUpdated(database.lastUpdated, database.infoTambahan) : "Diperbarui: -";
-  document.getElementById('lastUpdated1').textContent = baseText;
-  document.getElementById('lastUpdated2').textContent = baseText;
-}
-
 function resetToHome() {
   window.history.replaceState({}, '', window.location.pathname);
   document.getElementById('searchInput').value = '';
@@ -747,9 +660,6 @@ async function fetchOnlineDatabase() {
       database = actualData;
       database.rekening = migrateData(database.rekening);
       database.genshin = migrateData(database.genshin);
-      if (!Array.isArray(database.infoTambahan)) {
-        database.infoTambahan = database.infoTambahan ? [database.infoTambahan] : [];
-      }
       
       localStorage.setItem('cached_scammer_db', JSON.stringify(database));
       status.innerText = "🟢 Koneksi aman: Database optimal.";
@@ -764,9 +674,6 @@ async function fetchOnlineDatabase() {
         database = JSON.parse(cached); 
         database.rekening = migrateData(database.rekening || []);
         database.genshin = migrateData(database.genshin || []);
-        if (!Array.isArray(database.infoTambahan)) {
-          database.infoTambahan = database.infoTambahan ? [database.infoTambahan] : [];
-        }
       } catch(e) { 
         database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: [] }; 
       }
@@ -774,7 +681,6 @@ async function fetchOnlineDatabase() {
     status.innerText = "🔴 Mode Offline (Data Lokal)";
   }
   
-  updateLastUpdatedUI();
   checkUrlParams();
   updateMetaSelectOptions();
   filterData();
@@ -814,7 +720,6 @@ async function saveOnlineDatabase() {
     
     localStorage.setItem('cached_scammer_db', JSON.stringify(database));
     status.innerText = "🟢 Tersimpan di server!";
-    updateLastUpdatedUI();
     return true;
   } catch (err) {
     alert("⚠️ Gagal memperbarui server: Akses ditolak atau masalah jaringan.");
@@ -828,7 +733,6 @@ function exitAdminMode() {
   adminSecretKey = null;
   document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
   document.getElementById('addBox').style.display = "none";
-  document.getElementById('runningTextWrapper').style.display = "flex";
   filterData();
 }
 
@@ -891,15 +795,9 @@ async function submitAdminLogin() {
 
     document.getElementById('authBtn').innerText = "🔓 Keluar Mode";
     document.getElementById('addBox').style.display = "flex";
-    document.getElementById('runningTextWrapper').style.display = "none";
     document.getElementById('newDateInput').valueAsDate = new Date();
 
     updateMetaSelectOptions();
-
-    for (let i = 1; i <= 5; i++) {
-      const val = (database.infoTambahan && database.infoTambahan[i - 1]) ? database.infoTambahan[i - 1] : "";
-      document.getElementById(`infoTambahan${i}`).value = val;
-    }
 
     closeAdminModal();
     showToast("Mode Pemilik Aktif");
@@ -925,31 +823,11 @@ async function addNumber() {
   const customMetaInput = document.getElementById('metaCustomInput');
   
   let selectedMeta = selectMeta.value;
-  
-  let newInfoArr = [];
-  for (let i = 1; i <= 5; i++) {
-    newInfoArr.push(document.getElementById(`infoTambahan${i}`).value.trim());
-  }
-  database.infoTambahan = newInfoArr;
-
   const rawVal = input.value.trim();
   const dateVal = dateInput.value;
-  const hasInfo = newInfoArr.some(inf => inf !== "");
 
   if (!rawVal) {
-    if (!hasInfo) {
-      alert("⚠️ Masukkan nomor/UID baru atau isi setidaknya satu info tambahan!");
-      return;
-    }
-    btnAdd.disabled = true;
-    btnAdd.innerText = "⏳ Menyimpan Info...";
-    
-    const success = await saveOnlineDatabase();
-    if (success) {
-      showToast("Info tambahan berhasil diperbarui!");
-    }
-    btnAdd.disabled = false;
-    btnAdd.innerText = "+ Simpan Data";
+    alert("⚠️ Masukkan nomor/UID baru!");
     return;
   }
 
@@ -1111,7 +989,6 @@ function copyReportTemplate(itemObj) {
   copyToClipboard(template, 'Template laporan disalin!');
 }
 
-/* KODE DENGAN PEMBUATAN ELEMEN DOM AMAN DARI CHATGPT */
 function filterData() {
   try {
     const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -1164,7 +1041,6 @@ function filterData() {
       li.dataset.nomor = nomorStr;
       li.title = "Klik untuk menyalin nomor";
 
-      // --- POTONGAN KODE DARI CHATGPT DIINTEGRASIKAN ---
       const numberSpan = document.createElement('span');
       numberSpan.className = 'number';
       numberSpan.textContent = nomorStr;
@@ -1213,7 +1089,6 @@ function filterData() {
 
       li.appendChild(numberSpan);
       li.appendChild(rightContent);
-      // --- AKHIR INTEGRASI POTONGAN KODE ---
 
       fragment.appendChild(li);
     });
@@ -1223,10 +1098,10 @@ function filterData() {
       loadMoreLi.className = 'load-more-container';
       
       const loadMoreBtn = document.createElement('button');
-loadMoreBtn.className = 'btn btn-load-more';
-loadMoreBtn.textContent = 'Muat Lebih Banyak';
+      loadMoreBtn.className = 'btn btn-load-more';
+      loadMoreBtn.textContent = 'Muat Lebih Banyak';
 
-loadMoreLi.appendChild(loadMoreBtn);
+      loadMoreLi.appendChild(loadMoreBtn);
     }
 
     resultList.appendChild(fragment);
