@@ -689,8 +689,8 @@ async function fetchOnlineDatabase() {
 async function saveOnlineDatabase() {
   const status = document.getElementById('statusBar');
   status.innerText = "⏳ Menyimpan data...";
-  
-  if (!adminSecretKey) {
+
+  if (!isAdmin) {
     alert("Sesi Admin telah berakhir. Silakan login kembali.");
     exitAdminMode();
     return false;
@@ -699,30 +699,37 @@ async function saveOnlineDatabase() {
   database.lastUpdated = new Date().toISOString();
 
   try {
-    const cleanSecret = String(adminSecretKey).trim();
     const res = await fetch(PROXY_URL, {
       method: 'PUT',
+      credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Secret': cleanSecret
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(database)
     });
-    
+
     if (res.status === 401 || res.status === 403) {
-      alert("🔒 Password Admin Salah atau Sesi Ditolak!");
+      alert("🔒 Sesi Admin telah berakhir atau akses ditolak.");
       exitAdminMode();
       status.innerText = "⚠️ Autentikasi Gagal";
       return false;
     }
 
-    if (!res.ok) throw new Error("Gagal menyimpan data ke server");
-    
-    localStorage.setItem('cached_scammer_db', JSON.stringify(database));
+    if (!res.ok) {
+      throw new Error("Gagal menyimpan data ke server");
+    }
+
+    localStorage.setItem(
+      'cached_scammer_db',
+      JSON.stringify(database)
+    );
+
     status.innerText = "🟢 Tersimpan di server!";
     return true;
+
   } catch (err) {
-    alert("⚠️ Gagal memperbarui server: Akses ditolak atau masalah jaringan.");
+    console.error("Save database error:", err);
+    alert("⚠️ Gagal memperbarui server: masalah jaringan atau server.");
     status.innerText = "⚠️ Simpan gagal";
     return false;
   }
@@ -770,17 +777,20 @@ async function submitAdminLogin() {
 
   const submitBtn = document.querySelector('#adminModal .btn-add');
   const originalBtnText = submitBtn.innerText;
+
   submitBtn.disabled = true;
   submitBtn.innerText = "Verifikasi...";
 
   try {
-    const res = await fetch(PROXY_URL, {
-      method: 'PUT',
+    const res = await fetch(`${PROXY_URL}/auth/login`, {
+      method: 'POST',
+      credentials: 'include',
       headers: {
-        'Content-Type': 'application/json',
-        'X-Admin-Secret': cleanSecret
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(database)
+      body: JSON.stringify({
+        password: cleanSecret
+      })
     });
 
     if (res.status === 401 || res.status === 403) {
@@ -788,9 +798,11 @@ async function submitAdminLogin() {
       return;
     }
 
-    if (!res.ok) throw new Error("Gagal verifikasi ke server");
+    if (!res.ok) {
+      throw new Error("Gagal login ke server");
+    }
 
-    adminSecretKey = cleanSecret;
+    adminSecretKey = null;
     isAdmin = true;
 
     document.getElementById('authBtn').innerText = "🔓 Keluar Mode";
@@ -804,7 +816,8 @@ async function submitAdminLogin() {
     filterData();
 
   } catch (err) {
-    alert("⚠️ Gagal verifikasi: Terjadi kesalahan jaringan atau server.");
+    console.error("Login error:", err);
+    alert("⚠️ Gagal login: Terjadi kesalahan jaringan atau server.");
   } finally {
     submitBtn.disabled = false;
     submitBtn.innerText = originalBtnText;
