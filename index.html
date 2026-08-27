@@ -1107,17 +1107,22 @@ function filterData() {
     });
 
     if (filtered.length > renderLimit) {
-      const loadMoreLi = document.createElement('li');
-      loadMoreLi.className = 'load-more-container';
-      
-      const loadMoreBtn = document.createElement('button');
-      loadMoreBtn.className = 'btn btn-load-more';
-      loadMoreBtn.textContent = 'Muat Lebih Banyak';
+  const loadMoreLi = document.createElement('li');
+  loadMoreLi.className = 'load-more-container';
 
-      loadMoreLi.appendChild(loadMoreBtn);
-    }
+  const loadMoreBtn = document.createElement('button');
+  loadMoreBtn.className = 'btn btn-load-more';
+  loadMoreBtn.type = 'button';
+  loadMoreBtn.textContent = `Muat Lebih Banyak (${filtered.length - renderLimit} tersisa)`;
 
-    resultList.appendChild(fragment);
+  loadMoreLi.appendChild(loadMoreBtn);
+
+  // BUG FIX:
+  // Masukkan tombol "Muat Lebih Banyak" ke fragment
+  fragment.appendChild(loadMoreLi);
+}
+
+resultList.appendChild(fragment);
 
   } catch (error) {
     console.error("Terjadi masalah saat merender list:", error);
