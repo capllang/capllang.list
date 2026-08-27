@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Database UID HB & Scammer</title>
 
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -100,7 +101,11 @@
     }
 
     body, .container, .tab-btn, .btn, .result-item, input, select {
-      transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      transition:
+        background 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
     }
 
     html, body {
@@ -331,6 +336,11 @@
       gap: 6px;
     }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .btn-add {
       background: var(--btn-add);
       width: 100%;
@@ -522,7 +532,8 @@
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
 
-    .admin-modal-content {
+    .admin-modal-content,
+    .confirm-modal-content {
       background: var(--card-bg);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
@@ -532,6 +543,72 @@
       width: 90%;
       max-width: 320px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+
+    .confirm-modal-content {
+      max-width: 340px;
+    }
+
+    .confirm-title {
+      color: var(--text-title);
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+
+    .confirm-message {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .confirm-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .confirm-actions button {
+      flex: 1;
+    }
+
+    .btn-confirm-cancel {
+      background: var(--input-border);
+      color: var(--text-main);
+    }
+
+    .btn-confirm-danger {
+      background: var(--btn-delete);
+    }
+
+    .loading-indicator {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .loading-indicator.show {
+      display: flex;
+    }
+
+    .loading-spinner {
+      width: 15px;
+      height: 15px;
+      border: 2px solid var(--input-border);
+      border-top-color: var(--input-focus);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .toast {
@@ -589,11 +666,17 @@
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">
+    <button
+      class="tab-btn active"
+      id="tabRekening"
+      onclick="switchTab('rekening')">
       LIST REK SCAMMER
     </button>
 
-    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">
+    <button
+      class="tab-btn"
+      id="tabGenshin"
+      onclick="switchTab('genshin')">
       LIST UID HB
     </button>
   </div>
@@ -603,44 +686,55 @@
 
       <div class="admin-inputs">
 
-        <select id="metaSelectInput"
-                style="flex: 1.2;"
-                onchange="handleMetaSelectChange(this)">
+        <select
+          id="metaSelectInput"
+          style="flex: 1.2;"
+          onchange="handleMetaSelectChange(this)">
         </select>
 
-        <input type="text"
-               id="metaCustomInput"
-               style="flex: 1; display: none;"
-               placeholder="Nama Bank/Game Lain..."
-               maxlength="40">
+        <input
+          type="text"
+          id="metaCustomInput"
+          style="flex: 1; display: none;"
+          placeholder="Nama Bank/Game Lain...">
 
-        <input type="text"
-               id="newNumberInput"
-               style="flex: 1.5;"
-               placeholder="Nomor/UID baru..."
-               inputmode="numeric"
-               autocomplete="off"
-               maxlength="25"
-               onkeydown="handleInputKeyDown(event)">
+        <input
+          type="text"
+          id="newNumberInput"
+          style="flex: 1.5;"
+          placeholder="Nomor/UID baru..."
+          onkeydown="handleInputKeyDown(event)">
 
-        <input type="date"
-               id="newDateInput"
-               style="flex: 1;"
-               title="Tanggal Dilaporkan">
+        <input
+          type="date"
+          id="newDateInput"
+          style="flex: 1;"
+          title="Tanggal Dilaporkan">
+
       </div>
 
-      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">
+      <button
+        class="btn btn-add"
+        id="btnAdd"
+        onclick="addNumber()">
         + Simpan Data
       </button>
+
     </div>
   </div>
 
   <div class="search-box">
-    <input type="text"
-           id="searchInput"
-           aria-label="Cari Rekening atau UID"
-           placeholder="Tulis nomor rekening di sini..."
-           autocomplete="off">
+    <input
+      type="text"
+      id="searchInput"
+      aria-label="Cari Rekening atau UID"
+      placeholder="Tulis nomor rekening di sini..."
+      autocomplete="off">
+  </div>
+
+  <div id="loadingIndicator" class="loading-indicator">
+    <span class="loading-spinner"></span>
+    <span id="loadingText">Memuat...</span>
   </div>
 
   <ul class="result-list" id="resultList"></ul>
@@ -653,29 +747,37 @@
     </div>
 
     <div class="donation-action">
-      <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg"
-           alt="Scan QRIS"
-           class="qris-img"
-           onclick="openQrisModal(this.src)"
-           title="Perbesar QRIS">
 
-      <a href="https://saweria.co/capllang/"
-         target="_blank"
-         rel="noopener noreferrer"
-         class="btn-donate-link">
+      <img
+        src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg"
+        alt="Scan QRIS"
+        class="qris-img"
+        onclick="openQrisModal(this.src)"
+        title="Perbesar QRIS">
+
+      <a
+        href="https://saweria.co/capllang/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-donate-link">
         Saweria
       </a>
+
     </div>
   </div>
 
 </div>
 
-<div id="adminModal"
-     class="qris-modal"
-     style="display: none;"
-     onclick="closeAdminModal()">
+<!-- ADMIN LOGIN MODAL -->
+<div
+  id="adminModal"
+  class="qris-modal"
+  style="display: none;"
+  onclick="closeAdminModal()">
 
-  <div class="admin-modal-content" onclick="event.stopPropagation()">
+  <div
+    class="admin-modal-content"
+    onclick="event.stopPropagation()">
 
     <h3 style="color: var(--text-title); font-size: 0.95rem; margin-bottom: 10px;">
       🔑 Autentikasi Pemilik
@@ -685,24 +787,26 @@
       Masukkan password admin untuk mengakses panel kontrol.
     </p>
 
-    <input type="password"
-           id="adminPasswordInput"
-           placeholder="Password admin..."
-           autocomplete="current-password"
-           style="width: 100%; padding: 10px 14px; font-size: 0.825rem; background: var(--input-bg); color: var(--text-title); border: 1px solid var(--input-border); border-radius: 10px; outline: none; margin-bottom: 12px;"
-           onkeydown="handleAdminModalKeyDown(event)">
+    <input
+      type="password"
+      id="adminPasswordInput"
+      placeholder="Password admin..."
+      style="width: 100%; padding: 10px 14px; font-size: 0.825rem; background: var(--input-bg); color: var(--text-title); border: 1px solid var(--input-border); border-radius: 10px; outline: none; margin-bottom: 12px;"
+      onkeydown="handleAdminModalKeyDown(event)">
 
     <div style="display: flex; gap: 8px;">
 
-      <button class="btn"
-              style="background: var(--input-border); color: var(--text-main); flex: 1;"
-              onclick="closeAdminModal()">
+      <button
+        class="btn btn-confirm-cancel"
+        style="flex: 1;"
+        onclick="closeAdminModal()">
         Batal
       </button>
 
-      <button class="btn btn-add"
-              style="flex: 1;"
-              onclick="submitAdminLogin()">
+      <button
+        class="btn btn-add"
+        style="flex: 1;"
+        onclick="submitAdminLogin()">
         Masuk
       </button>
 
@@ -710,14 +814,56 @@
   </div>
 </div>
 
-<div id="qrisModal"
-     class="qris-modal"
-     onclick="closeQrisModal()">
+<!-- CONFIRM MODAL -->
+<div
+  id="confirmModal"
+  class="qris-modal"
+  style="display: none;"
+  onclick="closeConfirmModal(false)">
 
-  <img id="modalImg"
-       src=""
-       alt="QRIS Preview"
-       onclick="event.stopPropagation()">
+  <div
+    class="confirm-modal-content"
+    onclick="event.stopPropagation()">
+
+    <div class="confirm-title" id="confirmTitle">
+      Konfirmasi
+    </div>
+
+    <div class="confirm-message" id="confirmMessage">
+      Apakah Anda yakin?
+    </div>
+
+    <div class="confirm-actions">
+
+      <button
+        class="btn btn-confirm-cancel"
+        onclick="closeConfirmModal(false)">
+        Batal
+      </button>
+
+      <button
+        class="btn btn-confirm-danger"
+        id="confirmOkBtn"
+        onclick="closeConfirmModal(true)">
+        Hapus
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<!-- QRIS MODAL -->
+<div
+  id="qrisModal"
+  class="qris-modal"
+  onclick="closeQrisModal()">
+
+  <img
+    id="modalImg"
+    src=""
+    alt="QRIS Preview"
+    onclick="event.stopPropagation()">
+
 </div>
 
 <div id="toast" class="toast">
@@ -725,13 +871,8 @@
 </div>
 
 <script>
-
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
 
-const CACHE_KEY = 'cached_scammer_db';
-const CACHE_VERSION = 2;
-
-let adminSecretKey = null;
 let database = {
   rekening: [],
   genshin: [],
@@ -742,14 +883,12 @@ let database = {
 let isAdmin = false;
 let activeTab = 'rekening';
 let searchTimeout = null;
-let renderLimit = 50;
 
-/*
- * Snapshot versi server terakhir yang diketahui client.
- * Digunakan untuk mendeteksi perubahan database
- * sebelum admin menyimpan perubahan.
- */
-let serverSnapshotUpdatedAt = null;
+const PAGE_SIZE = 50;
+let renderLimit = PAGE_SIZE;
+
+let adminSessionActive = false;
+let isLoading = false;
 
 const BANK_OPTIONS = [
   "BCA",
@@ -779,239 +918,63 @@ const GAME_OPTIONS = [
   "Lainnya..."
 ];
 
+/* =========================
+   LOADING STATE
+========================= */
 
-/* =========================================================
-   NORMALISASI
-   ========================================================= */
+function setLoading(state, text = "Memuat...") {
+  isLoading = state;
 
-function normalizeNumber(value) {
-  if (value === null || value === undefined) {
-    return "";
-  }
+  const indicator = document.getElementById('loadingIndicator');
+  const loadingText = document.getElementById('loadingText');
 
-  /*
-   * Hanya angka ASCII.
-   * Spasi, titik, strip, dan karakter lain dibuang.
-   */
-  return String(value)
-    .replace(/[^\d]/g, '')
-    .trim();
+  if (!indicator) return;
+
+  loadingText.textContent = text;
+  indicator.classList.toggle('show', state);
 }
 
-
-function normalizeMeta(value) {
-  if (value === null || value === undefined) {
-    return "-";
-  }
-
-  const result = String(value)
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return result || "-";
-}
-
-
-function normalizeDate(value) {
-  if (!value) return "-";
-
-  const str = String(value).trim();
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-    return "-";
-  }
-
-  const date = new Date(`${str}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return str;
-}
-
-
-function isValidISODate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
-  }
-
-  const [year, month, day] = value.split('-').map(Number);
-
-  const date = new Date(year, month - 1, day);
-
-  return (
-    date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day
-  );
-}
-
-
-/* =========================================================
-   MIGRASI + VALIDASI DATABASE
-   ========================================================= */
+/* =========================
+   DATA MIGRATION
+========================= */
 
 function migrateData(dataArray) {
+  if (!Array.isArray(dataArray)) return [];
 
-  if (!Array.isArray(dataArray)) {
-    return [];
-  }
+  return dataArray.map(item => {
 
-  return dataArray
-    .map(item => {
-
-      if (item === null || item === undefined) {
-        return {
-          nomor: "-",
-          tanggal: "-",
-          meta: "-"
-        };
-      }
-
-      if (typeof item !== 'object') {
-        return {
-          nomor: normalizeNumber(item),
-          tanggal: "-",
-          meta: "-"
-        };
-      }
-
+    if (item === null || item === undefined) {
       return {
-        nomor: normalizeNumber(item.nomor),
-        tanggal: normalizeDate(item.tanggal),
-        meta: normalizeMeta(
-          item.meta ||
-          item.bank ||
-          item.game ||
-          "-"
-        )
+        nomor: "-",
+        tanggal: "-",
+        meta: "-"
       };
-
-    })
-    .filter(item => item.nomor !== "");
-}
-
-
-function normalizeDatabase(data) {
-
-  if (!data || typeof data !== 'object') {
-    return null;
-  }
-
-  if (!Array.isArray(data.rekening) ||
-      !Array.isArray(data.genshin)) {
-    return null;
-  }
-
-  return {
-    ...data,
-
-    rekening: migrateData(data.rekening),
-    genshin: migrateData(data.genshin),
-
-    lastUpdated:
-      typeof data.lastUpdated === 'string'
-        ? data.lastUpdated
-        : null,
-
-    infoTambahan:
-      Array.isArray(data.infoTambahan)
-        ? data.infoTambahan
-        : []
-  };
-}
-
-
-function isValidDatabase(data) {
-  return !!normalizeDatabase(data);
-}
-
-
-/* =========================================================
-   CACHE OFFLINE
-   ========================================================= */
-
-function saveLocalCache(data) {
-
-  try {
-
-    const normalized = normalizeDatabase(data);
-
-    if (!normalized) {
-      console.warn("Cache tidak disimpan: struktur database tidak valid.");
-      return false;
     }
 
-    localStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify({
-        version: CACHE_VERSION,
-        savedAt: new Date().toISOString(),
-        data: normalized
-      })
-    );
-
-    return true;
-
-  } catch (error) {
-
-    console.warn("Gagal menyimpan cache lokal:", error);
-    return false;
-  }
-}
-
-
-function loadLocalCache() {
-
-  try {
-
-    const raw = localStorage.getItem(CACHE_KEY);
-
-    if (!raw) {
-      return null;
+    if (typeof item !== 'object') {
+      return {
+        nomor: String(item),
+        tanggal: "-",
+        meta: "-"
+      };
     }
 
-    const parsed = JSON.parse(raw);
-
-    /*
-     * Mendukung cache lama yang langsung berisi database.
-     */
-    const candidate =
-      parsed &&
-      parsed.data &&
-      typeof parsed.data === 'object'
-        ? parsed.data
-        : parsed;
-
-    const normalized = normalizeDatabase(candidate);
-
-    if (!normalized) {
-      localStorage.removeItem(CACHE_KEY);
-      return null;
-    }
-
-    return normalized;
-
-  } catch (error) {
-
-    console.warn("Cache lokal rusak:", error);
-
-    try {
-      localStorage.removeItem(CACHE_KEY);
-    } catch (_) {}
-
-    return null;
-  }
+    return {
+      nomor: item.nomor ? String(item.nomor) : "",
+      tanggal: item.tanggal ? String(item.tanggal) : "-",
+      meta:
+        (item.meta || item.bank || item.game)
+          ? String(item.meta || item.bank || item.game)
+          : "-"
+    };
+  });
 }
 
-
-/* =========================================================
+/* =========================
    META SELECT
-   ========================================================= */
+========================= */
 
 function updateMetaSelectOptions() {
-
   const select = document.getElementById('metaSelectInput');
   const customInput = document.getElementById('metaCustomInput');
 
@@ -1037,23 +1000,19 @@ function updateMetaSelectOptions() {
       : GAME_OPTIONS;
 
   options.forEach(opt => {
-
     const el = document.createElement('option');
 
     el.value = opt;
     el.textContent = opt;
 
     select.appendChild(el);
-
   });
 
   customInput.style.display = 'none';
   customInput.value = '';
 }
 
-
 function handleMetaSelectChange(selectEl) {
-
   const customInput =
     document.getElementById('metaCustomInput');
 
@@ -1070,13 +1029,11 @@ function handleMetaSelectChange(selectEl) {
   }
 }
 
-
-/* =========================================================
+/* =========================
    THEME
-   ========================================================= */
+========================= */
 
 function toggleTheme() {
-
   document.body.classList.toggle('dark-mode');
 
   const isDark =
@@ -1091,7 +1048,6 @@ function toggleTheme() {
     isDark ? 'Light' : 'Dark';
 }
 
-
 if (localStorage.getItem('theme') === 'dark') {
 
   document.body.classList.add('dark-mode');
@@ -1100,17 +1056,22 @@ if (localStorage.getItem('theme') === 'dark') {
     'Light';
 }
 
-
-/* =========================================================
+/* =========================
    HOME
-   ========================================================= */
+========================= */
 
 function resetToHome() {
+
+  const url = new URL(window.location.href);
+
+  url.searchParams.delete('search');
+  url.searchParams.delete('q');
+  url.searchParams.delete('tab');
 
   window.history.replaceState(
     {},
     '',
-    window.location.pathname
+    url.pathname + url.search + url.hash
   );
 
   document.getElementById('searchInput').value = '';
@@ -1127,17 +1088,83 @@ function resetToHome() {
   showToast("Kembali ke Halaman Utama");
 }
 
+/* =========================
+   URL
+========================= */
 
-/* =========================================================
+function checkUrlParams() {
+
+  const urlParams =
+    new URLSearchParams(window.location.search);
+
+  const searchQuery =
+    urlParams.get('search') ||
+    urlParams.get('q');
+
+  const tabQuery =
+    urlParams.get('tab');
+
+  if (
+    tabQuery &&
+    (tabQuery === 'rekening' ||
+     tabQuery === 'genshin')
+  ) {
+
+    activeTab = tabQuery;
+
+    document
+      .getElementById('tabRekening')
+      .classList.toggle(
+        'active',
+        activeTab === 'rekening'
+      );
+
+    document
+      .getElementById('tabGenshin')
+      .classList.toggle(
+        'active',
+        activeTab === 'genshin'
+      );
+  }
+
+  if (searchQuery) {
+    document.getElementById('searchInput').value =
+      searchQuery;
+  }
+}
+
+function updateUrlParam(query) {
+
+  const url =
+    new URL(window.location.href);
+
+  const currentQuery =
+    url.searchParams.get('search') || '';
+
+  if (query === currentQuery) {
+    return;
+  }
+
+  if (query) {
+    url.searchParams.set('search', query);
+  } else {
+    url.searchParams.delete('search');
+  }
+
+  window.history.replaceState(
+    {},
+    '',
+    url.pathname +
+    (url.search ? url.search : '') +
+    url.hash
+  );
+}
+
+/* =========================
    FETCH DATABASE
-   ========================================================= */
+========================= */
 
-async function fetchOnlineDatabase(options = {}) {
-
-  const {
-    silent = false,
-    updateUI = true
-  } = options;
+async function fetchOnlineDatabase() {
 
   const status =
     document.getElementById('statusBar');
@@ -1146,94 +1173,100 @@ async function fetchOnlineDatabase(options = {}) {
     new AbortController();
 
   const timeoutId =
-    setTimeout(() => controller.abort(), 7000);
+    setTimeout(
+      () => controller.abort(),
+      5000
+    );
+
+  setLoading(true, "Memperbarui database...");
 
   try {
 
-    if (!silent) {
-      status.innerText =
-        "⏳ Memperbarui server...";
-    }
+    status.innerText =
+      "⏳ Memperbarui server...";
 
-    const res = await fetch(PROXY_URL, {
-      method: 'GET',
-      cache: 'no-store',
-      signal: controller.signal
-    });
+    const res =
+      await fetch(PROXY_URL, {
+        signal: controller.signal,
+        cache: 'no-store'
+      });
 
     clearTimeout(timeoutId);
 
     if (!res.ok) {
       throw new Error(
-        `HTTP ${res.status}`
+        "Gagal terhubung ke Worker"
       );
     }
 
-    const data = await res.json();
+    const data =
+      await res.json();
 
     const actualData =
-      data &&
-      data.record
-        ? data.record
-        : data;
+      data.record ? data.record : data;
 
-    const normalized =
-      normalizeDatabase(actualData);
+    if (
+      actualData &&
+      Array.isArray(actualData.rekening) &&
+      Array.isArray(actualData.genshin)
+    ) {
 
-    if (!normalized) {
+      database = actualData;
+
+      database.rekening =
+        migrateData(database.rekening);
+
+      database.genshin =
+        migrateData(database.genshin);
+
+      localStorage.setItem(
+        'cached_scammer_db',
+        JSON.stringify(database)
+      );
+
+      status.innerText =
+        "🟢 Koneksi aman: Database optimal.";
+
+    } else {
+
       throw new Error(
         "Format struktur data tidak sesuai"
       );
     }
 
-    database = normalized;
-
-    serverSnapshotUpdatedAt =
-      database.lastUpdated || null;
-
-    saveLocalCache(database);
-
-    if (!silent) {
-      status.innerText =
-        "🟢 Koneksi aman: Database optimal.";
-    }
-
-    if (updateUI) {
-      checkUrlParams();
-      updateMetaSelectOptions();
-      filterData();
-    }
-
-    return {
-      success: true,
-      data: database
-    };
-
   } catch (err) {
 
-    clearTimeout(timeoutId);
-
     console.warn(
-      "Gagal mengambil database online:",
+      "Menggunakan cache lokal:",
       err
     );
 
-    if (!silent) {
+    const cached =
+      localStorage.getItem(
+        'cached_scammer_db'
+      );
 
-      const cached =
-        loadLocalCache();
+    if (cached) {
 
-      if (cached) {
+      try {
 
-        database = cached;
+        database =
+          JSON.parse(cached);
 
-        serverSnapshotUpdatedAt =
-          database.lastUpdated || null;
+        database.rekening =
+          migrateData(
+            database.rekening || []
+          );
+
+        database.genshin =
+          migrateData(
+            database.genshin || []
+          );
 
         status.innerText =
-          "🟡 Mode Offline (Data Lokal)";
+          "🟡 Mode Offline: Data cache digunakan.";
 
-      } else {
+      } catch (e) {
 
         database = {
           rekening: [],
@@ -1242,120 +1275,30 @@ async function fetchOnlineDatabase(options = {}) {
           infoTambahan: []
         };
 
-        serverSnapshotUpdatedAt = null;
-
         status.innerText =
-          "🔴 Offline — Cache tidak tersedia";
+          "🔴 Mode Offline: Cache tidak tersedia.";
       }
 
+    } else {
+
+      status.innerText =
+        "🔴 Mode Offline: Tidak ada cache.";
     }
 
-    if (updateUI) {
-
-      checkUrlParams();
-      updateMetaSelectOptions();
-      filterData();
-
-    }
-
-    return {
-      success: false,
-      data: database,
-      error: err
-    };
-  }
-}
-
-
-/* =========================================================
-   CEK PERUBAHAN SERVER SEBELUM SAVE
-   ========================================================= */
-
-async function verifyServerVersionBeforeSave() {
-
-  try {
-
-    const controller =
-      new AbortController();
-
-    const timeoutId =
-      setTimeout(() => controller.abort(), 7000);
-
-    const res = await fetch(PROXY_URL, {
-      method: 'GET',
-      cache: 'no-store',
-      signal: controller.signal
-    });
+  } finally {
 
     clearTimeout(timeoutId);
-
-    if (!res.ok) {
-      throw new Error(
-        `HTTP ${res.status}`
-      );
-    }
-
-    const data = await res.json();
-
-    const actualData =
-      data && data.record
-        ? data.record
-        : data;
-
-    const serverData =
-      normalizeDatabase(actualData);
-
-    if (!serverData) {
-      throw new Error(
-        "Data server tidak valid"
-      );
-    }
-
-    const remoteUpdatedAt =
-      serverData.lastUpdated || null;
-
-    const localSnapshot =
-      serverSnapshotUpdatedAt || null;
-
-    /*
-     * Jika versi server berubah sejak data terakhir
-     * diambil client, jangan menimpa perubahan admin lain.
-     */
-    if (remoteUpdatedAt !== localSnapshot) {
-
-      return {
-        ok: false,
-        conflict: true,
-        serverData
-      };
-    }
-
-    return {
-      ok: true,
-      conflict: false,
-      serverData
-    };
-
-  } catch (error) {
-
-    console.error(
-      "Gagal memeriksa versi server:",
-      error
-    );
-
-    return {
-      ok: false,
-      conflict: false,
-      networkError: true,
-      error
-    };
+    setLoading(false);
   }
+
+  checkUrlParams();
+  updateMetaSelectOptions();
+  filterData();
 }
 
-
-/* =========================================================
+/* =========================
    SAVE DATABASE
-   ========================================================= */
+========================= */
 
 async function saveOnlineDatabase() {
 
@@ -1363,114 +1306,52 @@ async function saveOnlineDatabase() {
     document.getElementById('statusBar');
 
   status.innerText =
-    "⏳ Memeriksa perubahan server...";
+    "⏳ Menyimpan data...";
 
-  if (!isAdmin) {
+  if (!isAdmin || !adminSessionActive) {
 
-    alert(
-      "Sesi Admin telah berakhir. Silakan login kembali."
-    );
+    await showConfirm({
+      title: "Sesi Admin Berakhir",
+      message:
+        "Sesi admin tidak lagi aktif. Silakan login kembali.",
+      confirmText: "OK",
+      danger: false
+    });
 
     exitAdminMode();
 
     return false;
   }
 
-
-  /*
-   * Sebelum PUT, cek apakah ada perubahan dari admin lain.
-   */
-  const versionCheck =
-    await verifyServerVersionBeforeSave();
-
-
-  if (versionCheck.conflict) {
-
-    database =
-      normalizeDatabase(
-        versionCheck.serverData
-      );
-
-    serverSnapshotUpdatedAt =
-      database.lastUpdated || null;
-
-    saveLocalCache(database);
-
-    filterData();
-
-    status.innerText =
-      "⚠️ Data berubah di server";
-
-    alert(
-      "⚠️ Database berubah di server sejak terakhir dimuat.\n\n" +
-      "Perubahan Anda dibatalkan agar tidak menimpa data admin lain.\n" +
-      "Database terbaru telah dimuat."
-    );
-
-    return false;
-  }
-
-
-  if (versionCheck.networkError) {
-
-    status.innerText =
-      "⚠️ Tidak dapat memverifikasi server";
-
-    alert(
-      "⚠️ Tidak dapat memverifikasi versi database server.\n\n" +
-      "Penyimpanan dibatalkan untuk mencegah konflik data."
-    );
-
-    return false;
-  }
-
-
-  /*
-   * Jangan mengizinkan penyimpanan data invalid.
-   */
-  const normalized =
-    normalizeDatabase(database);
-
-  if (!normalized) {
-
-    status.innerText =
-      "⚠️ Struktur data tidak valid";
-
-    alert(
-      "⚠️ Data tidak valid dan tidak dapat disimpan."
-    );
-
-    return false;
-  }
-
-  database = normalized;
-
   database.lastUpdated =
     new Date().toISOString();
 
+  setLoading(true, "Menyimpan data...");
 
   try {
 
-    const res = await fetch(PROXY_URL, {
+    const res =
+      await fetch(PROXY_URL, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(database)
+      });
 
-      method: 'PUT',
+    if (
+      res.status === 401 ||
+      res.status === 403
+    ) {
 
-      credentials: 'include',
-
-      headers: {
-        'Content-Type': 'application/json'
-      },
-
-      body: JSON.stringify(database)
-    });
-
-
-    if (res.status === 401 ||
-        res.status === 403) {
-
-      alert(
-        "🔒 Sesi Admin telah berakhir atau akses ditolak."
-      );
+      await showConfirm({
+        title: "Akses Ditolak",
+        message:
+          "Sesi Admin telah berakhir atau akses ditolak oleh server.",
+        confirmText: "OK",
+        danger: false
+      });
 
       exitAdminMode();
 
@@ -1480,46 +1361,21 @@ async function saveOnlineDatabase() {
       return false;
     }
 
-
-    if (res.status === 409) {
-
-      /*
-       * Worker dapat mengembalikan 409 bila versi
-       * server mendeteksi konflik.
-       */
-      alert(
-        "⚠️ Perubahan ditolak karena database telah berubah.\n\n" +
-        "Data terbaru akan dimuat."
-      );
-
-      await fetchOnlineDatabase();
-
-      return false;
-    }
-
-
     if (!res.ok) {
       throw new Error(
-        `HTTP ${res.status}`
+        "Gagal menyimpan data ke server"
       );
     }
 
-
-    /*
-     * Update snapshot setelah berhasil.
-     */
-    serverSnapshotUpdatedAt =
-      database.lastUpdated;
-
-
-    saveLocalCache(database);
-
+    localStorage.setItem(
+      'cached_scammer_db',
+      JSON.stringify(database)
+    );
 
     status.innerText =
       "🟢 Tersimpan di server!";
 
     return true;
-
 
   } catch (err) {
 
@@ -1528,26 +1384,33 @@ async function saveOnlineDatabase() {
       err
     );
 
+    await showConfirm({
+      title: "Penyimpanan Gagal",
+      message:
+        "Data gagal diperbarui ke server karena masalah jaringan atau server.",
+      confirmText: "OK",
+      danger: false
+    });
+
     status.innerText =
       "⚠️ Simpan gagal";
 
-    alert(
-      "⚠️ Gagal memperbarui server: masalah jaringan atau server."
-    );
-
     return false;
+
+  } finally {
+
+    setLoading(false);
   }
 }
 
-
-/* =========================================================
+/* =========================
    ADMIN
-   ========================================================= */
+========================= */
 
 function exitAdminMode() {
 
   isAdmin = false;
-  adminSecretKey = null;
+  adminSessionActive = false;
 
   document.getElementById('authBtn').innerText =
     "🔑 Mode Pemilik";
@@ -1558,7 +1421,6 @@ function exitAdminMode() {
   filterData();
 }
 
-
 function toggleAdmin() {
 
   if (!isAdmin) {
@@ -1567,7 +1429,9 @@ function toggleAdmin() {
       'flex';
 
     const pwdInput =
-      document.getElementById('adminPasswordInput');
+      document.getElementById(
+        'adminPasswordInput'
+      );
 
     pwdInput.value = '';
     pwdInput.focus();
@@ -1582,13 +1446,11 @@ function toggleAdmin() {
   }
 }
 
-
 function closeAdminModal() {
 
   document.getElementById('adminModal').style.display =
     'none';
 }
-
 
 function handleAdminModalKeyDown(e) {
 
@@ -1597,7 +1459,6 @@ function handleAdminModalKeyDown(e) {
   }
 }
 
-
 async function submitAdminLogin() {
 
   const inputSecret =
@@ -1605,21 +1466,20 @@ async function submitAdminLogin() {
       'adminPasswordInput'
     ).value;
 
+  if (
+    !inputSecret ||
+    inputSecret.trim() === ""
+  ) {
 
-  if (!inputSecret ||
-      inputSecret.trim() === "") {
-
-    alert(
+    showToast(
       "⚠️ Password Admin wajib diisi!"
     );
 
     return;
   }
 
-
   const cleanSecret =
     inputSecret.trim();
-
 
   const submitBtn =
     document.querySelector(
@@ -1629,11 +1489,14 @@ async function submitAdminLogin() {
   const originalBtnText =
     submitBtn.innerText;
 
-
   submitBtn.disabled = true;
   submitBtn.innerText =
     "Verifikasi...";
 
+  setLoading(
+    true,
+    "Memverifikasi admin..."
+  );
 
   try {
 
@@ -1653,41 +1516,43 @@ async function submitAdminLogin() {
         }
       );
 
+    if (
+      res.status === 401 ||
+      res.status === 403
+    ) {
 
-    if (res.status === 401 ||
-        res.status === 403) {
-
-      alert(
-        "❌ Password Admin Salah! Akses ditolak."
+      showToast(
+        "❌ Password Admin Salah!"
       );
 
       return;
     }
 
-
     if (!res.ok) {
+
       throw new Error(
         "Gagal login ke server"
       );
     }
 
-
-    adminSecretKey = null;
+    /*
+     * Tidak menyimpan password/token/session
+     * ke JavaScript.
+     *
+     * Session ditangani oleh cookie
+     * HttpOnly dari server.
+     */
     isAdmin = true;
-
+    adminSessionActive = true;
 
     document.getElementById('authBtn').innerText =
       "🔓 Keluar Mode";
 
-
     document.getElementById('addBox').style.display =
       "flex";
 
-
     document.getElementById('newDateInput')
-      .valueAsDate =
-      new Date();
-
+      .valueAsDate = new Date();
 
     updateMetaSelectOptions();
 
@@ -1699,7 +1564,6 @@ async function submitAdminLogin() {
 
     filterData();
 
-
   } catch (err) {
 
     console.error(
@@ -1707,53 +1571,23 @@ async function submitAdminLogin() {
       err
     );
 
-    alert(
-      "⚠️ Gagal login: Terjadi kesalahan jaringan atau server."
+    showToast(
+      "⚠️ Gagal login: masalah jaringan/server."
     );
-
 
   } finally {
 
     submitBtn.disabled = false;
     submitBtn.innerText =
       originalBtnText;
+
+    setLoading(false);
   }
 }
 
-
-/* =========================================================
-   VALIDASI INPUT
-   ========================================================= */
-
-function validateNumber(cleanVal) {
-
-  if (!cleanVal) {
-    return false;
-  }
-
-  if (!/^\d+$/.test(cleanVal)) {
-    return false;
-  }
-
-  if (activeTab === 'genshin') {
-
-    return /^\d{5,12}$/.test(cleanVal);
-
-  }
-
-  if (activeTab === 'rekening') {
-
-    return /^\d{5,25}$/.test(cleanVal);
-
-  }
-
-  return false;
-}
-
-
-/* =========================================================
+/* =========================
    ADD DATA
-   ========================================================= */
+========================= */
 
 function handleInputKeyDown(e) {
 
@@ -1761,7 +1595,6 @@ function handleInputKeyDown(e) {
     addNumber();
   }
 }
-
 
 async function addNumber() {
 
@@ -1790,71 +1623,28 @@ async function addNumber() {
       'metaCustomInput'
     );
 
+  let selectedMeta =
+    selectMeta.value;
 
-  /*
-   * Normalisasi nomor sebelum validasi.
-   */
   const rawVal =
     input.value.trim();
-
-  const cleanVal =
-    normalizeNumber(rawVal);
 
   const dateVal =
     dateInput.value;
 
+  if (!rawVal) {
 
-  if (!cleanVal) {
-
-    alert(
+    showToast(
       "⚠️ Masukkan nomor/UID baru!"
     );
 
     return;
   }
 
-
-  if (!validateNumber(cleanVal)) {
-
-    if (activeTab === 'genshin') {
-
-      alert(
-        "⚠️ UID Game tidak valid!\n" +
-        "UID harus berupa angka dengan panjang 5 - 12 digit."
-      );
-
-    } else {
-
-      alert(
-        "⚠️ Nomor Rekening/E-Wallet tidak valid!\n" +
-        "Harus berupa angka dengan panjang 5 - 25 digit."
-      );
-    }
-
-    return;
-  }
-
-
-  /*
-   * Validasi tanggal yang lebih ketat.
-   */
-  if (!dateVal ||
-      !isValidISODate(dateVal)) {
-
-    alert(
-      "⚠️ Tanggal wajib diisi dengan format yang valid!"
-    );
-
-    return;
-  }
-
-
-  let selectedMeta =
-    selectMeta.value;
-
-
-  if (!selectedMeta ||
-      selectedMeta === "") {
+  if (
+    !selectedMeta ||
+    selectedMeta === ""
+  ) {
 
     selectedMeta = "-";
 
@@ -1863,45 +1653,54 @@ async function addNumber() {
   ) {
 
     selectedMeta =
-      normalizeMeta(
-        customMetaInput.value
-      );
+      customMetaInput.value.trim();
 
-    if (
-      selectedMeta === "-" ||
-      selectedMeta.length > 40
-    ) {
+    if (!selectedMeta) {
+      selectedMeta = "-";
+    }
+  }
 
-      alert(
-        "⚠️ Nama Bank/Game tidak valid.\n" +
-        "Maksimal 40 karakter."
+  if (!dateVal) {
+
+    showToast(
+      "⚠️ Tanggal wajib diisi!"
+    );
+
+    return;
+  }
+
+  /*
+   * Normalisasi input:
+   * hanya angka yang disimpan.
+   */
+  const cleanVal =
+    rawVal.replace(/\D/g, '');
+
+  if (activeTab === 'genshin') {
+
+    if (!/^\d{5,12}$/.test(cleanVal)) {
+
+      showToast(
+        "⚠️ UID harus 5 - 12 digit."
       );
 
       return;
     }
 
-  } else {
+  } else if (
+    activeTab === 'rekening'
+  ) {
 
-    selectedMeta =
-      normalizeMeta(
-        selectedMeta
+    if (!/^\d{5,25}$/.test(cleanVal)) {
+
+      showToast(
+        "⚠️ Nomor harus 5 - 25 digit."
       );
+
+      return;
+    }
   }
 
-
-  /*
-   * Pastikan tab memiliki array valid.
-   */
-  if (!Array.isArray(database[activeTab])) {
-
-    database[activeTab] = [];
-  }
-
-
-  /*
-   * Cek duplikasi menggunakan nilai
-   * yang sudah dinormalisasi.
-   */
   const exists =
     database[activeTab].some(item => {
 
@@ -1910,25 +1709,21 @@ async function addNumber() {
           ? item.nomor
           : item;
 
-      return normalizeNumber(num) === cleanVal;
+      return String(num) === cleanVal;
     });
-
 
   if (exists) {
 
-    alert(
-      "⚠️ Nomor/UID ini sudah ada di dalam database!"
+    showToast(
+      "⚠️ Nomor/UID sudah ada!"
     );
 
     return;
   }
 
-
   btnAdd.disabled = true;
-
   btnAdd.innerText =
     "⏳ Menyimpan...";
-
 
   const newItem = {
     nomor: cleanVal,
@@ -1936,15 +1731,12 @@ async function addNumber() {
     meta: selectedMeta
   };
 
-
   database[activeTab].unshift(
     newItem
   );
 
-
   const success =
     await saveOnlineDatabase();
-
 
   if (success) {
 
@@ -1957,7 +1749,7 @@ async function addNumber() {
       'searchInput'
     ).value = "";
 
-    renderLimit = 50;
+    renderLimit = PAGE_SIZE;
 
     filterData();
 
@@ -1965,36 +1757,80 @@ async function addNumber() {
       "Data & info berhasil ditambahkan!"
     );
 
-
   } else {
 
-    /*
-     * Hanya rollback jika objek baru masih
-     * berada di posisi pertama.
-     */
-    const firstItem =
-      database[activeTab][0];
-
-    if (
-      firstItem &&
-      firstItem.nomor === cleanVal
-    ) {
-
-      database[activeTab].shift();
-    }
+    database[activeTab].shift();
   }
 
-
   btnAdd.disabled = false;
-
   btnAdd.innerText =
     "+ Simpan Data";
 }
 
+/* =========================
+   CUSTOM CONFIRM
+========================= */
 
-/* =========================================================
+let confirmResolver = null;
+
+function showConfirm({
+  title = "Konfirmasi",
+  message = "Apakah Anda yakin?",
+  confirmText = "OK",
+  danger = true
+} = {}) {
+
+  return new Promise(resolve => {
+
+    confirmResolver = resolve;
+
+    document.getElementById(
+      'confirmTitle'
+    ).textContent = title;
+
+    document.getElementById(
+      'confirmMessage'
+    ).textContent = message;
+
+    const btn =
+      document.getElementById(
+        'confirmOkBtn'
+      );
+
+    btn.textContent =
+      confirmText;
+
+    btn.className =
+      danger
+        ? "btn btn-confirm-danger"
+        : "btn btn-add";
+
+    document.getElementById(
+      'confirmModal'
+    ).style.display = 'flex';
+  });
+}
+
+function closeConfirmModal(result) {
+
+  document.getElementById(
+    'confirmModal'
+  ).style.display = 'none';
+
+  if (confirmResolver) {
+
+    const resolver =
+      confirmResolver;
+
+    confirmResolver = null;
+
+    resolver(result);
+  }
+}
+
+/* =========================
    DELETE
-   ========================================================= */
+========================= */
 
 async function deleteNumber(
   itemObj,
@@ -2006,229 +1842,125 @@ async function deleteNumber(
       ? String(itemObj.nomor)
       : String(itemObj);
 
+  const confirmed =
+    await showConfirm({
+      title: "Hapus Data?",
+      message:
+        `Data "${nomorStr}" akan dihapus dari database. Tindakan ini tidak dapat dibatalkan.`,
+      confirmText: "Hapus",
+      danger: true
+    });
 
-  if (
-    confirm(
-      `Hapus ${nomorStr} dari database?`
-    )
-  ) {
+  if (!confirmed) return;
 
-    const index =
-      database[activeTab]
-        .indexOf(itemObj);
+  const index =
+    database[activeTab]
+      .indexOf(itemObj);
 
+  if (index > -1) {
 
-    if (index > -1) {
+    if (btnEl) {
+      btnEl.disabled = true;
+    }
 
-      if (btnEl) {
-        btnEl.disabled = true;
-      }
+    const originalData =
+      [...database[activeTab]];
 
+    database[activeTab]
+      .splice(index, 1);
 
-      const originalData =
-        [...database[activeTab]];
+    const success =
+      await saveOnlineDatabase();
 
+    if (success) {
 
-      database[activeTab].splice(
-        index,
-        1
+      filterData();
+
+      showToast(
+        "Data dihapus!"
       );
 
+    } else {
 
-      const success =
-        await saveOnlineDatabase();
+      database[activeTab] =
+        originalData;
 
-
-      if (success) {
-
-        filterData();
-
-        showToast(
-          "Data dihapus!"
-        );
-
-
-      } else {
-
-        /*
-         * Jangan restore jika save gagal
-         * karena konflik telah memuat data server.
-         */
-        if (!database[activeTab].some(
-          item => item === itemObj
-        )) {
-
-          /*
-           * Hanya restore jika data lokal
-           * masih merupakan dataset yang sama.
-           */
-          const currentUpdatedAt =
-            database.lastUpdated;
-
-          if (
-            currentUpdatedAt ===
-            serverSnapshotUpdatedAt
-          ) {
-            database[activeTab] =
-              originalData;
-          }
-        }
-
-        if (btnEl) {
-          btnEl.disabled = false;
-        }
+      if (btnEl) {
+        btnEl.disabled = false;
       }
     }
   }
 }
 
-
-/* =========================================================
-   TAB
-   ========================================================= */
+/* =========================
+   TABS
+========================= */
 
 function switchTab(tab) {
 
   activeTab = tab;
 
-  renderLimit = 50;
+  renderLimit =
+    PAGE_SIZE;
 
-  document.getElementById(
-    'tabRekening'
-  ).classList.toggle(
-    'active',
-    tab === 'rekening'
-  );
+  document
+    .getElementById('tabRekening')
+    .classList.toggle(
+      'active',
+      tab === 'rekening'
+    );
 
-  document.getElementById(
-    'tabGenshin'
-  ).classList.toggle(
-    'active',
-    tab === 'genshin'
-  );
-
+  document
+    .getElementById('tabGenshin')
+    .classList.toggle(
+      'active',
+      tab === 'genshin'
+    );
 
   const input =
     document.getElementById(
       'searchInput'
     );
 
-
   input.placeholder =
     tab === 'rekening'
       ? "Tulis nomor rekening di sini..."
       : "Tulis UID game di sini...";
-
 
   updateMetaSelectOptions();
 
   filterData();
 }
 
+/* =========================
+   SEARCH NORMALIZATION
+========================= */
 
-/* =========================================================
-   URL
-   ========================================================= */
+function normalizeSearchValue(value) {
 
-function checkUrlParams() {
-
-  const urlParams =
-    new URLSearchParams(
-      window.location.search
-    );
-
-
-  const searchQuery =
-    urlParams.get('search') ||
-    urlParams.get('q');
-
-
-  const tabQuery =
-    urlParams.get('tab');
-
-
-  if (
-    tabQuery &&
-    (
-      tabQuery === 'rekening' ||
-      tabQuery === 'genshin'
-    )
-  ) {
-
-    activeTab = tabQuery;
-
-    document.getElementById(
-      'tabRekening'
-    ).classList.toggle(
-      'active',
-      activeTab === 'rekening'
-    );
-
-    document.getElementById(
-      'tabGenshin'
-    ).classList.toggle(
-      'active',
-      activeTab === 'genshin'
-    );
-  }
-
-
-  if (searchQuery) {
-
-    document.getElementById(
-      'searchInput'
-    ).value =
-      searchQuery;
-  }
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
 }
 
-
-function updateUrlParam(query) {
-
-  const url =
-    new URL(
-      window.location.href
-    );
-
-
-  if (query) {
-
-    url.searchParams.set(
-      'search',
-      query
-    );
-
-  } else {
-
-    url.searchParams.delete(
-      'search'
-    );
-  }
-
-
-  window.history.replaceState(
-    {},
-    '',
-    url.toString()
-  );
-}
-
-
-/* =========================================================
-   RESULT LIST
-   ========================================================= */
+/* =========================
+   EVENT RESULT LIST
+========================= */
 
 document
   .getElementById('resultList')
   .addEventListener(
     'click',
-    (e) => {
+    async (e) => {
 
       const target =
         e.target;
 
       /*
-       * FIX BUG "MUAT LEBIH BANYAK"
+       * Pagination diperbaiki:
+       * tombol sekarang benar-benar
+       * bekerja karena elemen load-more
+       * ditambahkan ke fragment/resultList.
        */
       if (
         target.classList.contains(
@@ -2236,49 +1968,36 @@ document
         )
       ) {
 
-        renderLimit += 50;
+        target.disabled = true;
+        target.textContent =
+          "Memuat...";
+
+        renderLimit += PAGE_SIZE;
 
         filterData();
 
-        /*
-         * Fokus tetap di list.
-         */
-        const resultList =
-          document.getElementById(
-            'resultList'
-          );
-
-        resultList.focus?.();
-
         return;
       }
-
 
       const itemEl =
         target.closest(
           '.result-item'
         );
 
-
-      if (!itemEl) {
-        return;
-      }
-
+      if (!itemEl) return;
 
       const nomorStr =
         itemEl.dataset.nomor;
-
 
       const itemObj =
         database[activeTab].find(
           i =>
             (
               typeof i === 'object'
-                ? normalizeNumber(i.nomor)
-                : normalizeNumber(i)
+                ? String(i.nomor)
+                : String(i)
             ) === nomorStr
         );
-
 
       if (
         target.classList.contains(
@@ -2288,7 +2007,7 @@ document
 
         e.stopPropagation();
 
-        deleteNumber(
+        await deleteNumber(
           itemObj,
           target
         );
@@ -2315,20 +2034,16 @@ document
     }
   );
 
-
-/* =========================================================
+/* =========================
    COPY TEMPLATE
-   ========================================================= */
+========================= */
 
-function copyReportTemplate(
-  itemObj
-) {
+function copyReportTemplate(itemObj) {
 
   const nomorStr =
     typeof itemObj === 'object'
       ? itemObj.nomor
       : itemObj;
-
 
   const metaStr =
     typeof itemObj === 'object'
@@ -2340,12 +2055,10 @@ function copyReportTemplate(
         )
       : '-';
 
-
   const tanggalStr =
     typeof itemObj === 'object'
       ? itemObj.tanggal
       : '-';
-
 
   const template =
 `🚨 LAPORAN PENIPUAN 🚨
@@ -2356,140 +2069,124 @@ Tanggal Terdata: ${tanggalStr}
 
 Hati-hati terhadap modus penipuan dengan informasi di atas!`;
 
-
   copyToClipboard(
     template,
     'Template laporan disalin!'
   );
 }
 
-
-/* =========================================================
-   FILTER + RENDER
-   ========================================================= */
+/* =========================
+   FILTER + PAGINATION
+========================= */
 
 function filterData() {
 
   try {
 
     const rawQuery =
-      document.getElementById(
-        'searchInput'
-      ).value
+      document
+        .getElementById('searchInput')
+        .value
         .trim()
         .toLowerCase();
 
+    const cleanQuery =
+      normalizeSearchValue(
+        rawQuery
+      );
 
     /*
-     * Query nomor juga dinormalisasi agar:
-     * 0812-3456 = 08123456
+     * URL hanya diperbarui jika
+     * query benar-benar berubah.
      */
-    const cleanQuery =
-      normalizeNumber(rawQuery);
-
-
     updateUrlParam(
       rawQuery
     );
-
 
     const resultList =
       document.getElementById(
         'resultList'
       );
 
-
     const counter =
       document.getElementById(
         'dataCounter'
       );
 
-
     while (
       resultList.firstChild
     ) {
-
       resultList.removeChild(
         resultList.firstChild
       );
     }
 
-
     const currentData =
-      Array.isArray(
-        database[activeTab]
-      )
-        ? database[activeTab]
-        : [];
+      database[activeTab] || [];
 
-
+    /*
+     * Untuk pencarian besar:
+     * normalisasi query dilakukan
+     * satu kali.
+     */
     const filtered =
-      currentData.filter(
-        item => {
+      currentData.filter(item => {
 
-          if (
-            rawQuery === ''
-          ) {
-            return true;
-          }
-
-
-          const nomorStr =
-            typeof item === 'object'
-              ? normalizeNumber(
-                  item.nomor
-                )
-              : normalizeNumber(
-                  item
-                );
-
-
-          const tanggalStr =
-            typeof item === 'object'
-              ? String(
-                  item.tanggal || ''
-                ).toLowerCase()
-              : '';
-
-
-          const metaStr =
-            typeof item === 'object'
-              ? normalizeMeta(
-                  item.meta ||
-                  item.bank ||
-                  item.game ||
-                  ''
-                ).toLowerCase()
-              : '';
-
-
-          return (
-            nomorStr.includes(
-              rawQuery
-            ) ||
-
-            (
-              cleanQuery !== '' &&
-              nomorStr.includes(
-                cleanQuery
-              )
-            ) ||
-
-            tanggalStr.includes(
-              rawQuery
-            ) ||
-
-            metaStr.includes(
-              rawQuery
-            )
-          );
+        if (rawQuery === '') {
+          return true;
         }
-      );
 
+        const nomorStr =
+          typeof item === 'object'
+            ? String(item.nomor || '')
+            : String(item);
+
+        const tanggalStr =
+          typeof item === 'object'
+            ? String(
+                item.tanggal || ''
+              ).toLowerCase()
+            : '';
+
+        const metaStr =
+          typeof item === 'object'
+            ? String(
+                item.meta ||
+                item.bank ||
+                item.game ||
+                ''
+              ).toLowerCase()
+            : '';
+
+        const nomorLower =
+          nomorStr.toLowerCase();
+
+        const nomorNormalized =
+          normalizeSearchValue(
+            nomorStr
+          );
+
+        return (
+          nomorLower.includes(
+            rawQuery
+          ) ||
+          (
+            cleanQuery !== '' &&
+            nomorNormalized.includes(
+              cleanQuery
+            )
+          ) ||
+          tanggalStr.includes(
+            rawQuery
+          ) ||
+          metaStr.includes(
+            rawQuery
+          )
+        );
+      });
 
     counter.textContent =
       `${filtered.length} Data`;
-
 
     if (
       filtered.length === 0
@@ -2513,217 +2210,185 @@ function filterData() {
       return;
     }
 
-
     const visibleData =
       filtered.slice(
         0,
         renderLimit
       );
 
-
     const fragment =
       document.createDocumentFragment();
 
+    visibleData.forEach(item => {
 
-    visibleData.forEach(
-      item => {
+      const nomorStr =
+        typeof item === 'object'
+          ? String(item.nomor)
+          : String(item);
 
-        const nomorStr =
-          typeof item === 'object'
-            ? normalizeNumber(
-                item.nomor
-              )
-            : normalizeNumber(
-                item
-              );
+      const tanggalStr =
+        typeof item === 'object'
+          ? String(
+              item.tanggal || '-'
+            )
+          : '-';
 
+      const metaStr =
+        typeof item === 'object'
+          ? String(
+              item.meta ||
+              item.bank ||
+              item.game ||
+              '-'
+            )
+          : '-';
 
-        const tanggalStr =
-          typeof item === 'object'
-            ? normalizeDate(
-                item.tanggal
-              )
-            : '-';
+      const li =
+        document.createElement(
+          'li'
+        );
 
+      li.className =
+        'result-item';
 
-        const metaStr =
-          typeof item === 'object'
-            ? normalizeMeta(
-                item.meta ||
-                item.bank ||
-                item.game ||
-                '-'
-              )
-            : '-';
+      li.dataset.nomor =
+        nomorStr;
 
+      li.title =
+        "Klik untuk menyalin nomor";
 
-        const li =
-          document.createElement(
-            'li'
-          );
+      const numberSpan =
+        document.createElement(
+          'span'
+        );
 
+      numberSpan.className =
+        'number';
 
-        li.className =
-          'result-item';
+      numberSpan.textContent =
+        nomorStr;
 
-        li.dataset.nomor =
-          nomorStr;
+      const rightContent =
+        document.createElement(
+          'div'
+        );
 
-        li.title =
-          "Klik untuk menyalin nomor";
+      rightContent.className =
+        'right-content';
 
+      if (
+        metaStr &&
+        metaStr !== '-'
+      ) {
 
-        const numberSpan =
+        const metaSpan =
           document.createElement(
             'span'
           );
 
+        metaSpan.className =
+          'badge-meta';
 
-        numberSpan.className =
-          'number';
+        metaSpan.textContent =
+          metaStr;
 
-        numberSpan.textContent =
-          nomorStr;
+        rightContent.appendChild(
+          metaSpan
+        );
+      }
 
+      if (
+        tanggalStr !== '-' &&
+        tanggalStr.length > 0
+      ) {
 
-        const rightContent =
+        const dateSpan =
           document.createElement(
-            'div'
+            'span'
           );
 
+        dateSpan.className =
+          'badge-date';
 
-        rightContent.className =
-          'right-content';
+        const dParts =
+          tanggalStr.includes('-')
+            ? tanggalStr.split('-')
+            : [tanggalStr];
 
+        const formattedDate =
+          dParts.length === 3
+            ? `${dParts[2]}/${dParts[1]}/${dParts[0]}`
+            : tanggalStr;
 
-        if (
-          metaStr &&
-          metaStr !== '-'
-        ) {
+        dateSpan.textContent =
+          formattedDate;
 
-          const metaSpan =
-            document.createElement(
-              'span'
-            );
+        rightContent.appendChild(
+          dateSpan
+        );
+      }
 
+      const copyBtn =
+        document.createElement(
+          'button'
+        );
 
-          metaSpan.className =
-            'badge-meta';
+      copyBtn.className =
+        'btn-icon';
 
-          metaSpan.textContent =
-            metaStr;
+      copyBtn.title =
+        'Salin Template Laporan';
 
+      copyBtn.setAttribute(
+        'aria-label',
+        'Salin Template Laporan'
+      );
 
-          rightContent.appendChild(
-            metaSpan
-          );
-        }
+      copyBtn.textContent =
+        '📢';
 
+      rightContent.appendChild(
+        copyBtn
+      );
 
-        if (
-          tanggalStr !== '-' &&
-          tanggalStr.length > 0
-        ) {
+      if (isAdmin) {
 
-          const dateSpan =
-            document.createElement(
-              'span'
-            );
-
-
-          dateSpan.className =
-            'badge-date';
-
-
-          const dParts =
-            tanggalStr.includes('-')
-              ? tanggalStr.split('-')
-              : [tanggalStr];
-
-
-          const formattedDate =
-            dParts.length === 3
-              ? `${dParts[2]}/${dParts[1]}/${dParts[0]}`
-              : tanggalStr;
-
-
-          dateSpan.textContent =
-            formattedDate;
-
-
-          rightContent.appendChild(
-            dateSpan
-          );
-        }
-
-
-        const copyBtn =
+        const deleteBtn =
           document.createElement(
             'button'
           );
 
+        deleteBtn.className =
+          'btn btn-delete';
 
-        copyBtn.className =
-          'btn-icon';
-
-        copyBtn.title =
-          'Salin Template Laporan';
-
-        copyBtn.setAttribute(
-          'aria-label',
-          'Salin Template Laporan'
-        );
-
-        copyBtn.textContent =
-          '📢';
-
+        deleteBtn.textContent =
+          'Hapus';
 
         rightContent.appendChild(
-          copyBtn
-        );
-
-
-        if (isAdmin) {
-
-          const deleteBtn =
-            document.createElement(
-              'button'
-            );
-
-
-          deleteBtn.className =
-            'btn btn-delete';
-
-          deleteBtn.textContent =
-            'Hapus';
-
-
-          rightContent.appendChild(
-            deleteBtn
-          );
-        }
-
-
-        li.appendChild(
-          numberSpan
-        );
-
-        li.appendChild(
-          rightContent
-        );
-
-
-        fragment.appendChild(
-          li
+          deleteBtn
         );
       }
-    );
 
+      li.appendChild(
+        numberSpan
+      );
+
+      li.appendChild(
+        rightContent
+      );
+
+      fragment.appendChild(
+        li
+      );
+    });
 
     /*
-     * FIX UTAMA:
-     * loadMoreLi sekarang benar-benar dimasukkan
-     * ke fragment/resultList.
+     * FIX BUG "MUAT LEBIH BANYAK":
+     *
+     * Sebelumnya loadMoreLi dibuat tetapi
+     * tidak pernah dimasukkan ke DOM.
+     *
+     * Sekarang benar-benar di-append ke fragment.
      */
     if (
       filtered.length > renderLimit
@@ -2734,51 +2399,38 @@ function filterData() {
           'li'
         );
 
-
       loadMoreLi.className =
         'load-more-container';
-
 
       const loadMoreBtn =
         document.createElement(
           'button'
         );
 
-
       loadMoreBtn.className =
         'btn btn-load-more';
 
-
-      const remaining =
-        filtered.length -
-        renderLimit;
-
-
       loadMoreBtn.textContent =
         `Muat Lebih Banyak (${Math.min(
-          50,
-          remaining
+          PAGE_SIZE,
+          filtered.length - renderLimit
         )})`;
-
 
       loadMoreLi.appendChild(
         loadMoreBtn
       );
 
-
       /*
-       * INI bagian yang sebelumnya hilang.
+       * INI PERBAIKAN UTAMANYA.
        */
       fragment.appendChild(
         loadMoreLi
       );
     }
 
-
     resultList.appendChild(
       fragment
     );
-
 
   } catch (error) {
 
@@ -2787,28 +2439,23 @@ function filterData() {
       error
     );
 
-
     const resultList =
       document.getElementById(
         'resultList'
       );
 
-
     while (
       resultList.firstChild
     ) {
-
       resultList.removeChild(
         resultList.firstChild
       );
     }
 
-
     const errLi =
       document.createElement(
         'li'
       );
-
 
     errLi.className =
       'empty-msg';
@@ -2819,17 +2466,15 @@ function filterData() {
     errLi.textContent =
       'Terjadi kendala saat membaca data. Coba muat ulang halaman.';
 
-
     resultList.appendChild(
       errLi
     );
   }
 }
 
-
-/* =========================================================
-   SEARCH
-   ========================================================= */
+/* =========================
+   SEARCH EVENT
+========================= */
 
 document
   .getElementById('searchInput')
@@ -2841,25 +2486,21 @@ document
         searchTimeout
       );
 
-
       searchTimeout =
-        setTimeout(
-          () => {
+        setTimeout(() => {
 
-            renderLimit = 50;
+          renderLimit =
+            PAGE_SIZE;
 
-            filterData();
+          filterData();
 
-          },
-          300
-        );
+        }, 250);
     }
   );
 
-
-/* =========================================================
+/* =========================
    KEYBOARD SEARCH
-   ========================================================= */
+========================= */
 
 document.addEventListener(
   'keydown',
@@ -2869,7 +2510,6 @@ document.addEventListener(
       document.getElementById(
         'searchInput'
       );
-
 
     if (
       e.key === '/' &&
@@ -2885,10 +2525,9 @@ document.addEventListener(
   }
 );
 
-
-/* =========================================================
+/* =========================
    CLIPBOARD
-   ========================================================= */
+========================= */
 
 function copyToClipboard(
   text,
@@ -2896,96 +2535,137 @@ function copyToClipboard(
 ) {
 
   if (
-    !navigator.clipboard ||
-    !navigator.clipboard.writeText
+    navigator.clipboard &&
+    window.isSecureContext
   ) {
 
-    alert(
-      'Clipboard tidak tersedia di browser ini.'
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+
+        showToast(
+          toastMessage
+        );
+
+      })
+      .catch(err => {
+
+        console.error(
+          'Gagal menyalin:',
+          err
+        );
+
+        fallbackCopy(
+          text,
+          toastMessage
+        );
+      });
+
+  } else {
+
+    fallbackCopy(
+      text,
+      toastMessage
     );
-
-    return;
   }
-
-
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-
-      showToast(
-        toastMessage
-      );
-
-    })
-    .catch(err => {
-
-      console.error(
-        'Gagal menyalin:',
-        err
-      );
-
-      alert(
-        'Gagal menyalin ke clipboard.'
-      );
-    });
 }
 
-
-/* =========================================================
-   TOAST
-   ========================================================= */
-
-function showToast(
-  message
+function fallbackCopy(
+  text,
+  toastMessage
 ) {
+
+  const textarea =
+    document.createElement(
+      'textarea'
+    );
+
+  textarea.value =
+    text;
+
+  textarea.style.position =
+    'fixed';
+
+  textarea.style.opacity =
+    '0';
+
+  document.body.appendChild(
+    textarea
+  );
+
+  textarea.select();
+
+  try {
+
+    document.execCommand(
+      'copy'
+    );
+
+    showToast(
+      toastMessage
+    );
+
+  } catch (err) {
+
+    console.error(
+      'Gagal menyalin:',
+      err
+    );
+
+    showToast(
+      'Gagal menyalin ke clipboard.'
+    );
+
+  } finally {
+
+    document.body.removeChild(
+      textarea
+    );
+  }
+}
+
+/* =========================
+   TOAST
+========================= */
+
+function showToast(message) {
 
   const toast =
     document.getElementById(
       'toast'
     );
 
-
   toast.textContent =
     message;
-
 
   toast.classList.add(
     'show'
   );
 
+  setTimeout(() => {
 
-  setTimeout(
-    () => {
+    toast.classList.remove(
+      'show'
+    );
 
-      toast.classList.remove(
-        'show'
-      );
-
-    },
-    3000
-  );
+  }, 3000);
 }
 
-
-/* =========================================================
+/* =========================
    QRIS
-   ========================================================= */
+========================= */
 
-function openQrisModal(
-  src
-) {
+function openQrisModal(src) {
 
   document.getElementById(
     'modalImg'
   ).src = src;
-
 
   document.getElementById(
     'qrisModal'
   ).style.display =
     'flex';
 }
-
 
 function closeQrisModal() {
 
@@ -2995,10 +2675,9 @@ function closeQrisModal() {
     'none';
 }
 
-
-/* =========================================================
-   INIT
-   ========================================================= */
+/* =========================
+   INITIAL LOAD
+========================= */
 
 fetchOnlineDatabase();
 
