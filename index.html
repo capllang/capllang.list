@@ -4,91 +4,89 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Database UID HB & Scammer</title>
-  <!-- Google Fonts: Inter -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      
-      /* Mode Terang (Default) */
-      --outer-bg: #1e293b; 
+
+      --outer-bg: #1e293b;
       --bg-gradient: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
       --card-bg: rgba(255, 255, 255, 0.88);
       --card-border: rgba(255, 255, 255, 0.9);
       --card-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
-      
+
       --text-main: #334155;
       --text-muted: #64748b;
       --text-title: #0f172a;
-      
+
       --tab-bg: #f1f5f9;
       --tab-active-bg: #ffffff;
       --tab-active-text: #4f46e5;
       --tab-active-shadow: 0 4px 12px rgba(79, 70, 229, 0.12);
-      
+
       --input-bg: #ffffff;
       --input-border: #cbd5e1;
       --input-focus: #6366f1;
-      
+
       --item-bg: #ffffff;
       --item-border: #fecdd3;
-      
+
       --date-badge: #64748b;
       --date-badge-bg: #f1f5f9;
 
       --meta-badge: #4338ca;
       --meta-badge-bg: #eef2ff;
       --meta-badge-border: #c7d2fe;
-      
+
       --btn-primary: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
       --btn-add: linear-gradient(135deg, #10b981 0%, #059669 100%);
       --btn-delete: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-      
+
       --donate-bg: rgba(254, 243, 199, 0.6);
       --donate-border: rgba(252, 211, 77, 0.7);
       --scrollbar-thumb: #cbd5e1;
     }
 
     body.dark-mode {
-      /* Mode Gelap */
-      --outer-bg: #e2e8f0; 
+      --outer-bg: #e2e8f0;
       --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
       --card-bg: rgba(17, 24, 39, 0.82);
       --card-border: rgba(255, 255, 255, 0.08);
       --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      
+
       --text-main: #cbd5e1;
       --text-muted: #94a3b8;
       --text-title: #f8fafc;
-      
+
       --tab-bg: rgba(15, 23, 42, 0.6);
       --tab-active-bg: #1e293b;
       --tab-active-text: #818cf8;
       --tab-active-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      
+
       --input-bg: rgba(15, 23, 42, 0.65);
       --input-border: #334155;
       --input-focus: #818cf8;
-      
+
       --item-bg: #1e293b;
       --item-border: #881337;
-      
+
       --date-badge: #cbd5e1;
       --date-badge-bg: rgba(15, 23, 42, 0.5);
 
       --meta-badge: #a5b4fc;
       --meta-badge-bg: rgba(99, 102, 241, 0.18);
       --meta-badge-border: #4338ca;
-      
+
       --btn-primary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
       --btn-add: linear-gradient(135deg, #10b981 0%, #059669 100%);
       --btn-delete: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-      
+
       --donate-bg: rgba(120, 53, 15, 0.2);
       --donate-border: rgba(180, 83, 9, 0.3);
       --scrollbar-thumb: #334155;
@@ -143,6 +141,7 @@
       body {
         padding: 24px;
       }
+
       .container {
         max-width: 540px;
         height: 88dvh;
@@ -182,7 +181,8 @@
       gap: 6px;
     }
 
-    .btn-theme, .btn-header-admin {
+    .btn-theme,
+    .btn-header-admin {
       background: transparent;
       color: var(--text-muted);
       border: 1px solid var(--input-border);
@@ -196,7 +196,8 @@
       white-space: nowrap;
     }
 
-    .btn-theme:hover, .btn-header-admin:hover {
+    .btn-theme:hover,
+    .btn-header-admin:hover {
       background: var(--input-border);
       color: var(--text-title);
     }
@@ -261,11 +262,14 @@
       box-shadow: var(--tab-active-shadow);
     }
 
-    .search-box, .admin-panel {
+    .search-box,
+    .admin-panel {
       flex-shrink: 0;
     }
 
-    .search-box input, .admin-box input, .admin-box select {
+    .search-box input,
+    .admin-box input,
+    .admin-box select {
       width: 100%;
       padding: 10px 14px;
       font-size: 0.825rem;
@@ -300,12 +304,15 @@
       flex-wrap: wrap;
     }
 
-    .admin-inputs input, .admin-inputs select {
+    .admin-inputs input,
+    .admin-inputs select {
       padding: 7px 10px;
       font-size: 0.78rem;
     }
 
-    .search-box input:focus, .admin-box input:focus, .admin-box select:focus {
+    .search-box input:focus,
+    .admin-box input:focus,
+    .admin-box select:focus {
       border-color: var(--input-focus);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
@@ -324,9 +331,19 @@
       gap: 6px;
     }
 
-    .btn-add { background: var(--btn-add); width: 100%; padding: 8px 16px; }
-    .btn-delete { background: var(--btn-delete); padding: 5px 8px; font-size: 0.7rem; border-radius: 6px; }
-    
+    .btn-add {
+      background: var(--btn-add);
+      width: 100%;
+      padding: 8px 16px;
+    }
+
+    .btn-delete {
+      background: var(--btn-delete);
+      padding: 5px 8px;
+      font-size: 0.7rem;
+      border-radius: 6px;
+    }
+
     .btn-load-more {
       background: var(--btn-admin);
       width: 100%;
@@ -350,6 +367,7 @@
     .result-list::-webkit-scrollbar {
       width: 5px;
     }
+
     .result-list::-webkit-scrollbar-thumb {
       background-color: var(--scrollbar-thumb);
       border-radius: 10px;
@@ -421,12 +439,14 @@
       cursor: pointer;
       color: var(--text-muted);
     }
+
     .btn-icon:hover {
       background: var(--input-border);
       color: var(--text-title);
     }
 
-    .empty-msg, .load-more-container {
+    .empty-msg,
+    .load-more-container {
       text-align: center;
       color: var(--text-muted);
       padding: 12px;
@@ -446,27 +466,60 @@
       gap: 12px;
     }
 
-    .donation-title { font-weight: 700; font-size: 0.8rem; color: var(--text-title); }
-    .donation-action { display: flex; align-items: center; gap: 10px; }
-    
-    .qris-img {
-      width: 36px; height: 36px; object-fit: cover;
-      border-radius: 8px; border: 1px solid var(--card-border); cursor: pointer;
+    .donation-title {
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--text-title);
     }
+
+    .donation-action {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qris-img {
+      width: 36px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+    }
+
     .btn-donate-link {
-      background: #f59e0b; color: #ffffff; padding: 6px 12px;
-      font-size: 0.75rem; font-weight: 600; text-decoration: none;
-      border-radius: 10px; white-space: nowrap;
+      background: #f59e0b;
+      color: #ffffff;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 10px;
+      white-space: nowrap;
     }
 
     .qris-modal {
-      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px); justify-content: center; align-items: center; z-index: 1000;
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100dvh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
     }
+
     .qris-modal img {
-      max-width: 85%; max-height: 75%; border-radius: 16px; background: #ffffff;
-      padding: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      max-width: 85%;
+      max-height: 75%;
+      border-radius: 16px;
+      background: #ffffff;
+      padding: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
 
     .admin-modal-content {
@@ -482,706 +535,2474 @@
     }
 
     .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
-      background: rgba(15, 23, 42, 0.95); color: #ffffff; padding: 8px 18px; border-radius: 20px;
-      font-size: 0.75rem; font-weight: 500; opacity: 0;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; z-index: 2000;
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      z-index: 2000;
     }
-    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
   </style>
 </head>
+
 <body>
 
 <div class="container">
+
   <div class="header-area">
-    <h2 onclick="resetToHome()" title="Kembali ke Halaman Utama">🛡️ UID HB & REK SCAMMER</h2>
+    <h2 onclick="resetToHome()" title="Kembali ke Halaman Utama">
+      🛡️ UID HB & REK SCAMMER
+    </h2>
+
     <div class="header-actions">
-      <button id="authBtn" class="btn-header-admin" onclick="toggleAdmin()">🔑 Mode Pemilik</button>
-      <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">Dark</button>
+      <button id="authBtn" class="btn-header-admin" onclick="toggleAdmin()">
+        🔑 Mode Pemilik
+      </button>
+
+      <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">
+        Dark
+      </button>
     </div>
   </div>
-  
+
   <div class="status-bar-container">
-    <div id="statusBar" class="status-bar">Memuat data online...</div>
-    <div id="dataCounter" class="data-counter">0 Data</div>
+    <div id="statusBar" class="status-bar">
+      Memuat data online...
+    </div>
+
+    <div id="dataCounter" class="data-counter">
+      0 Data
+    </div>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">LIST REK SCAMMER</button>
-    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">LIST UID HB</button>
+    <button class="tab-btn active" id="tabRekening" onclick="switchTab('rekening')">
+      LIST REK SCAMMER
+    </button>
+
+    <button class="tab-btn" id="tabGenshin" onclick="switchTab('genshin')">
+      LIST UID HB
+    </button>
   </div>
 
   <div class="admin-panel">
     <div id="addBox" class="admin-box" style="display: none;">
+
       <div class="admin-inputs">
-        <select id="metaSelectInput" style="flex: 1.2;" onchange="handleMetaSelectChange(this)">
+
+        <select id="metaSelectInput"
+                style="flex: 1.2;"
+                onchange="handleMetaSelectChange(this)">
         </select>
-        <input type="text" id="metaCustomInput" style="flex: 1; display: none;" placeholder="Nama Bank/Game Lain...">
-        <input type="text" id="newNumberInput" style="flex: 1.5;" placeholder="Nomor/UID baru..." onkeydown="handleInputKeyDown(event)">
-        <input type="date" id="newDateInput" style="flex: 1;" title="Tanggal Dilaporkan">
+
+        <input type="text"
+               id="metaCustomInput"
+               style="flex: 1; display: none;"
+               placeholder="Nama Bank/Game Lain..."
+               maxlength="40">
+
+        <input type="text"
+               id="newNumberInput"
+               style="flex: 1.5;"
+               placeholder="Nomor/UID baru..."
+               inputmode="numeric"
+               autocomplete="off"
+               maxlength="25"
+               onkeydown="handleInputKeyDown(event)">
+
+        <input type="date"
+               id="newDateInput"
+               style="flex: 1;"
+               title="Tanggal Dilaporkan">
       </div>
-      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">+ Simpan Data</button>
+
+      <button class="btn btn-add" id="btnAdd" onclick="addNumber()">
+        + Simpan Data
+      </button>
     </div>
   </div>
 
   <div class="search-box">
-    <input type="text" id="searchInput" aria-label="Cari Rekening atau UID" placeholder="Tulis nomor rekening di sini...">
+    <input type="text"
+           id="searchInput"
+           aria-label="Cari Rekening atau UID"
+           placeholder="Tulis nomor rekening di sini..."
+           autocomplete="off">
   </div>
 
   <ul class="result-list" id="resultList"></ul>
 
   <div class="donation-section">
     <div class="donation-text">
-      <span class="donation-title">☕ Silahkan Donasi Untuk Dukung Capllang</span>
+      <span class="donation-title">
+        ☕ Silahkan Donasi Untuk Dukung Capllang
+      </span>
     </div>
+
     <div class="donation-action">
-      <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg" alt="Scan QRIS" class="qris-img" onclick="openQrisModal(this.src)" title="Perbesar QRIS">
-      <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">Saweria</a>
+      <img src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg"
+           alt="Scan QRIS"
+           class="qris-img"
+           onclick="openQrisModal(this.src)"
+           title="Perbesar QRIS">
+
+      <a href="https://saweria.co/capllang/"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="btn-donate-link">
+        Saweria
+      </a>
     </div>
   </div>
+
 </div>
 
-<div id="adminModal" class="qris-modal" style="display: none;" onclick="closeAdminModal()">
+<div id="adminModal"
+     class="qris-modal"
+     style="display: none;"
+     onclick="closeAdminModal()">
+
   <div class="admin-modal-content" onclick="event.stopPropagation()">
-    <h3 style="color: var(--text-title); font-size: 0.95rem; margin-bottom: 10px;">🔑 Autentikasi Pemilik</h3>
-    <p style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 12px;">Masukkan password admin untuk mengakses panel kontrol.</p>
-    <input type="password" id="adminPasswordInput" placeholder="Password admin..." style="width: 100%; padding: 10px 14px; font-size: 0.825rem; background: var(--input-bg); color: var(--text-title); border: 1px solid var(--input-border); border-radius: 10px; outline: none; margin-bottom: 12px;" onkeydown="handleAdminModalKeyDown(event)">
+
+    <h3 style="color: var(--text-title); font-size: 0.95rem; margin-bottom: 10px;">
+      🔑 Autentikasi Pemilik
+    </h3>
+
+    <p style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 12px;">
+      Masukkan password admin untuk mengakses panel kontrol.
+    </p>
+
+    <input type="password"
+           id="adminPasswordInput"
+           placeholder="Password admin..."
+           autocomplete="current-password"
+           style="width: 100%; padding: 10px 14px; font-size: 0.825rem; background: var(--input-bg); color: var(--text-title); border: 1px solid var(--input-border); border-radius: 10px; outline: none; margin-bottom: 12px;"
+           onkeydown="handleAdminModalKeyDown(event)">
+
     <div style="display: flex; gap: 8px;">
-      <button class="btn" style="background: var(--input-border); color: var(--text-main); flex: 1;" onclick="closeAdminModal()">Batal</button>
-      <button class="btn btn-add" style="flex: 1;" onclick="submitAdminLogin()">Masuk</button>
+
+      <button class="btn"
+              style="background: var(--input-border); color: var(--text-main); flex: 1;"
+              onclick="closeAdminModal()">
+        Batal
+      </button>
+
+      <button class="btn btn-add"
+              style="flex: 1;"
+              onclick="submitAdminLogin()">
+        Masuk
+      </button>
+
     </div>
   </div>
 </div>
 
-<div id="qrisModal" class="qris-modal" onclick="closeQrisModal()">
-  <img id="modalImg" src="" alt="QRIS Preview" onclick="event.stopPropagation()">
+<div id="qrisModal"
+     class="qris-modal"
+     onclick="closeQrisModal()">
+
+  <img id="modalImg"
+       src=""
+       alt="QRIS Preview"
+       onclick="event.stopPropagation()">
 </div>
 
-<div id="toast" class="toast">Berhasil disalin!</div>
+<div id="toast" class="toast">
+  Berhasil disalin!
+</div>
 
 <script>
+
 const PROXY_URL = "https://jsonbin-proxy.awak-cot-u-sibak.workers.dev";
+
+const CACHE_KEY = 'cached_scammer_db';
+const CACHE_VERSION = 2;
+
 let adminSecretKey = null;
-let database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: [] };
+let database = {
+  rekening: [],
+  genshin: [],
+  lastUpdated: null,
+  infoTambahan: []
+};
+
 let isAdmin = false;
 let activeTab = 'rekening';
 let searchTimeout = null;
 let renderLimit = 50;
 
-const BANK_OPTIONS = ["BCA", "BRI", "Mandiri", "BNI", "BSI", "DANA", "OVO", "GoPay", "ShopeePay", "Seabank", "Jago", "Blu", "Lainnya..."];
-const GAME_OPTIONS = ["Genshin Impact", "Honkai: Star Rail", "Zenless Zone Zero", "Mobile Legends", "Free Fire", "PUBG Mobile", "Roblox", "Valorant", "Lainnya..."];
+/*
+ * Snapshot versi server terakhir yang diketahui client.
+ * Digunakan untuk mendeteksi perubahan database
+ * sebelum admin menyimpan perubahan.
+ */
+let serverSnapshotUpdatedAt = null;
 
-function migrateData(dataArray) {
-  if (!Array.isArray(dataArray)) return [];
-  return dataArray.map(item => {
-    if (item === null || item === undefined) return { nomor: "-", tanggal: "-", meta: "-" };
-    if (typeof item !== 'object') return { nomor: String(item), tanggal: "-", meta: "-" };
-    return {
-      nomor: item.nomor ? String(item.nomor) : "",
-      tanggal: item.tanggal ? String(item.tanggal) : "-",
-      meta: (item.meta || item.bank || item.game) ? String(item.meta || item.bank || item.game) : "-"
-    };
-  });
+const BANK_OPTIONS = [
+  "BCA",
+  "BRI",
+  "Mandiri",
+  "BNI",
+  "BSI",
+  "DANA",
+  "OVO",
+  "GoPay",
+  "ShopeePay",
+  "Seabank",
+  "Jago",
+  "Blu",
+  "Lainnya..."
+];
+
+const GAME_OPTIONS = [
+  "Genshin Impact",
+  "Honkai: Star Rail",
+  "Zenless Zone Zero",
+  "Mobile Legends",
+  "Free Fire",
+  "PUBG Mobile",
+  "Roblox",
+  "Valorant",
+  "Lainnya..."
+];
+
+
+/* =========================================================
+   NORMALISASI
+   ========================================================= */
+
+function normalizeNumber(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  /*
+   * Hanya angka ASCII.
+   * Spasi, titik, strip, dan karakter lain dibuang.
+   */
+  return String(value)
+    .replace(/[^\d]/g, '')
+    .trim();
 }
 
+
+function normalizeMeta(value) {
+  if (value === null || value === undefined) {
+    return "-";
+  }
+
+  const result = String(value)
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  return result || "-";
+}
+
+
+function normalizeDate(value) {
+  if (!value) return "-";
+
+  const str = String(value).trim();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    return "-";
+  }
+
+  const date = new Date(`${str}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return str;
+}
+
+
+function isValidISODate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [year, month, day] = value.split('-').map(Number);
+
+  const date = new Date(year, month - 1, day);
+
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
+
+/* =========================================================
+   MIGRASI + VALIDASI DATABASE
+   ========================================================= */
+
+function migrateData(dataArray) {
+
+  if (!Array.isArray(dataArray)) {
+    return [];
+  }
+
+  return dataArray
+    .map(item => {
+
+      if (item === null || item === undefined) {
+        return {
+          nomor: "-",
+          tanggal: "-",
+          meta: "-"
+        };
+      }
+
+      if (typeof item !== 'object') {
+        return {
+          nomor: normalizeNumber(item),
+          tanggal: "-",
+          meta: "-"
+        };
+      }
+
+      return {
+        nomor: normalizeNumber(item.nomor),
+        tanggal: normalizeDate(item.tanggal),
+        meta: normalizeMeta(
+          item.meta ||
+          item.bank ||
+          item.game ||
+          "-"
+        )
+      };
+
+    })
+    .filter(item => item.nomor !== "");
+}
+
+
+function normalizeDatabase(data) {
+
+  if (!data || typeof data !== 'object') {
+    return null;
+  }
+
+  if (!Array.isArray(data.rekening) ||
+      !Array.isArray(data.genshin)) {
+    return null;
+  }
+
+  return {
+    ...data,
+
+    rekening: migrateData(data.rekening),
+    genshin: migrateData(data.genshin),
+
+    lastUpdated:
+      typeof data.lastUpdated === 'string'
+        ? data.lastUpdated
+        : null,
+
+    infoTambahan:
+      Array.isArray(data.infoTambahan)
+        ? data.infoTambahan
+        : []
+  };
+}
+
+
+function isValidDatabase(data) {
+  return !!normalizeDatabase(data);
+}
+
+
+/* =========================================================
+   CACHE OFFLINE
+   ========================================================= */
+
+function saveLocalCache(data) {
+
+  try {
+
+    const normalized = normalizeDatabase(data);
+
+    if (!normalized) {
+      console.warn("Cache tidak disimpan: struktur database tidak valid.");
+      return false;
+    }
+
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({
+        version: CACHE_VERSION,
+        savedAt: new Date().toISOString(),
+        data: normalized
+      })
+    );
+
+    return true;
+
+  } catch (error) {
+
+    console.warn("Gagal menyimpan cache lokal:", error);
+    return false;
+  }
+}
+
+
+function loadLocalCache() {
+
+  try {
+
+    const raw = localStorage.getItem(CACHE_KEY);
+
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+
+    /*
+     * Mendukung cache lama yang langsung berisi database.
+     */
+    const candidate =
+      parsed &&
+      parsed.data &&
+      typeof parsed.data === 'object'
+        ? parsed.data
+        : parsed;
+
+    const normalized = normalizeDatabase(candidate);
+
+    if (!normalized) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+
+    return normalized;
+
+  } catch (error) {
+
+    console.warn("Cache lokal rusak:", error);
+
+    try {
+      localStorage.removeItem(CACHE_KEY);
+    } catch (_) {}
+
+    return null;
+  }
+}
+
+
+/* =========================================================
+   META SELECT
+   ========================================================= */
+
 function updateMetaSelectOptions() {
+
   const select = document.getElementById('metaSelectInput');
   const customInput = document.getElementById('metaCustomInput');
+
   if (!select) return;
-  
+
   select.innerHTML = '';
-  
+
   const defaultOpt = document.createElement('option');
+
   defaultOpt.value = "";
-  defaultOpt.textContent = activeTab === 'rekening' ? "-- Pilih Bank (Opsional) --" : "-- Pilih Game (Opsional) --";
+  defaultOpt.textContent =
+    activeTab === 'rekening'
+      ? "-- Pilih Bank (Opsional) --"
+      : "-- Pilih Game (Opsional) --";
+
   defaultOpt.selected = true;
+
   select.appendChild(defaultOpt);
 
-  const options = activeTab === 'rekening' ? BANK_OPTIONS : GAME_OPTIONS;
+  const options =
+    activeTab === 'rekening'
+      ? BANK_OPTIONS
+      : GAME_OPTIONS;
+
   options.forEach(opt => {
+
     const el = document.createElement('option');
+
     el.value = opt;
     el.textContent = opt;
+
     select.appendChild(el);
+
   });
-  
+
   customInput.style.display = 'none';
   customInput.value = '';
 }
 
+
 function handleMetaSelectChange(selectEl) {
-  const customInput = document.getElementById('metaCustomInput');
+
+  const customInput =
+    document.getElementById('metaCustomInput');
+
   if (selectEl.value === 'Lainnya...') {
+
     customInput.style.display = 'block';
     customInput.focus();
+
   } else {
+
     customInput.style.display = 'none';
     customInput.value = '';
+
   }
 }
 
+
+/* =========================================================
+   THEME
+   ========================================================= */
+
 function toggleTheme() {
+
   document.body.classList.toggle('dark-mode');
-  const isDark = document.body.classList.contains('dark-mode');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  document.getElementById('themeToggleBtn').textContent = isDark ? 'Light' : 'Dark';
+
+  const isDark =
+    document.body.classList.contains('dark-mode');
+
+  localStorage.setItem(
+    'theme',
+    isDark ? 'dark' : 'light'
+  );
+
+  document.getElementById('themeToggleBtn').textContent =
+    isDark ? 'Light' : 'Dark';
 }
+
 
 if (localStorage.getItem('theme') === 'dark') {
+
   document.body.classList.add('dark-mode');
-  document.getElementById('themeToggleBtn').textContent = 'Light';
+
+  document.getElementById('themeToggleBtn').textContent =
+    'Light';
 }
 
+
+/* =========================================================
+   HOME
+   ========================================================= */
+
 function resetToHome() {
-  window.history.replaceState({}, '', window.location.pathname);
+
+  window.history.replaceState(
+    {},
+    '',
+    window.location.pathname
+  );
+
   document.getElementById('searchInput').value = '';
+
   switchTab('rekening');
-  const resultList = document.getElementById('resultList');
-  if(resultList) resultList.scrollTop = 0;
+
+  const resultList =
+    document.getElementById('resultList');
+
+  if (resultList) {
+    resultList.scrollTop = 0;
+  }
+
   showToast("Kembali ke Halaman Utama");
 }
 
-async function fetchOnlineDatabase() {
-  const status = document.getElementById('statusBar');
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+/* =========================================================
+   FETCH DATABASE
+   ========================================================= */
+
+async function fetchOnlineDatabase(options = {}) {
+
+  const {
+    silent = false,
+    updateUI = true
+  } = options;
+
+  const status =
+    document.getElementById('statusBar');
+
+  const controller =
+    new AbortController();
+
+  const timeoutId =
+    setTimeout(() => controller.abort(), 7000);
 
   try {
-    status.innerText = "⏳ Memperbarui server...";
-    const res = await fetch(PROXY_URL, { signal: controller.signal });
+
+    if (!silent) {
+      status.innerText =
+        "⏳ Memperbarui server...";
+    }
+
+    const res = await fetch(PROXY_URL, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller.signal
+    });
+
     clearTimeout(timeoutId);
 
-    if (!res.ok) throw new Error("Gagal terhubung ke Worker");
-    
-    const data = await res.json();
-    const actualData = data.record ? data.record : data;
+    if (!res.ok) {
+      throw new Error(
+        `HTTP ${res.status}`
+      );
+    }
 
-    if (actualData && Array.isArray(actualData.rekening) && Array.isArray(actualData.genshin)) {
-      database = actualData;
-      database.rekening = migrateData(database.rekening);
-      database.genshin = migrateData(database.genshin);
-      
-      localStorage.setItem('cached_scammer_db', JSON.stringify(database));
-      status.innerText = "🟢 Koneksi aman: Database optimal.";
-    } else {
-      throw new Error("Format struktur data tidak sesuai");
+    const data = await res.json();
+
+    const actualData =
+      data &&
+      data.record
+        ? data.record
+        : data;
+
+    const normalized =
+      normalizeDatabase(actualData);
+
+    if (!normalized) {
+      throw new Error(
+        "Format struktur data tidak sesuai"
+      );
     }
+
+    database = normalized;
+
+    serverSnapshotUpdatedAt =
+      database.lastUpdated || null;
+
+    saveLocalCache(database);
+
+    if (!silent) {
+      status.innerText =
+        "🟢 Koneksi aman: Database optimal.";
+    }
+
+    if (updateUI) {
+      checkUrlParams();
+      updateMetaSelectOptions();
+      filterData();
+    }
+
+    return {
+      success: true,
+      data: database
+    };
+
   } catch (err) {
-    console.warn("Menggunakan cache lokal:", err);
-    const cached = localStorage.getItem('cached_scammer_db');
-    if (cached) {
-      try { 
-        database = JSON.parse(cached); 
-        database.rekening = migrateData(database.rekening || []);
-        database.genshin = migrateData(database.genshin || []);
-      } catch(e) { 
-        database = { rekening: [], genshin: [], lastUpdated: null, infoTambahan: [] }; 
+
+    clearTimeout(timeoutId);
+
+    console.warn(
+      "Gagal mengambil database online:",
+      err
+    );
+
+    if (!silent) {
+
+      const cached =
+        loadLocalCache();
+
+      if (cached) {
+
+        database = cached;
+
+        serverSnapshotUpdatedAt =
+          database.lastUpdated || null;
+
+        status.innerText =
+          "🟡 Mode Offline (Data Lokal)";
+
+      } else {
+
+        database = {
+          rekening: [],
+          genshin: [],
+          lastUpdated: null,
+          infoTambahan: []
+        };
+
+        serverSnapshotUpdatedAt = null;
+
+        status.innerText =
+          "🔴 Offline — Cache tidak tersedia";
       }
+
     }
-    status.innerText = "🔴 Mode Offline (Data Lokal)";
+
+    if (updateUI) {
+
+      checkUrlParams();
+      updateMetaSelectOptions();
+      filterData();
+
+    }
+
+    return {
+      success: false,
+      data: database,
+      error: err
+    };
   }
-  
-  checkUrlParams();
-  updateMetaSelectOptions();
-  filterData();
 }
 
+
+/* =========================================================
+   CEK PERUBAHAN SERVER SEBELUM SAVE
+   ========================================================= */
+
+async function verifyServerVersionBeforeSave() {
+
+  try {
+
+    const controller =
+      new AbortController();
+
+    const timeoutId =
+      setTimeout(() => controller.abort(), 7000);
+
+    const res = await fetch(PROXY_URL, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      throw new Error(
+        `HTTP ${res.status}`
+      );
+    }
+
+    const data = await res.json();
+
+    const actualData =
+      data && data.record
+        ? data.record
+        : data;
+
+    const serverData =
+      normalizeDatabase(actualData);
+
+    if (!serverData) {
+      throw new Error(
+        "Data server tidak valid"
+      );
+    }
+
+    const remoteUpdatedAt =
+      serverData.lastUpdated || null;
+
+    const localSnapshot =
+      serverSnapshotUpdatedAt || null;
+
+    /*
+     * Jika versi server berubah sejak data terakhir
+     * diambil client, jangan menimpa perubahan admin lain.
+     */
+    if (remoteUpdatedAt !== localSnapshot) {
+
+      return {
+        ok: false,
+        conflict: true,
+        serverData
+      };
+    }
+
+    return {
+      ok: true,
+      conflict: false,
+      serverData
+    };
+
+  } catch (error) {
+
+    console.error(
+      "Gagal memeriksa versi server:",
+      error
+    );
+
+    return {
+      ok: false,
+      conflict: false,
+      networkError: true,
+      error
+    };
+  }
+}
+
+
+/* =========================================================
+   SAVE DATABASE
+   ========================================================= */
+
 async function saveOnlineDatabase() {
-  const status = document.getElementById('statusBar');
-  status.innerText = "⏳ Menyimpan data...";
+
+  const status =
+    document.getElementById('statusBar');
+
+  status.innerText =
+    "⏳ Memeriksa perubahan server...";
 
   if (!isAdmin) {
-    alert("Sesi Admin telah berakhir. Silakan login kembali.");
+
+    alert(
+      "Sesi Admin telah berakhir. Silakan login kembali."
+    );
+
     exitAdminMode();
+
     return false;
   }
 
-  database.lastUpdated = new Date().toISOString();
+
+  /*
+   * Sebelum PUT, cek apakah ada perubahan dari admin lain.
+   */
+  const versionCheck =
+    await verifyServerVersionBeforeSave();
+
+
+  if (versionCheck.conflict) {
+
+    database =
+      normalizeDatabase(
+        versionCheck.serverData
+      );
+
+    serverSnapshotUpdatedAt =
+      database.lastUpdated || null;
+
+    saveLocalCache(database);
+
+    filterData();
+
+    status.innerText =
+      "⚠️ Data berubah di server";
+
+    alert(
+      "⚠️ Database berubah di server sejak terakhir dimuat.\n\n" +
+      "Perubahan Anda dibatalkan agar tidak menimpa data admin lain.\n" +
+      "Database terbaru telah dimuat."
+    );
+
+    return false;
+  }
+
+
+  if (versionCheck.networkError) {
+
+    status.innerText =
+      "⚠️ Tidak dapat memverifikasi server";
+
+    alert(
+      "⚠️ Tidak dapat memverifikasi versi database server.\n\n" +
+      "Penyimpanan dibatalkan untuk mencegah konflik data."
+    );
+
+    return false;
+  }
+
+
+  /*
+   * Jangan mengizinkan penyimpanan data invalid.
+   */
+  const normalized =
+    normalizeDatabase(database);
+
+  if (!normalized) {
+
+    status.innerText =
+      "⚠️ Struktur data tidak valid";
+
+    alert(
+      "⚠️ Data tidak valid dan tidak dapat disimpan."
+    );
+
+    return false;
+  }
+
+  database = normalized;
+
+  database.lastUpdated =
+    new Date().toISOString();
+
 
   try {
+
     const res = await fetch(PROXY_URL, {
+
       method: 'PUT',
+
       credentials: 'include',
+
       headers: {
         'Content-Type': 'application/json'
       },
+
       body: JSON.stringify(database)
     });
 
-    if (res.status === 401 || res.status === 403) {
-      alert("🔒 Sesi Admin telah berakhir atau akses ditolak.");
+
+    if (res.status === 401 ||
+        res.status === 403) {
+
+      alert(
+        "🔒 Sesi Admin telah berakhir atau akses ditolak."
+      );
+
       exitAdminMode();
-      status.innerText = "⚠️ Autentikasi Gagal";
+
+      status.innerText =
+        "⚠️ Autentikasi Gagal";
+
       return false;
     }
 
-    if (!res.ok) {
-      throw new Error("Gagal menyimpan data ke server");
+
+    if (res.status === 409) {
+
+      /*
+       * Worker dapat mengembalikan 409 bila versi
+       * server mendeteksi konflik.
+       */
+      alert(
+        "⚠️ Perubahan ditolak karena database telah berubah.\n\n" +
+        "Data terbaru akan dimuat."
+      );
+
+      await fetchOnlineDatabase();
+
+      return false;
     }
 
-    localStorage.setItem(
-      'cached_scammer_db',
-      JSON.stringify(database)
-    );
 
-    status.innerText = "🟢 Tersimpan di server!";
+    if (!res.ok) {
+      throw new Error(
+        `HTTP ${res.status}`
+      );
+    }
+
+
+    /*
+     * Update snapshot setelah berhasil.
+     */
+    serverSnapshotUpdatedAt =
+      database.lastUpdated;
+
+
+    saveLocalCache(database);
+
+
+    status.innerText =
+      "🟢 Tersimpan di server!";
+
     return true;
 
+
   } catch (err) {
-    console.error("Save database error:", err);
-    alert("⚠️ Gagal memperbarui server: masalah jaringan atau server.");
-    status.innerText = "⚠️ Simpan gagal";
+
+    console.error(
+      "Save database error:",
+      err
+    );
+
+    status.innerText =
+      "⚠️ Simpan gagal";
+
+    alert(
+      "⚠️ Gagal memperbarui server: masalah jaringan atau server."
+    );
+
     return false;
   }
 }
 
+
+/* =========================================================
+   ADMIN
+   ========================================================= */
+
 function exitAdminMode() {
+
   isAdmin = false;
   adminSecretKey = null;
-  document.getElementById('authBtn').innerText = "🔑 Mode Pemilik";
-  document.getElementById('addBox').style.display = "none";
+
+  document.getElementById('authBtn').innerText =
+    "🔑 Mode Pemilik";
+
+  document.getElementById('addBox').style.display =
+    "none";
+
   filterData();
 }
 
+
 function toggleAdmin() {
+
   if (!isAdmin) {
-    document.getElementById('adminModal').style.display = 'flex';
-    const pwdInput = document.getElementById('adminPasswordInput');
+
+    document.getElementById('adminModal').style.display =
+      'flex';
+
+    const pwdInput =
+      document.getElementById('adminPasswordInput');
+
     pwdInput.value = '';
     pwdInput.focus();
+
   } else {
+
     exitAdminMode();
-    showToast("Keluar Mode Pemilik");
+
+    showToast(
+      "Keluar Mode Pemilik"
+    );
   }
 }
 
+
 function closeAdminModal() {
-  document.getElementById('adminModal').style.display = 'none';
+
+  document.getElementById('adminModal').style.display =
+    'none';
 }
 
+
 function handleAdminModalKeyDown(e) {
+
   if (e.key === 'Enter') {
     submitAdminLogin();
   }
 }
 
-async function submitAdminLogin() {
-  const inputSecret = document.getElementById('adminPasswordInput').value;
 
-  if (!inputSecret || inputSecret.trim() === "") {
-    alert("⚠️ Password Admin wajib diisi!");
+async function submitAdminLogin() {
+
+  const inputSecret =
+    document.getElementById(
+      'adminPasswordInput'
+    ).value;
+
+
+  if (!inputSecret ||
+      inputSecret.trim() === "") {
+
+    alert(
+      "⚠️ Password Admin wajib diisi!"
+    );
+
     return;
   }
 
-  const cleanSecret = inputSecret.trim();
 
-  const submitBtn = document.querySelector('#adminModal .btn-add');
-  const originalBtnText = submitBtn.innerText;
+  const cleanSecret =
+    inputSecret.trim();
+
+
+  const submitBtn =
+    document.querySelector(
+      '#adminModal .btn-add'
+    );
+
+  const originalBtnText =
+    submitBtn.innerText;
+
 
   submitBtn.disabled = true;
-  submitBtn.innerText = "Verifikasi...";
+  submitBtn.innerText =
+    "Verifikasi...";
+
 
   try {
-    const res = await fetch(`${PROXY_URL}/auth/login`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        password: cleanSecret
-      })
-    });
 
-    if (res.status === 401 || res.status === 403) {
-      alert("❌ Password Admin Salah! Akses ditolak.");
+    const res =
+      await fetch(
+        `${PROXY_URL}/auth/login`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+          body: JSON.stringify({
+            password: cleanSecret
+          })
+        }
+      );
+
+
+    if (res.status === 401 ||
+        res.status === 403) {
+
+      alert(
+        "❌ Password Admin Salah! Akses ditolak."
+      );
+
       return;
     }
 
+
     if (!res.ok) {
-      throw new Error("Gagal login ke server");
+      throw new Error(
+        "Gagal login ke server"
+      );
     }
+
 
     adminSecretKey = null;
     isAdmin = true;
 
-    document.getElementById('authBtn').innerText = "🔓 Keluar Mode";
-    document.getElementById('addBox').style.display = "flex";
-    document.getElementById('newDateInput').valueAsDate = new Date();
+
+    document.getElementById('authBtn').innerText =
+      "🔓 Keluar Mode";
+
+
+    document.getElementById('addBox').style.display =
+      "flex";
+
+
+    document.getElementById('newDateInput')
+      .valueAsDate =
+      new Date();
+
 
     updateMetaSelectOptions();
 
     closeAdminModal();
-    showToast("Mode Pemilik Aktif");
+
+    showToast(
+      "Mode Pemilik Aktif"
+    );
+
     filterData();
+
 
   } catch (err) {
-    console.error("Login error:", err);
-    alert("⚠️ Gagal login: Terjadi kesalahan jaringan atau server.");
+
+    console.error(
+      "Login error:",
+      err
+    );
+
+    alert(
+      "⚠️ Gagal login: Terjadi kesalahan jaringan atau server."
+    );
+
+
   } finally {
+
     submitBtn.disabled = false;
-    submitBtn.innerText = originalBtnText;
+    submitBtn.innerText =
+      originalBtnText;
   }
 }
 
-function handleInputKeyDown(e) {
-  if (e.key === 'Enter') addNumber();
-}
 
-async function addNumber() {
-  const input = document.getElementById('newNumberInput');
-  const dateInput = document.getElementById('newDateInput');
-  const btnAdd = document.getElementById('btnAdd');
-  const selectMeta = document.getElementById('metaSelectInput');
-  const customMetaInput = document.getElementById('metaCustomInput');
-  
-  let selectedMeta = selectMeta.value;
-  const rawVal = input.value.trim();
-  const dateVal = dateInput.value;
+/* =========================================================
+   VALIDASI INPUT
+   ========================================================= */
 
-  if (!rawVal) {
-    alert("⚠️ Masukkan nomor/UID baru!");
-    return;
+function validateNumber(cleanVal) {
+
+  if (!cleanVal) {
+    return false;
   }
 
-  if (!selectedMeta || selectedMeta === "") {
-    selectedMeta = "-";
-  } else if (selectedMeta === 'Lainnya...') {
-    selectedMeta = customMetaInput.value.trim();
-    if (!selectedMeta) {
-      selectedMeta = "-";
-    }
+  if (!/^\d+$/.test(cleanVal)) {
+    return false;
   }
-
-  if (!dateVal) {
-    alert("⚠️ Tanggal wajib diisi jika menambahkan nomor!");
-    return;
-  }
-
-  const cleanVal = rawVal.replace(/\D/g, '');
 
   if (activeTab === 'genshin') {
-    if (!/^\d{5,12}$/.test(cleanVal)) {
-      alert("⚠️ UID Game tidak valid!\nUID harus berupa angka dengan panjang 5 - 12 digit.");
-      return;
-    }
-  } else if (activeTab === 'rekening') {
-    if (!/^\d{5,25}$/.test(cleanVal)) {
-      alert("⚠️ Nomor Rekening/E-Wallet tidak valid!\nHarus berupa angka dengan panjang minimal 5 digit.");
-      return;
-    }
+
+    return /^\d{5,12}$/.test(cleanVal);
+
   }
 
-  const exists = database[activeTab].some(item => {
-    const num = typeof item === 'object' ? item.nomor : item;
-    return String(num) === cleanVal;
-  });
+  if (activeTab === 'rekening') {
 
-  if (exists) {
-    alert("⚠️ Nomor/UID ini sudah ada di dalam database!");
+    return /^\d{5,25}$/.test(cleanVal);
+
+  }
+
+  return false;
+}
+
+
+/* =========================================================
+   ADD DATA
+   ========================================================= */
+
+function handleInputKeyDown(e) {
+
+  if (e.key === 'Enter') {
+    addNumber();
+  }
+}
+
+
+async function addNumber() {
+
+  const input =
+    document.getElementById(
+      'newNumberInput'
+    );
+
+  const dateInput =
+    document.getElementById(
+      'newDateInput'
+    );
+
+  const btnAdd =
+    document.getElementById(
+      'btnAdd'
+    );
+
+  const selectMeta =
+    document.getElementById(
+      'metaSelectInput'
+    );
+
+  const customMetaInput =
+    document.getElementById(
+      'metaCustomInput'
+    );
+
+
+  /*
+   * Normalisasi nomor sebelum validasi.
+   */
+  const rawVal =
+    input.value.trim();
+
+  const cleanVal =
+    normalizeNumber(rawVal);
+
+  const dateVal =
+    dateInput.value;
+
+
+  if (!cleanVal) {
+
+    alert(
+      "⚠️ Masukkan nomor/UID baru!"
+    );
+
     return;
   }
 
+
+  if (!validateNumber(cleanVal)) {
+
+    if (activeTab === 'genshin') {
+
+      alert(
+        "⚠️ UID Game tidak valid!\n" +
+        "UID harus berupa angka dengan panjang 5 - 12 digit."
+      );
+
+    } else {
+
+      alert(
+        "⚠️ Nomor Rekening/E-Wallet tidak valid!\n" +
+        "Harus berupa angka dengan panjang 5 - 25 digit."
+      );
+    }
+
+    return;
+  }
+
+
+  /*
+   * Validasi tanggal yang lebih ketat.
+   */
+  if (!dateVal ||
+      !isValidISODate(dateVal)) {
+
+    alert(
+      "⚠️ Tanggal wajib diisi dengan format yang valid!"
+    );
+
+    return;
+  }
+
+
+  let selectedMeta =
+    selectMeta.value;
+
+
+  if (!selectedMeta ||
+      selectedMeta === "") {
+
+    selectedMeta = "-";
+
+  } else if (
+    selectedMeta === 'Lainnya...'
+  ) {
+
+    selectedMeta =
+      normalizeMeta(
+        customMetaInput.value
+      );
+
+    if (
+      selectedMeta === "-" ||
+      selectedMeta.length > 40
+    ) {
+
+      alert(
+        "⚠️ Nama Bank/Game tidak valid.\n" +
+        "Maksimal 40 karakter."
+      );
+
+      return;
+    }
+
+  } else {
+
+    selectedMeta =
+      normalizeMeta(
+        selectedMeta
+      );
+  }
+
+
+  /*
+   * Pastikan tab memiliki array valid.
+   */
+  if (!Array.isArray(database[activeTab])) {
+
+    database[activeTab] = [];
+  }
+
+
+  /*
+   * Cek duplikasi menggunakan nilai
+   * yang sudah dinormalisasi.
+   */
+  const exists =
+    database[activeTab].some(item => {
+
+      const num =
+        typeof item === 'object'
+          ? item.nomor
+          : item;
+
+      return normalizeNumber(num) === cleanVal;
+    });
+
+
+  if (exists) {
+
+    alert(
+      "⚠️ Nomor/UID ini sudah ada di dalam database!"
+    );
+
+    return;
+  }
+
+
   btnAdd.disabled = true;
-  btnAdd.innerText = "⏳ Menyimpan...";
-  
-  const newItem = { nomor: cleanVal, tanggal: dateVal, meta: selectedMeta };
-  database[activeTab].unshift(newItem);
-  
-  const success = await saveOnlineDatabase();
+
+  btnAdd.innerText =
+    "⏳ Menyimpan...";
+
+
+  const newItem = {
+    nomor: cleanVal,
+    tanggal: dateVal,
+    meta: selectedMeta
+  };
+
+
+  database[activeTab].unshift(
+    newItem
+  );
+
+
+  const success =
+    await saveOnlineDatabase();
+
+
   if (success) {
+
     input.value = "";
     customMetaInput.value = "";
+
     updateMetaSelectOptions();
-    document.getElementById('searchInput').value = "";
+
+    document.getElementById(
+      'searchInput'
+    ).value = "";
+
     renderLimit = 50;
+
     filterData();
-    showToast("Data & info berhasil ditambahkan!");
+
+    showToast(
+      "Data & info berhasil ditambahkan!"
+    );
+
+
   } else {
-    database[activeTab].shift();
+
+    /*
+     * Hanya rollback jika objek baru masih
+     * berada di posisi pertama.
+     */
+    const firstItem =
+      database[activeTab][0];
+
+    if (
+      firstItem &&
+      firstItem.nomor === cleanVal
+    ) {
+
+      database[activeTab].shift();
+    }
   }
-  
+
+
   btnAdd.disabled = false;
-  btnAdd.innerText = "+ Simpan Data";
+
+  btnAdd.innerText =
+    "+ Simpan Data";
 }
 
-async function deleteNumber(itemObj, btnEl) {
-  const nomorStr = typeof itemObj === 'object' ? String(itemObj.nomor) : String(itemObj);
-  
-  if (confirm(`Hapus ${nomorStr} dari database?`)) {
-    const index = database[activeTab].indexOf(itemObj);
+
+/* =========================================================
+   DELETE
+   ========================================================= */
+
+async function deleteNumber(
+  itemObj,
+  btnEl
+) {
+
+  const nomorStr =
+    typeof itemObj === 'object'
+      ? String(itemObj.nomor)
+      : String(itemObj);
+
+
+  if (
+    confirm(
+      `Hapus ${nomorStr} dari database?`
+    )
+  ) {
+
+    const index =
+      database[activeTab]
+        .indexOf(itemObj);
+
+
     if (index > -1) {
-      if (btnEl) btnEl.disabled = true;
-      
-      const originalData = [...database[activeTab]];
-      database[activeTab].splice(index, 1);
-      
-      const success = await saveOnlineDatabase();
+
+      if (btnEl) {
+        btnEl.disabled = true;
+      }
+
+
+      const originalData =
+        [...database[activeTab]];
+
+
+      database[activeTab].splice(
+        index,
+        1
+      );
+
+
+      const success =
+        await saveOnlineDatabase();
+
+
       if (success) {
+
         filterData();
-        showToast("Data dihapus!");
+
+        showToast(
+          "Data dihapus!"
+        );
+
+
       } else {
-        database[activeTab] = originalData;
-        if (btnEl) btnEl.disabled = false;
+
+        /*
+         * Jangan restore jika save gagal
+         * karena konflik telah memuat data server.
+         */
+        if (!database[activeTab].some(
+          item => item === itemObj
+        )) {
+
+          /*
+           * Hanya restore jika data lokal
+           * masih merupakan dataset yang sama.
+           */
+          const currentUpdatedAt =
+            database.lastUpdated;
+
+          if (
+            currentUpdatedAt ===
+            serverSnapshotUpdatedAt
+          ) {
+            database[activeTab] =
+              originalData;
+          }
+        }
+
+        if (btnEl) {
+          btnEl.disabled = false;
+        }
       }
     }
   }
 }
 
-function switchTab(tab) {
-  activeTab = tab;
-  renderLimit = 50;
-  document.getElementById('tabRekening').classList.toggle('active', tab === 'rekening');
-  document.getElementById('tabGenshin').classList.toggle('active', tab === 'genshin');
 
-  const input = document.getElementById('searchInput');
-  input.placeholder = tab === 'rekening' 
-    ? "Tulis nomor rekening di sini..." 
-    : "Tulis UID game di sini...";
+/* =========================================================
+   TAB
+   ========================================================= */
+
+function switchTab(tab) {
+
+  activeTab = tab;
+
+  renderLimit = 50;
+
+  document.getElementById(
+    'tabRekening'
+  ).classList.toggle(
+    'active',
+    tab === 'rekening'
+  );
+
+  document.getElementById(
+    'tabGenshin'
+  ).classList.toggle(
+    'active',
+    tab === 'genshin'
+  );
+
+
+  const input =
+    document.getElementById(
+      'searchInput'
+    );
+
+
+  input.placeholder =
+    tab === 'rekening'
+      ? "Tulis nomor rekening di sini..."
+      : "Tulis UID game di sini...";
+
 
   updateMetaSelectOptions();
+
   filterData();
 }
 
-function checkUrlParams() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const searchQuery = urlParams.get('search') || urlParams.get('q');
-  const tabQuery = urlParams.get('tab');
 
-  if (tabQuery && (tabQuery === 'rekening' || tabQuery === 'genshin')) {
+/* =========================================================
+   URL
+   ========================================================= */
+
+function checkUrlParams() {
+
+  const urlParams =
+    new URLSearchParams(
+      window.location.search
+    );
+
+
+  const searchQuery =
+    urlParams.get('search') ||
+    urlParams.get('q');
+
+
+  const tabQuery =
+    urlParams.get('tab');
+
+
+  if (
+    tabQuery &&
+    (
+      tabQuery === 'rekening' ||
+      tabQuery === 'genshin'
+    )
+  ) {
+
     activeTab = tabQuery;
-    document.getElementById('tabRekening').classList.toggle('active', activeTab === 'rekening');
-    document.getElementById('tabGenshin').classList.toggle('active', activeTab === 'genshin');
+
+    document.getElementById(
+      'tabRekening'
+    ).classList.toggle(
+      'active',
+      activeTab === 'rekening'
+    );
+
+    document.getElementById(
+      'tabGenshin'
+    ).classList.toggle(
+      'active',
+      activeTab === 'genshin'
+    );
   }
+
+
   if (searchQuery) {
-    document.getElementById('searchInput').value = searchQuery;
+
+    document.getElementById(
+      'searchInput'
+    ).value =
+      searchQuery;
   }
 }
+
 
 function updateUrlParam(query) {
-  const url = new URL(window.location.href);
+
+  const url =
+    new URL(
+      window.location.href
+    );
+
+
   if (query) {
-    url.searchParams.set('search', query);
+
+    url.searchParams.set(
+      'search',
+      query
+    );
+
   } else {
-    url.searchParams.delete('search');
+
+    url.searchParams.delete(
+      'search'
+    );
   }
-  window.history.replaceState({}, '', url.toString());
+
+
+  window.history.replaceState(
+    {},
+    '',
+    url.toString()
+  );
 }
 
-document.getElementById('resultList').addEventListener('click', (e) => {
-  const target = e.target;
-  const itemEl = target.closest('.result-item');
-  
-  if (target.classList.contains('btn-load-more')) {
-    renderLimit += 50;
-    filterData();
-    return;
-  }
 
-  if (!itemEl) return;
-  const nomorStr = itemEl.dataset.nomor;
-  const itemObj = database[activeTab].find(i => (typeof i === 'object' ? String(i.nomor) : String(i)) === nomorStr);
+/* =========================================================
+   RESULT LIST
+   ========================================================= */
 
-  if (target.classList.contains('btn-delete')) {
-    e.stopPropagation();
-    deleteNumber(itemObj, target);
-  } else if (target.classList.contains('btn-icon')) {
-    e.stopPropagation();
-    copyReportTemplate(itemObj || nomorStr);
-  } else {
-    copyToClipboard(nomorStr, `Disalin: ${nomorStr}`);
-  }
-});
+document
+  .getElementById('resultList')
+  .addEventListener(
+    'click',
+    (e) => {
 
-function copyReportTemplate(itemObj) {
-  const nomorStr = typeof itemObj === 'object' ? itemObj.nomor : itemObj;
-  const metaStr = typeof itemObj === 'object' ? (itemObj.meta || itemObj.bank || itemObj.game || '-') : '-';
-  const tanggalStr = typeof itemObj === 'object' ? itemObj.tanggal : '-';
+      const target =
+        e.target;
 
-  const template = `🚨 LAPORAN PENIPUAN 🚨\n\nNomor/UID: ${nomorStr}\nPlatform/Bank: ${metaStr}\nTanggal Terdata: ${tanggalStr}\n\nHati-hati terhadap modus penipuan dengan informasi di atas!`;
-  copyToClipboard(template, 'Template laporan disalin!');
+      /*
+       * FIX BUG "MUAT LEBIH BANYAK"
+       */
+      if (
+        target.classList.contains(
+          'btn-load-more'
+        )
+      ) {
+
+        renderLimit += 50;
+
+        filterData();
+
+        /*
+         * Fokus tetap di list.
+         */
+        const resultList =
+          document.getElementById(
+            'resultList'
+          );
+
+        resultList.focus?.();
+
+        return;
+      }
+
+
+      const itemEl =
+        target.closest(
+          '.result-item'
+        );
+
+
+      if (!itemEl) {
+        return;
+      }
+
+
+      const nomorStr =
+        itemEl.dataset.nomor;
+
+
+      const itemObj =
+        database[activeTab].find(
+          i =>
+            (
+              typeof i === 'object'
+                ? normalizeNumber(i.nomor)
+                : normalizeNumber(i)
+            ) === nomorStr
+        );
+
+
+      if (
+        target.classList.contains(
+          'btn-delete'
+        )
+      ) {
+
+        e.stopPropagation();
+
+        deleteNumber(
+          itemObj,
+          target
+        );
+
+      } else if (
+        target.classList.contains(
+          'btn-icon'
+        )
+      ) {
+
+        e.stopPropagation();
+
+        copyReportTemplate(
+          itemObj || nomorStr
+        );
+
+      } else {
+
+        copyToClipboard(
+          nomorStr,
+          `Disalin: ${nomorStr}`
+        );
+      }
+    }
+  );
+
+
+/* =========================================================
+   COPY TEMPLATE
+   ========================================================= */
+
+function copyReportTemplate(
+  itemObj
+) {
+
+  const nomorStr =
+    typeof itemObj === 'object'
+      ? itemObj.nomor
+      : itemObj;
+
+
+  const metaStr =
+    typeof itemObj === 'object'
+      ? (
+          itemObj.meta ||
+          itemObj.bank ||
+          itemObj.game ||
+          '-'
+        )
+      : '-';
+
+
+  const tanggalStr =
+    typeof itemObj === 'object'
+      ? itemObj.tanggal
+      : '-';
+
+
+  const template =
+`🚨 LAPORAN PENIPUAN 🚨
+
+Nomor/UID: ${nomorStr}
+Platform/Bank: ${metaStr}
+Tanggal Terdata: ${tanggalStr}
+
+Hati-hati terhadap modus penipuan dengan informasi di atas!`;
+
+
+  copyToClipboard(
+    template,
+    'Template laporan disalin!'
+  );
 }
+
+
+/* =========================================================
+   FILTER + RENDER
+   ========================================================= */
 
 function filterData() {
+
   try {
-    const rawQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-    const cleanQuery = rawQuery.replace(/[^a-zA-Z0-9]/g, '');
 
-    updateUrlParam(rawQuery);
+    const rawQuery =
+      document.getElementById(
+        'searchInput'
+      ).value
+        .trim()
+        .toLowerCase();
 
-    const resultList = document.getElementById('resultList');
-    const counter = document.getElementById('dataCounter');
-    
-    while (resultList.firstChild) {
-      resultList.removeChild(resultList.firstChild);
+
+    /*
+     * Query nomor juga dinormalisasi agar:
+     * 0812-3456 = 08123456
+     */
+    const cleanQuery =
+      normalizeNumber(rawQuery);
+
+
+    updateUrlParam(
+      rawQuery
+    );
+
+
+    const resultList =
+      document.getElementById(
+        'resultList'
+      );
+
+
+    const counter =
+      document.getElementById(
+        'dataCounter'
+      );
+
+
+    while (
+      resultList.firstChild
+    ) {
+
+      resultList.removeChild(
+        resultList.firstChild
+      );
     }
 
-    const currentData = database[activeTab] || [];
-    
-    const filtered = currentData.filter(item => {
-      if (rawQuery === '') return true;
 
-      const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
-      const tanggalStr = typeof item === 'object' ? String(item.tanggal || '').toLowerCase() : '';
-      const metaStr = typeof item === 'object' ? String(item.meta || item.bank || item.game || '').toLowerCase() : '';
+    const currentData =
+      Array.isArray(
+        database[activeTab]
+      )
+        ? database[activeTab]
+        : [];
 
-      return nomorStr.toLowerCase().includes(rawQuery) || 
-             (cleanQuery !== '' && nomorStr.includes(cleanQuery)) ||
-             tanggalStr.includes(rawQuery) ||
-             metaStr.includes(rawQuery);
-    });
 
-    counter.textContent = `${filtered.length} Data`;
+    const filtered =
+      currentData.filter(
+        item => {
 
-    if (filtered.length === 0) {
-      const emptyLi = document.createElement('li');
-      emptyLi.className = 'empty-msg';
-      emptyLi.textContent = 'Tidak ada data ditemukan.';
-      resultList.appendChild(emptyLi);
+          if (
+            rawQuery === ''
+          ) {
+            return true;
+          }
+
+
+          const nomorStr =
+            typeof item === 'object'
+              ? normalizeNumber(
+                  item.nomor
+                )
+              : normalizeNumber(
+                  item
+                );
+
+
+          const tanggalStr =
+            typeof item === 'object'
+              ? String(
+                  item.tanggal || ''
+                ).toLowerCase()
+              : '';
+
+
+          const metaStr =
+            typeof item === 'object'
+              ? normalizeMeta(
+                  item.meta ||
+                  item.bank ||
+                  item.game ||
+                  ''
+                ).toLowerCase()
+              : '';
+
+
+          return (
+            nomorStr.includes(
+              rawQuery
+            ) ||
+
+            (
+              cleanQuery !== '' &&
+              nomorStr.includes(
+                cleanQuery
+              )
+            ) ||
+
+            tanggalStr.includes(
+              rawQuery
+            ) ||
+
+            metaStr.includes(
+              rawQuery
+            )
+          );
+        }
+      );
+
+
+    counter.textContent =
+      `${filtered.length} Data`;
+
+
+    if (
+      filtered.length === 0
+    ) {
+
+      const emptyLi =
+        document.createElement(
+          'li'
+        );
+
+      emptyLi.className =
+        'empty-msg';
+
+      emptyLi.textContent =
+        'Tidak ada data ditemukan.';
+
+      resultList.appendChild(
+        emptyLi
+      );
+
       return;
     }
 
-    const visibleData = filtered.slice(0, renderLimit);
-    const fragment = document.createDocumentFragment();
 
-    visibleData.forEach(item => {
-      const nomorStr = typeof item === 'object' ? String(item.nomor) : String(item);
-      const tanggalStr = typeof item === 'object' ? String(item.tanggal || '-') : '-';
-      const metaStr = typeof item === 'object' ? String(item.meta || item.bank || item.game || '-') : '-';
+    const visibleData =
+      filtered.slice(
+        0,
+        renderLimit
+      );
 
-      const li = document.createElement('li');
-      li.className = 'result-item';
-      li.dataset.nomor = nomorStr;
-      li.title = "Klik untuk menyalin nomor";
 
-      const numberSpan = document.createElement('span');
-      numberSpan.className = 'number';
-      numberSpan.textContent = nomorStr;
+    const fragment =
+      document.createDocumentFragment();
 
-      const rightContent = document.createElement('div');
-      rightContent.className = 'right-content';
 
-      if (metaStr && metaStr !== '-') {
-        const metaSpan = document.createElement('span');
-        metaSpan.className = 'badge-meta';
-        metaSpan.textContent = metaStr;
-        rightContent.appendChild(metaSpan);
+    visibleData.forEach(
+      item => {
+
+        const nomorStr =
+          typeof item === 'object'
+            ? normalizeNumber(
+                item.nomor
+              )
+            : normalizeNumber(
+                item
+              );
+
+
+        const tanggalStr =
+          typeof item === 'object'
+            ? normalizeDate(
+                item.tanggal
+              )
+            : '-';
+
+
+        const metaStr =
+          typeof item === 'object'
+            ? normalizeMeta(
+                item.meta ||
+                item.bank ||
+                item.game ||
+                '-'
+              )
+            : '-';
+
+
+        const li =
+          document.createElement(
+            'li'
+          );
+
+
+        li.className =
+          'result-item';
+
+        li.dataset.nomor =
+          nomorStr;
+
+        li.title =
+          "Klik untuk menyalin nomor";
+
+
+        const numberSpan =
+          document.createElement(
+            'span'
+          );
+
+
+        numberSpan.className =
+          'number';
+
+        numberSpan.textContent =
+          nomorStr;
+
+
+        const rightContent =
+          document.createElement(
+            'div'
+          );
+
+
+        rightContent.className =
+          'right-content';
+
+
+        if (
+          metaStr &&
+          metaStr !== '-'
+        ) {
+
+          const metaSpan =
+            document.createElement(
+              'span'
+            );
+
+
+          metaSpan.className =
+            'badge-meta';
+
+          metaSpan.textContent =
+            metaStr;
+
+
+          rightContent.appendChild(
+            metaSpan
+          );
+        }
+
+
+        if (
+          tanggalStr !== '-' &&
+          tanggalStr.length > 0
+        ) {
+
+          const dateSpan =
+            document.createElement(
+              'span'
+            );
+
+
+          dateSpan.className =
+            'badge-date';
+
+
+          const dParts =
+            tanggalStr.includes('-')
+              ? tanggalStr.split('-')
+              : [tanggalStr];
+
+
+          const formattedDate =
+            dParts.length === 3
+              ? `${dParts[2]}/${dParts[1]}/${dParts[0]}`
+              : tanggalStr;
+
+
+          dateSpan.textContent =
+            formattedDate;
+
+
+          rightContent.appendChild(
+            dateSpan
+          );
+        }
+
+
+        const copyBtn =
+          document.createElement(
+            'button'
+          );
+
+
+        copyBtn.className =
+          'btn-icon';
+
+        copyBtn.title =
+          'Salin Template Laporan';
+
+        copyBtn.setAttribute(
+          'aria-label',
+          'Salin Template Laporan'
+        );
+
+        copyBtn.textContent =
+          '📢';
+
+
+        rightContent.appendChild(
+          copyBtn
+        );
+
+
+        if (isAdmin) {
+
+          const deleteBtn =
+            document.createElement(
+              'button'
+            );
+
+
+          deleteBtn.className =
+            'btn btn-delete';
+
+          deleteBtn.textContent =
+            'Hapus';
+
+
+          rightContent.appendChild(
+            deleteBtn
+          );
+        }
+
+
+        li.appendChild(
+          numberSpan
+        );
+
+        li.appendChild(
+          rightContent
+        );
+
+
+        fragment.appendChild(
+          li
+        );
       }
+    );
 
-      if (tanggalStr !== '-' && tanggalStr.length > 0) {
-        const dateSpan = document.createElement('span');
-        dateSpan.className = 'badge-date';
 
-        const dParts = tanggalStr.includes('-')
-          ? tanggalStr.split('-')
-          : [tanggalStr];
+    /*
+     * FIX UTAMA:
+     * loadMoreLi sekarang benar-benar dimasukkan
+     * ke fragment/resultList.
+     */
+    if (
+      filtered.length > renderLimit
+    ) {
 
-        const formattedDate = dParts.length === 3
-          ? `${dParts[2]}/${dParts[1]}/${dParts[0]}`
-          : tanggalStr;
+      const loadMoreLi =
+        document.createElement(
+          'li'
+        );
 
-        dateSpan.textContent = formattedDate;
-        rightContent.appendChild(dateSpan);
-      }
 
-      const copyBtn = document.createElement('button');
-      copyBtn.className = 'btn-icon';
-      copyBtn.title = 'Salin Template Laporan';
-      copyBtn.setAttribute('aria-label', 'Salin Template Laporan');
-      copyBtn.textContent = '📢';
+      loadMoreLi.className =
+        'load-more-container';
 
-      rightContent.appendChild(copyBtn);
 
-      if (isAdmin) {
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn btn-delete';
-        deleteBtn.textContent = 'Hapus';
+      const loadMoreBtn =
+        document.createElement(
+          'button'
+        );
 
-        rightContent.appendChild(deleteBtn);
-      }
 
-      li.appendChild(numberSpan);
-      li.appendChild(rightContent);
+      loadMoreBtn.className =
+        'btn btn-load-more';
 
-      fragment.appendChild(li);
-    });
 
-    if (filtered.length > renderLimit) {
-  const loadMoreLi = document.createElement('li');
-  loadMoreLi.className = 'load-more-container';
+      const remaining =
+        filtered.length -
+        renderLimit;
 
-  const loadMoreBtn = document.createElement('button');
-  loadMoreBtn.className = 'btn btn-load-more';
-  loadMoreBtn.type = 'button';
-  loadMoreBtn.textContent = `Muat Lebih Banyak (${filtered.length - renderLimit} tersisa)`;
 
-  loadMoreLi.appendChild(loadMoreBtn);
+      loadMoreBtn.textContent =
+        `Muat Lebih Banyak (${Math.min(
+          50,
+          remaining
+        )})`;
 
-  // BUG FIX:
-  // Masukkan tombol "Muat Lebih Banyak" ke fragment
-  fragment.appendChild(loadMoreLi);
-}
 
-resultList.appendChild(fragment);
+      loadMoreLi.appendChild(
+        loadMoreBtn
+      );
+
+
+      /*
+       * INI bagian yang sebelumnya hilang.
+       */
+      fragment.appendChild(
+        loadMoreLi
+      );
+    }
+
+
+    resultList.appendChild(
+      fragment
+    );
+
 
   } catch (error) {
-    console.error("Terjadi masalah saat merender list:", error);
-    const resultList = document.getElementById('resultList');
-    while (resultList.firstChild) resultList.removeChild(resultList.firstChild);
-    
-    const errLi = document.createElement('li');
-    errLi.className = 'empty-msg';
-    errLi.style.color = '#e11d48';
-    errLi.textContent = 'Terjadi kendala saat membaca data. Coba muat ulang halaman.';
-    resultList.appendChild(errLi);
+
+    console.error(
+      "Terjadi masalah saat merender list:",
+      error
+    );
+
+
+    const resultList =
+      document.getElementById(
+        'resultList'
+      );
+
+
+    while (
+      resultList.firstChild
+    ) {
+
+      resultList.removeChild(
+        resultList.firstChild
+      );
+    }
+
+
+    const errLi =
+      document.createElement(
+        'li'
+      );
+
+
+    errLi.className =
+      'empty-msg';
+
+    errLi.style.color =
+      '#e11d48';
+
+    errLi.textContent =
+      'Terjadi kendala saat membaca data. Coba muat ulang halaman.';
+
+
+    resultList.appendChild(
+      errLi
+    );
   }
 }
 
-document.getElementById('searchInput').addEventListener('input', () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    renderLimit = 50;
-    filterData();
-  }, 300);
-});
 
-document.addEventListener('keydown', (e) => {
-  const searchInput = document.getElementById('searchInput');
-  if (e.key === '/' && document.activeElement !== searchInput && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-    e.preventDefault();
-    searchInput.focus();
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+document
+  .getElementById('searchInput')
+  .addEventListener(
+    'input',
+    () => {
+
+      clearTimeout(
+        searchTimeout
+      );
+
+
+      searchTimeout =
+        setTimeout(
+          () => {
+
+            renderLimit = 50;
+
+            filterData();
+
+          },
+          300
+        );
+    }
+  );
+
+
+/* =========================================================
+   KEYBOARD SEARCH
+   ========================================================= */
+
+document.addEventListener(
+  'keydown',
+  (e) => {
+
+    const searchInput =
+      document.getElementById(
+        'searchInput'
+      );
+
+
+    if (
+      e.key === '/' &&
+      document.activeElement !== searchInput &&
+      document.activeElement.tagName !== 'INPUT' &&
+      document.activeElement.tagName !== 'TEXTAREA'
+    ) {
+
+      e.preventDefault();
+
+      searchInput.focus();
+    }
   }
-});
+);
 
-function copyToClipboard(text, toastMessage = 'Berhasil disalin!') {
-  navigator.clipboard.writeText(text).then(() => {
-    showToast(toastMessage);
-  }).catch(err => {
-    console.error('Gagal menyalin:', err);
-    alert('Gagal menyalin ke clipboard.');
-  });
+
+/* =========================================================
+   CLIPBOARD
+   ========================================================= */
+
+function copyToClipboard(
+  text,
+  toastMessage = 'Berhasil disalin!'
+) {
+
+  if (
+    !navigator.clipboard ||
+    !navigator.clipboard.writeText
+  ) {
+
+    alert(
+      'Clipboard tidak tersedia di browser ini.'
+    );
+
+    return;
+  }
+
+
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
+
+      showToast(
+        toastMessage
+      );
+
+    })
+    .catch(err => {
+
+      console.error(
+        'Gagal menyalin:',
+        err
+      );
+
+      alert(
+        'Gagal menyalin ke clipboard.'
+      );
+    });
 }
 
-function showToast(message) {
-  const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  setTimeout(() => {
-    toast.classList.remove('show');
-  }, 3000);
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+
+function showToast(
+  message
+) {
+
+  const toast =
+    document.getElementById(
+      'toast'
+    );
+
+
+  toast.textContent =
+    message;
+
+
+  toast.classList.add(
+    'show'
+  );
+
+
+  setTimeout(
+    () => {
+
+      toast.classList.remove(
+        'show'
+      );
+
+    },
+    3000
+  );
 }
 
-function openQrisModal(src) {
-  document.getElementById('modalImg').src = src;
-  document.getElementById('qrisModal').style.display = 'flex';
+
+/* =========================================================
+   QRIS
+   ========================================================= */
+
+function openQrisModal(
+  src
+) {
+
+  document.getElementById(
+    'modalImg'
+  ).src = src;
+
+
+  document.getElementById(
+    'qrisModal'
+  ).style.display =
+    'flex';
 }
+
 
 function closeQrisModal() {
-  document.getElementById('qrisModal').style.display = 'none';
+
+  document.getElementById(
+    'qrisModal'
+  ).style.display =
+    'none';
 }
+
+
+/* =========================================================
+   INIT
+   ========================================================= */
 
 fetchOnlineDatabase();
 
 </script>
+
 </body>
 </html>
