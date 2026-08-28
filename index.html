@@ -950,10 +950,28 @@ let activeTab = 'rekening';
 let searchTimeout = null;
 
 const PAGE_SIZE = 50;
-let renderLimit = PAGE_SIZE;
 
 let adminSessionActive = false;
 let isLoading = false;
+let offlineMode = false;
+
+const paginationState = {
+  rekening: {
+    total: 0,
+    query: null,
+    hasMore: false
+  },
+  genshin: {
+    total: 0,
+    query: null,
+    hasMore: false
+  }
+};
+
+const categoryControllers = {
+  rekening: null,
+  genshin: null
+};
 
 const modalPreviousFocus = new Map();
 
@@ -1181,10 +1199,58 @@ function sortRecords(dataArray) {
 }
 
 function cacheDatabase() {
+  const cachedState = {
+    rekening: {
+      total: paginationState.rekening.total,
+      query: paginationState.rekening.query
+    },
+    genshin: {
+      total: paginationState.genshin.total,
+      query: paginationState.genshin.query
+    }
+  };
+
   localStorage.setItem(
     'cached_scammer_db',
-    JSON.stringify(database)
+    JSON.stringify({
+      ...database,
+      paginationState: cachedState
+    })
   );
+}
+
+function getSearchQuery() {
+  return document
+    .getElementById('searchInput')
+    .value
+    .trim();
+}
+
+function restorePaginationState(parsed) {
+  const cachedState =
+    parsed && typeof parsed.paginationState === 'object'
+      ? parsed.paginationState
+      : {};
+
+  for (const category of ['rekening', 'genshin']) {
+    const items = database[category] || [];
+    const saved = cachedState[category] || {};
+    const total = Number(saved.total);
+
+    paginationState[category].total =
+      Number.isSafeInteger(total) && total >= items.length
+        ? total
+        : items.length;
+
+    paginationState[category].query =
+      typeof saved.query === 'string'
+        ? saved.query
+        : '';
+
+    // Cache hanya menyimpan halaman yang pernah dimuat.
+    // Saat offline jangan menawarkan load-more yang membutuhkan server.
+    paginationState[category].hasMore = false;
+  }
 }
 
 /* =========================
@@ -1404,92 +1470,215 @@ function updateUrlParam(query) {
 }
 
 /* =========================
-   FETCH D1 DATABASE
+   SERVER-SIDE PAGINATION
 ========================= */
 
-async function fetchOnlineDatabase() {
+async function fetchCategoryRecords(
+  category,
+  {
+    reset = false,
+    query = getSearchQuery(),
+    silent = false
+  } = {}
+) {
+  if (!['rekening', 'genshin'].includes(category)) {
+    return false;
+  }
 
-  const status =
-    document.getElementById('statusBar');
+  const state = paginationState[category];
+  const cleanQuery = String(query || '').trim();
 
-  const controller =
-    new AbortController();
+  const shouldReset =
+    reset ||
+    state.query !== cleanQuery;
 
-  const timeoutId =
-    setTimeout(
-      () => controller.abort(),
-      7000
+  if (!shouldReset && !state.hasMore) {
+    return true;
+  }
+
+  const offset =
+    shouldReset
+      ? 0
+      : database[category].length;
+
+  if (categoryControllers[category]) {
+    categoryControllers[category].abort();
+  }
+
+  const controller = new AbortController();
+  categoryControllers[category] = controller;
+
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, 7000);
+
+  if (!silent) {
+    setLoading(
+      true,
+      reset ? "Memuat data..." : "Memuat data berikutnya..."
     );
-
-  setLoading(true, "Memperbarui database...");
+  }
 
   try {
+    const params = new URLSearchParams({
+      category,
+      limit: String(PAGE_SIZE),
+      offset: String(offset)
+    });
 
-    status.innerText =
-      "⏳ Memperbarui server...";
+    if (cleanQuery) {
+      params.set('q', cleanQuery);
+    }
 
-    const [rekeningRes, genshinRes] =
-      await Promise.all([
-        fetch(
-          `${PROXY_URL}/records?category=rekening&limit=10000`,
-          {
-            signal: controller.signal,
-            cache: 'no-store'
-          }
-        ),
-        fetch(
-          `${PROXY_URL}/records?category=genshin&limit=10000`,
-          {
-            signal: controller.signal,
-            cache: 'no-store'
-          }
-        )
-      ]);
+    const res = await fetch(
+      `${PROXY_URL}/records?${params.toString()}`,
+      {
+        signal: controller.signal,
+        cache: 'no-store'
+      }
+    );
 
-    if (!rekeningRes.ok || !genshinRes.ok) {
+    if (!res.ok) {
       throw new Error(
-        "Gagal mengambil data dari D1"
+        `Gagal mengambil data (${res.status})`
       );
     }
 
-    const [rekeningData, genshinData] =
-      await Promise.all([
-        rekeningRes.json(),
-        genshinRes.json()
-      ]);
+    const data = await res.json();
 
-    if (
-      !Array.isArray(rekeningData.records) ||
-      !Array.isArray(genshinData.records)
-    ) {
+    if (!Array.isArray(data.records)) {
       throw new Error(
         "Format data D1 tidak sesuai"
       );
     }
 
-    database = {
-      rekening: migrateData(
-        rekeningData.records,
-        'rekening'
-      ),
-      genshin: migrateData(
-        genshinData.records,
-        'genshin'
-      ),
-      lastUpdated: new Date().toISOString(),
-      infoTambahan: []
-    };
+    const incoming = migrateData(
+      data.records,
+      category
+    );
 
-    sortRecords(database.rekening);
-    sortRecords(database.genshin);
+    if (shouldReset) {
+      database[category] = incoming;
+    } else {
+      const existingIds = new Set(
+        database[category]
+          .map(item => Number(item.id))
+          .filter(id => Number.isSafeInteger(id) && id > 0)
+      );
+
+      for (const item of incoming) {
+        const id = Number(item.id);
+
+        if (
+          Number.isSafeInteger(id) &&
+          id > 0 &&
+          existingIds.has(id)
+        ) {
+          continue;
+        }
+
+        database[category].push(item);
+
+        if (Number.isSafeInteger(id) && id > 0) {
+          existingIds.add(id);
+        }
+      }
+    }
+
+    state.total = Number(data.total || 0);
+    state.query = cleanQuery;
+    state.hasMore =
+      database[category].length < state.total;
+
+    offlineMode = false;
+    database.lastUpdated =
+      new Date().toISOString();
 
     cacheDatabase();
 
-    status.innerText =
-      "🟢 Terhubung ke server dengan sempurna.";
+    return true;
 
   } catch (err) {
+    if (
+      err?.name === 'AbortError' &&
+      !timedOut
+    ) {
+      return false;
+    }
 
+    console.warn(
+      `Gagal mengambil ${category}:`,
+      err
+    );
+
+    return false;
+
+  } finally {
+    clearTimeout(timeoutId);
+
+    if (categoryControllers[category] === controller) {
+      categoryControllers[category] = null;
+    }
+
+    if (!silent) {
+      setLoading(false);
+    }
+  }
+}
+
+async function fetchOnlineDatabase() {
+  const status =
+    document.getElementById('statusBar');
+
+  checkUrlParams();
+  updateMetaSelectOptions();
+
+  const initialQuery =
+    getSearchQuery();
+
+  setLoading(
+    true,
+    "Memuat data awal..."
+  );
+
+  try {
+    status.innerText =
+      "⏳ Mengambil data dari D1...";
+
+    const [rekeningOk, genshinOk] =
+      await Promise.all([
+        fetchCategoryRecords(
+          'rekening',
+          {
+            reset: true,
+            query: initialQuery,
+            silent: true
+          }
+        ),
+        fetchCategoryRecords(
+          'genshin',
+          {
+            reset: true,
+            query: initialQuery,
+            silent: true
+          }
+        )
+      ]);
+
+    if (!rekeningOk || !genshinOk) {
+      throw new Error(
+        "Sebagian data gagal dimuat"
+      );
+    }
+
+    offlineMode = false;
+
+    status.innerText =
+      "🟢 Terhubung ke D1 — data dimuat bertahap.";
+
+  } catch (err) {
     console.warn(
       "Menggunakan cache lokal:",
       err
@@ -1501,9 +1690,7 @@ async function fetchOnlineDatabase() {
       );
 
     if (cached) {
-
       try {
-
         const parsed =
           JSON.parse(cached);
 
@@ -1522,14 +1709,13 @@ async function fetchOnlineDatabase() {
             parsed.infoTambahan || []
         };
 
-        sortRecords(database.rekening);
-        sortRecords(database.genshin);
+        restorePaginationState(parsed);
+        offlineMode = true;
 
         status.innerText =
-          "🟡 Mode Offline: Data cache digunakan.";
+          "🟡 Mode Offline: cache parsial digunakan.";
 
       } catch (e) {
-
         database = {
           rekening: [],
           genshin: [],
@@ -1537,25 +1723,90 @@ async function fetchOnlineDatabase() {
           infoTambahan: []
         };
 
+        paginationState.rekening = {
+          total: 0,
+          query: '',
+          hasMore: false
+        };
+
+        paginationState.genshin = {
+          total: 0,
+          query: '',
+          hasMore: false
+        };
+
+        offlineMode = true;
+
         status.innerText =
           "🔴 Mode Offline: Cache tidak tersedia.";
       }
 
     } else {
+      offlineMode = true;
 
       status.innerText =
         "🔴 Mode Offline: Tidak ada cache.";
     }
 
   } finally {
-
-    clearTimeout(timeoutId);
     setLoading(false);
   }
 
-  checkUrlParams();
-  updateMetaSelectOptions();
   filterData();
+}
+
+async function loadMoreRecords() {
+  if (offlineMode) {
+    showToast(
+      "Mode offline: data tambahan membutuhkan koneksi."
+    );
+    return;
+  }
+
+  const ok = await fetchCategoryRecords(
+    activeTab,
+    {
+      reset: false,
+      query: getSearchQuery()
+    }
+  );
+
+  if (ok) {
+    filterData();
+  } else {
+    showToast(
+      "⚠️ Gagal memuat data berikutnya."
+    );
+  }
+}
+
+async function runServerSearch() {
+  const query =
+    getSearchQuery();
+
+  updateUrlParam(query);
+
+  if (offlineMode) {
+    // Saat offline, pencarian hanya pada cache yang tersedia.
+    filterData();
+    return;
+  }
+
+  const ok = await fetchCategoryRecords(
+    activeTab,
+    {
+      reset: true,
+      query
+    }
+  );
+
+  if (ok) {
+    filterData();
+  } else {
+    showToast(
+      "⚠️ Pencarian gagal. Coba lagi."
+    );
+  }
 }
 
 /* =========================
@@ -1934,19 +2185,6 @@ async function addNumber() {
     }
   }
 
-  const exists =
-    database[activeTab].some(item =>
-      String(item.nomor) === cleanVal
-    );
-
-  if (exists) {
-
-    showToast(
-      "⚠️ Nomor/UID sudah ada!"
-    );
-
-    return;
-  }
 
   btnAdd.disabled = true;
   btnAdd.innerText =
@@ -2021,19 +2259,6 @@ async function addNumber() {
       );
     }
 
-    database[activeTab].push(
-      newItem
-    );
-
-    sortRecords(
-      database[activeTab]
-    );
-
-    database.lastUpdated =
-      new Date().toISOString();
-
-    cacheDatabase();
-
     input.value = "";
     customMetaInput.value = "";
 
@@ -2043,7 +2268,43 @@ async function addNumber() {
       'searchInput'
     ).value = "";
 
-    renderLimit = PAGE_SIZE;
+    updateUrlParam("");
+
+    const refreshed =
+      await fetchCategoryRecords(
+        activeTab,
+        {
+          reset: true,
+          query: "",
+          silent: true
+        }
+      );
+
+    if (!refreshed) {
+      database[activeTab].unshift(
+        newItem
+      );
+
+      sortRecords(
+        database[activeTab]
+      );
+
+      const state =
+        paginationState[activeTab];
+
+      state.query = "";
+      state.total =
+        Math.max(
+          state.total + 1,
+          database[activeTab].length
+        );
+
+      state.hasMore =
+        database[activeTab].length <
+        state.total;
+
+      cacheDatabase();
+    }
 
     filterData();
 
@@ -2230,15 +2491,42 @@ async function deleteNumber(
       );
     }
 
-    database[activeTab] =
-      database[activeTab].filter(
-        item => Number(item.id) !== Number(itemObj.id)
+    const currentQuery =
+      getSearchQuery();
+
+    const refreshed =
+      await fetchCategoryRecords(
+        activeTab,
+        {
+          reset: true,
+          query: currentQuery,
+          silent: true
+        }
       );
 
-    database.lastUpdated =
-      new Date().toISOString();
+    if (!refreshed) {
+      database[activeTab] =
+        database[activeTab].filter(
+          item =>
+            Number(item.id) !==
+            Number(itemObj.id)
+        );
 
-    cacheDatabase();
+      const state =
+        paginationState[activeTab];
+
+      state.total =
+        Math.max(
+          0,
+          state.total - 1
+        );
+
+      state.hasMore =
+        database[activeTab].length <
+        state.total;
+
+      cacheDatabase();
+    }
 
     filterData();
 
@@ -2278,12 +2566,8 @@ async function deleteNumber(
    TABS
 ========================= */
 
-function switchTab(tab) {
-
+async function switchTab(tab) {
   activeTab = tab;
-
-  renderLimit =
-    PAGE_SIZE;
 
   document
     .getElementById('tabRekening')
@@ -2333,6 +2617,31 @@ function switchTab(tab) {
 
   updateMetaSelectOptions();
 
+  const query =
+    getSearchQuery();
+
+  const state =
+    paginationState[tab];
+
+  if (
+    !offlineMode &&
+    state.query !== query
+  ) {
+    const ok = await fetchCategoryRecords(
+      tab,
+      {
+        reset: true,
+        query
+      }
+    );
+
+    if (!ok) {
+      showToast(
+        "⚠️ Gagal memuat tab."
+      );
+    }
+  }
+
   filterData();
 }
 
@@ -2376,9 +2685,7 @@ document
         target.textContent =
           "Memuat...";
 
-        renderLimit += PAGE_SIZE;
-
-        filterData();
+        await loadMoreRecords();
 
         return;
       }
@@ -2518,28 +2825,15 @@ Hati-hati terhadap modus penipuan dengan informasi di atas!`;
 ========================= */
 
 function filterData() {
-
   try {
-
     const rawQuery =
-      document
-        .getElementById('searchInput')
-        .value
-        .trim()
+      getSearchQuery()
         .toLowerCase();
 
     const cleanQuery =
       normalizeSearchValue(
         rawQuery
       );
-
-    /*
-     * URL hanya diperbarui jika
-     * query benar-benar berubah.
-     */
-    updateUrlParam(
-      rawQuery
-    );
 
     const resultList =
       document.getElementById(
@@ -2562,74 +2856,73 @@ function filterData() {
     const currentData =
       database[activeTab] || [];
 
-    /*
-     * Untuk pencarian besar:
-     * normalisasi query dilakukan
-     * satu kali.
-     */
-    const filtered =
-      currentData.filter(item => {
+    const state =
+      paginationState[activeTab];
 
-        if (rawQuery === '') {
-          return true;
-        }
+    let visibleData =
+      currentData;
 
-        const nomorStr =
-          typeof item === 'object'
-            ? String(item.nomor || '')
-            : String(item);
+    // Hanya dipakai saat offline karena server tidak tersedia.
+    if (offlineMode && rawQuery) {
+      visibleData =
+        currentData.filter(item => {
+          const nomorStr =
+            String(item?.nomor || '');
 
-        const tanggalStr =
-          typeof item === 'object'
-            ? String(
-                item.tanggal || ''
-              ).toLowerCase()
-            : '';
+          const tanggalStr =
+            String(
+              item?.tanggal || ''
+            ).toLowerCase();
 
-        const metaStr =
-          typeof item === 'object'
-            ? String(
-                item.meta ||
-                item.bank ||
-                item.game ||
-                ''
-              ).toLowerCase()
-            : '';
+          const metaStr =
+            String(
+              item?.meta ||
+              item?.bank ||
+              item?.game ||
+              ''
+            ).toLowerCase();
 
-        const nomorLower =
-          nomorStr.toLowerCase();
+          const nomorNormalized =
+            normalizeSearchValue(
+              nomorStr
+            );
 
-        const nomorNormalized =
-          normalizeSearchValue(
+          return (
             nomorStr
-          );
-
-        return (
-          nomorLower.includes(
-            rawQuery
-          ) ||
-          (
-            cleanQuery !== '' &&
-            nomorNormalized.includes(
-              cleanQuery
+              .toLowerCase()
+              .includes(rawQuery) ||
+            (
+              cleanQuery &&
+              nomorNormalized.includes(
+                cleanQuery
+              )
+            ) ||
+            tanggalStr.includes(
+              rawQuery
+            ) ||
+            metaStr.includes(
+              rawQuery
             )
-          ) ||
-          tanggalStr.includes(
-            rawQuery
-          ) ||
-          metaStr.includes(
-            rawQuery
-          )
-        );
-      });
+          );
+        });
+    }
 
-    counter.textContent =
-      `${filtered.length} Data`;
+    if (offlineMode) {
+      const cachedTotal =
+        Number(state.total || 0);
+
+      counter.textContent =
+        cachedTotal > visibleData.length
+          ? `${visibleData.length}/${cachedTotal} Cache`
+          : `${visibleData.length} Data`;
+    } else {
+      counter.textContent =
+        `${state.total} Data`;
+    }
 
     if (
-      filtered.length === 0
+      visibleData.length === 0
     ) {
-
       const emptyLi =
         document.createElement(
           'li'
@@ -2648,17 +2941,10 @@ function filterData() {
       return;
     }
 
-    const visibleData =
-      filtered.slice(
-        0,
-        renderLimit
-      );
-
     const fragment =
       document.createDocumentFragment();
 
     visibleData.forEach(item => {
-
       const nomorStr =
         typeof item === 'object'
           ? String(item.nomor)
@@ -2693,7 +2979,8 @@ function filterData() {
         nomorStr;
 
       if (item && item.id) {
-        li.dataset.id = String(item.id);
+        li.dataset.id =
+          String(item.id);
       }
 
       li.title =
@@ -2734,7 +3021,6 @@ function filterData() {
         metaStr &&
         metaStr !== '-'
       ) {
-
         const metaSpan =
           document.createElement(
             'span'
@@ -2755,7 +3041,6 @@ function filterData() {
         tanggalStr !== '-' &&
         tanggalStr.length > 0
       ) {
-
         const dateSpan =
           document.createElement(
             'span'
@@ -2806,7 +3091,6 @@ function filterData() {
       );
 
       if (isAdmin) {
-
         const deleteBtn =
           document.createElement(
             'button'
@@ -2841,18 +3125,10 @@ function filterData() {
       );
     });
 
-    /*
-     * FIX BUG "MUAT LEBIH BANYAK":
-     *
-     * Sebelumnya loadMoreLi dibuat tetapi
-     * tidak pernah dimasukkan ke DOM.
-     *
-     * Sekarang benar-benar di-append ke fragment.
-     */
     if (
-      filtered.length > renderLimit
+      !offlineMode &&
+      state.hasMore
     ) {
-
       const loadMoreLi =
         document.createElement(
           'li'
@@ -2869,19 +3145,31 @@ function filterData() {
       loadMoreBtn.className =
         'btn btn-load-more';
 
+      const remaining =
+        Math.max(
+          0,
+          state.total -
+          currentData.length
+        );
+
       loadMoreBtn.textContent =
         `Muat Lebih Banyak (${Math.min(
           PAGE_SIZE,
-          filtered.length - renderLimit
+          remaining
         )})`;
+
+      loadMoreBtn.setAttribute(
+        'aria-label',
+        `Muat ${Math.min(
+          PAGE_SIZE,
+          remaining
+        )} data berikutnya`
+      );
 
       loadMoreLi.appendChild(
         loadMoreBtn
       );
 
-      /*
-       * INI PERBAIKAN UTAMANYA.
-       */
       fragment.appendChild(
         loadMoreLi
       );
@@ -2892,7 +3180,6 @@ function filterData() {
     );
 
   } catch (error) {
-
     console.error(
       "Terjadi masalah saat merender list:",
       error
@@ -2940,20 +3227,14 @@ document
   .addEventListener(
     'input',
     () => {
-
       clearTimeout(
         searchTimeout
       );
 
       searchTimeout =
         setTimeout(() => {
-
-          renderLimit =
-            PAGE_SIZE;
-
-          filterData();
-
-        }, 250);
+          runServerSearch();
+        }, 300);
     }
   );
 
