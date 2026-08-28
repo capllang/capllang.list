@@ -935,39 +935,85 @@ function setLoading(state, text = "Memuat...") {
 }
 
 /* =========================
-   DATA MIGRATION
+   DATA NORMALIZATION
 ========================= */
 
-function migrateData(dataArray) {
+function migrateData(dataArray, fallbackCategory = "") {
   if (!Array.isArray(dataArray)) return [];
 
-  return dataArray.map(item => {
+  return dataArray
+    .map(item => {
 
-    if (item === null || item === undefined) {
+      if (item === null || item === undefined) {
+        return null;
+      }
+
+      if (typeof item !== 'object') {
+        return {
+          id: null,
+          category: fallbackCategory,
+          nomor: String(item),
+          tanggal: "-",
+          meta: "-"
+        };
+      }
+
+      const rawId =
+        item.id === null || item.id === undefined
+          ? null
+          : Number(item.id);
+
       return {
-        nomor: "-",
-        tanggal: "-",
-        meta: "-"
+        id:
+          Number.isSafeInteger(rawId) && rawId > 0
+            ? rawId
+            : null,
+        category:
+          item.category
+            ? String(item.category)
+            : fallbackCategory,
+        nomor:
+          item.nomor === null || item.nomor === undefined
+            ? ""
+            : String(item.nomor),
+        tanggal:
+          item.tanggal
+            ? String(item.tanggal)
+            : "-",
+        meta:
+          (item.meta || item.bank || item.game)
+            ? String(item.meta || item.bank || item.game)
+            : "-"
       };
+    })
+    .filter(item => item && item.nomor);
+}
+
+function sortRecords(dataArray) {
+  dataArray.sort((a, b) => {
+    const aDate =
+      a.tanggal && a.tanggal !== '-'
+        ? String(a.tanggal)
+        : '';
+
+    const bDate =
+      b.tanggal && b.tanggal !== '-'
+        ? String(b.tanggal)
+        : '';
+
+    if (aDate !== bDate) {
+      return bDate.localeCompare(aDate);
     }
 
-    if (typeof item !== 'object') {
-      return {
-        nomor: String(item),
-        tanggal: "-",
-        meta: "-"
-      };
-    }
-
-    return {
-      nomor: item.nomor ? String(item.nomor) : "",
-      tanggal: item.tanggal ? String(item.tanggal) : "-",
-      meta:
-        (item.meta || item.bank || item.game)
-          ? String(item.meta || item.bank || item.game)
-          : "-"
-    };
+    return Number(b.id || 0) - Number(a.id || 0);
   });
+}
+
+function cacheDatabase() {
+  localStorage.setItem(
+    'cached_scammer_db',
+    JSON.stringify(database)
+  );
 }
 
 /* =========================
@@ -1161,7 +1207,7 @@ function updateUrlParam(query) {
 }
 
 /* =========================
-   FETCH DATABASE
+   FETCH D1 DATABASE
 ========================= */
 
 async function fetchOnlineDatabase() {
@@ -1175,7 +1221,7 @@ async function fetchOnlineDatabase() {
   const timeoutId =
     setTimeout(
       () => controller.abort(),
-      5000
+      7000
     );
 
   setLoading(true, "Memperbarui database...");
@@ -1185,54 +1231,65 @@ async function fetchOnlineDatabase() {
     status.innerText =
       "⏳ Memperbarui server...";
 
-    const res =
-      await fetch(PROXY_URL, {
-        signal: controller.signal,
-        cache: 'no-store'
-      });
+    const [rekeningRes, genshinRes] =
+      await Promise.all([
+        fetch(
+          `${PROXY_URL}/records?category=rekening&limit=10000`,
+          {
+            signal: controller.signal,
+            cache: 'no-store'
+          }
+        ),
+        fetch(
+          `${PROXY_URL}/records?category=genshin&limit=10000`,
+          {
+            signal: controller.signal,
+            cache: 'no-store'
+          }
+        )
+      ]);
 
-    clearTimeout(timeoutId);
-
-    if (!res.ok) {
+    if (!rekeningRes.ok || !genshinRes.ok) {
       throw new Error(
-        "Gagal terhubung ke Worker"
+        "Gagal mengambil data dari D1"
       );
     }
 
-    const data =
-      await res.json();
-
-    const actualData =
-      data.record ? data.record : data;
+    const [rekeningData, genshinData] =
+      await Promise.all([
+        rekeningRes.json(),
+        genshinRes.json()
+      ]);
 
     if (
-      actualData &&
-      Array.isArray(actualData.rekening) &&
-      Array.isArray(actualData.genshin)
+      !Array.isArray(rekeningData.records) ||
+      !Array.isArray(genshinData.records)
     ) {
-
-      database = actualData;
-
-      database.rekening =
-        migrateData(database.rekening);
-
-      database.genshin =
-        migrateData(database.genshin);
-
-      localStorage.setItem(
-        'cached_scammer_db',
-        JSON.stringify(database)
-      );
-
-      status.innerText =
-        "🟢 Terhubung ke server dengan sempurna.";
-
-    } else {
-
       throw new Error(
-        "Format struktur data tidak sesuai"
+        "Format data D1 tidak sesuai"
       );
     }
+
+    database = {
+      rekening: migrateData(
+        rekeningData.records,
+        'rekening'
+      ),
+      genshin: migrateData(
+        genshinData.records,
+        'genshin'
+      ),
+      lastUpdated: new Date().toISOString(),
+      infoTambahan: []
+    };
+
+    sortRecords(database.rekening);
+    sortRecords(database.genshin);
+
+    cacheDatabase();
+
+    status.innerText =
+      "🟢 Terhubung ke server dengan sempurna.";
 
   } catch (err) {
 
@@ -1250,18 +1307,26 @@ async function fetchOnlineDatabase() {
 
       try {
 
-        database =
+        const parsed =
           JSON.parse(cached);
 
-        database.rekening =
-          migrateData(
-            database.rekening || []
-          );
+        database = {
+          rekening: migrateData(
+            parsed.rekening || [],
+            'rekening'
+          ),
+          genshin: migrateData(
+            parsed.genshin || [],
+            'genshin'
+          ),
+          lastUpdated:
+            parsed.lastUpdated || null,
+          infoTambahan:
+            parsed.infoTambahan || []
+        };
 
-        database.genshin =
-          migrateData(
-            database.genshin || []
-          );
+        sortRecords(database.rekening);
+        sortRecords(database.genshin);
 
         status.innerText =
           "🟡 Mode Offline: Data cache digunakan.";
@@ -1297,113 +1362,6 @@ async function fetchOnlineDatabase() {
 }
 
 /* =========================
-   SAVE DATABASE
-========================= */
-
-async function saveOnlineDatabase() {
-
-  const status =
-    document.getElementById('statusBar');
-
-  status.innerText =
-    "⏳ Menyimpan data...";
-
-  if (!isAdmin || !adminSessionActive) {
-
-    await showConfirm({
-      title: "Sesi Admin Berakhir",
-      message:
-        "Sesi admin tidak lagi aktif. Silakan login kembali.",
-      confirmText: "OK",
-      danger: false
-    });
-
-    exitAdminMode();
-
-    return false;
-  }
-
-  database.lastUpdated =
-    new Date().toISOString();
-
-  setLoading(true, "Menyimpan data...");
-
-  try {
-
-    const res =
-      await fetch(PROXY_URL, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(database)
-      });
-
-    if (
-      res.status === 401 ||
-      res.status === 403
-    ) {
-
-      await showConfirm({
-        title: "Akses Ditolak",
-        message:
-          "Sesi Admin telah berakhir atau akses ditolak oleh server.",
-        confirmText: "OK",
-        danger: false
-      });
-
-      exitAdminMode();
-
-      status.innerText =
-        "⚠️ Autentikasi Gagal";
-
-      return false;
-    }
-
-    if (!res.ok) {
-      throw new Error(
-        "Gagal menyimpan data ke server"
-      );
-    }
-
-    localStorage.setItem(
-      'cached_scammer_db',
-      JSON.stringify(database)
-    );
-
-    status.innerText =
-      "🟢 Tersimpan di server!";
-
-    return true;
-
-  } catch (err) {
-
-    console.error(
-      "Save database error:",
-      err
-    );
-
-    await showConfirm({
-      title: "Penyimpanan Gagal",
-      message:
-        "Data gagal diperbarui ke server karena masalah jaringan atau server.",
-      confirmText: "OK",
-      danger: false
-    });
-
-    status.innerText =
-      "⚠️ Simpan gagal";
-
-    return false;
-
-  } finally {
-
-    setLoading(false);
-  }
-}
-
-/* =========================
    ADMIN
 ========================= */
 
@@ -1421,7 +1379,7 @@ function exitAdminMode() {
   filterData();
 }
 
-function toggleAdmin() {
+async function toggleAdmin() {
 
   if (!isAdmin) {
 
@@ -1438,10 +1396,65 @@ function toggleAdmin() {
 
   } else {
 
+    try {
+      await fetch(
+        `${PROXY_URL}/auth/logout`,
+        {
+          method: 'POST',
+          credentials: 'include'
+        }
+      );
+    } catch (err) {
+      console.warn(
+        'Logout server gagal:',
+        err
+      );
+    }
+
     exitAdminMode();
 
     showToast(
       "Keluar Mode Pemilik"
+    );
+  }
+}
+
+async function restoreAdminSession() {
+
+  try {
+    const res = await fetch(
+      `${PROXY_URL}/auth/me`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store'
+      }
+    );
+
+    if (!res.ok) return;
+
+    const data = await res.json();
+
+    if (!data.authenticated) return;
+
+    isAdmin = true;
+    adminSessionActive = true;
+
+    document.getElementById('authBtn').innerText =
+      "🔓 Keluar Mode";
+
+    document.getElementById('addBox').style.display =
+      "flex";
+
+    document.getElementById('newDateInput')
+      .valueAsDate = new Date();
+
+    updateMetaSelectOptions();
+
+  } catch (err) {
+    console.warn(
+      'Tidak dapat memulihkan sesi admin:',
+      err
     );
   }
 }
@@ -1623,6 +1636,19 @@ async function addNumber() {
       'metaCustomInput'
     );
 
+  if (!isAdmin || !adminSessionActive) {
+    await showConfirm({
+      title: "Sesi Admin Berakhir",
+      message:
+        "Sesi admin tidak lagi aktif. Silakan login kembali.",
+      confirmText: "OK",
+      danger: false
+    });
+
+    exitAdminMode();
+    return;
+  }
+
   let selectedMeta =
     selectMeta.value;
 
@@ -1669,10 +1695,6 @@ async function addNumber() {
     return;
   }
 
-  /*
-   * Normalisasi input:
-   * hanya angka yang disimpan.
-   */
   const cleanVal =
     rawVal.replace(/\D/g, '');
 
@@ -1702,15 +1724,9 @@ async function addNumber() {
   }
 
   const exists =
-    database[activeTab].some(item => {
-
-      const num =
-        typeof item === 'object'
-          ? item.nomor
-          : item;
-
-      return String(num) === cleanVal;
-    });
+    database[activeTab].some(item =>
+      String(item.nomor) === cleanVal
+    );
 
   if (exists) {
 
@@ -1725,20 +1741,87 @@ async function addNumber() {
   btnAdd.innerText =
     "⏳ Menyimpan...";
 
-  const newItem = {
-    nomor: cleanVal,
-    tanggal: dateVal,
-    meta: selectedMeta
-  };
+  setLoading(true, "Menyimpan data...");
 
-  database[activeTab].unshift(
-    newItem
-  );
+  try {
 
-  const success =
-    await saveOnlineDatabase();
+    const res = await fetch(
+      `${PROXY_URL}/records`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          category: activeTab,
+          nomor: cleanVal,
+          tanggal: dateVal,
+          meta: selectedMeta
+        })
+      }
+    );
 
-  if (success) {
+    let responseData = {};
+
+    try {
+      responseData = await res.json();
+    } catch (_) {}
+
+    if (
+      res.status === 401 ||
+      res.status === 403
+    ) {
+      await showConfirm({
+        title: "Akses Ditolak",
+        message:
+          "Sesi Admin telah berakhir atau akses ditolak oleh server.",
+        confirmText: "OK",
+        danger: false
+      });
+
+      exitAdminMode();
+      return;
+    }
+
+    if (res.status === 409) {
+      showToast(
+        "⚠️ Nomor/UID sudah ada!"
+      );
+      return;
+    }
+
+    if (!res.ok || !responseData.record) {
+      throw new Error(
+        responseData.error ||
+        "Gagal menambahkan data"
+      );
+    }
+
+    const newItem =
+      migrateData(
+        [responseData.record],
+        activeTab
+      )[0];
+
+    if (!newItem) {
+      throw new Error(
+        "Respons record tidak valid"
+      );
+    }
+
+    database[activeTab].push(
+      newItem
+    );
+
+    sortRecords(
+      database[activeTab]
+    );
+
+    database.lastUpdated =
+      new Date().toISOString();
+
+    cacheDatabase();
 
     input.value = "";
     customMetaInput.value = "";
@@ -1753,18 +1836,39 @@ async function addNumber() {
 
     filterData();
 
+    document.getElementById('statusBar').innerText =
+      "🟢 Tersimpan di D1!";
+
     showToast(
-      "Data & info berhasil ditambahkan!"
+      "Data berhasil ditambahkan!"
     );
 
-  } else {
+  } catch (err) {
 
-    database[activeTab].shift();
+    console.error(
+      "Add record error:",
+      err
+    );
+
+    await showConfirm({
+      title: "Penyimpanan Gagal",
+      message:
+        "Data gagal ditambahkan karena masalah jaringan atau server.",
+      confirmText: "OK",
+      danger: false
+    });
+
+    document.getElementById('statusBar').innerText =
+      "⚠️ Simpan gagal";
+
+  } finally {
+
+    btnAdd.disabled = false;
+    btnAdd.innerText =
+      "+ Simpan Data";
+
+    setLoading(false);
   }
-
-  btnAdd.disabled = false;
-  btnAdd.innerText =
-    "+ Simpan Data";
 }
 
 /* =========================
@@ -1837,10 +1941,28 @@ async function deleteNumber(
   btnEl
 ) {
 
+  if (!isAdmin || !adminSessionActive) {
+    await showConfirm({
+      title: "Sesi Admin Berakhir",
+      message:
+        "Sesi admin tidak lagi aktif. Silakan login kembali.",
+      confirmText: "OK",
+      danger: false
+    });
+
+    exitAdminMode();
+    return;
+  }
+
+  if (!itemObj || !Number.isSafeInteger(Number(itemObj.id))) {
+    showToast(
+      "⚠️ ID data tidak tersedia. Muat ulang halaman."
+    );
+    return;
+  }
+
   const nomorStr =
-    typeof itemObj === 'object'
-      ? String(itemObj.nomor)
-      : String(itemObj);
+    String(itemObj.nomor);
 
   const confirmed =
     await showConfirm({
@@ -1853,42 +1975,92 @@ async function deleteNumber(
 
   if (!confirmed) return;
 
-  const index =
-    database[activeTab]
-      .indexOf(itemObj);
+  if (btnEl) {
+    btnEl.disabled = true;
+  }
 
-  if (index > -1) {
+  setLoading(true, "Menghapus data...");
 
-    if (btnEl) {
-      btnEl.disabled = true;
+  try {
+
+    const res = await fetch(
+      `${PROXY_URL}/records/${itemObj.id}`,
+      {
+        method: 'DELETE',
+        credentials: 'include'
+      }
+    );
+
+    let responseData = {};
+
+    try {
+      responseData = await res.json();
+    } catch (_) {}
+
+    if (
+      res.status === 401 ||
+      res.status === 403
+    ) {
+      await showConfirm({
+        title: "Akses Ditolak",
+        message:
+          "Sesi Admin telah berakhir atau akses ditolak oleh server.",
+        confirmText: "OK",
+        danger: false
+      });
+
+      exitAdminMode();
+      return;
     }
 
-    const originalData =
-      [...database[activeTab]];
+    if (!res.ok) {
+      throw new Error(
+        responseData.error ||
+        "Gagal menghapus data"
+      );
+    }
 
-    database[activeTab]
-      .splice(index, 1);
-
-    const success =
-      await saveOnlineDatabase();
-
-    if (success) {
-
-      filterData();
-
-      showToast(
-        "Data dihapus!"
+    database[activeTab] =
+      database[activeTab].filter(
+        item => Number(item.id) !== Number(itemObj.id)
       );
 
-    } else {
+    database.lastUpdated =
+      new Date().toISOString();
 
-      database[activeTab] =
-        originalData;
+    cacheDatabase();
 
-      if (btnEl) {
-        btnEl.disabled = false;
-      }
+    filterData();
+
+    document.getElementById('statusBar').innerText =
+      "🟢 Data dihapus dari D1!";
+
+    showToast(
+      "Data dihapus!"
+    );
+
+  } catch (err) {
+
+    console.error(
+      "Delete record error:",
+      err
+    );
+
+    await showConfirm({
+      title: "Penghapusan Gagal",
+      message:
+        "Data gagal dihapus karena masalah jaringan atau server.",
+      confirmText: "OK",
+      danger: false
+    });
+
+    if (btnEl) {
+      btnEl.disabled = false;
     }
+
+  } finally {
+
+    setLoading(false);
   }
 }
 
@@ -1989,14 +2161,17 @@ document
       const nomorStr =
         itemEl.dataset.nomor;
 
+      const itemId =
+        Number(itemEl.dataset.id || 0);
+
       const itemObj =
         database[activeTab].find(
           i =>
             (
-              typeof i === 'object'
-                ? String(i.nomor)
-                : String(i)
-            ) === nomorStr
+              itemId > 0 &&
+              Number(i.id) === itemId
+            ) ||
+            String(i.nomor) === nomorStr
         );
 
       if (
@@ -2253,6 +2428,10 @@ function filterData() {
 
       li.dataset.nomor =
         nomorStr;
+
+      if (item && item.id) {
+        li.dataset.id = String(item.id);
+      }
 
       li.title =
         "Klik untuk menyalin nomor";
@@ -2679,7 +2858,10 @@ function closeQrisModal() {
    INITIAL LOAD
 ========================= */
 
-fetchOnlineDatabase();
+(async function initApp() {
+  await restoreAdminSession();
+  await fetchOnlineDatabase();
+})();
 
 </script>
 
