@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Database UID HB & No Scammer</title>
 
   <!-- Google Fonts: Inter -->
@@ -632,6 +632,22 @@
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
+
+
+    /* ACCESSIBILITY */
+    :focus-visible {
+      outline: 3px solid var(--input-focus);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 
@@ -640,43 +656,59 @@
 <div class="container">
 
   <div class="header-area">
-    <h2 onclick="resetToHome()" title="Kembali ke Halaman Utama">
+    <h2
+      role="button"
+      tabindex="0"
+      aria-label="Kembali ke halaman utama"
+      onclick="resetToHome()"
+      onkeydown="handleActivationKey(event, resetToHome)"
+      title="Kembali ke Halaman Utama">
       🛡️ UID HB & NO SCAMMER
     </h2>
 
     <div class="header-actions">
-      <button id="authBtn" class="btn-header-admin" onclick="toggleAdmin()">
+      <button type="button" id="authBtn" class="btn-header-admin" aria-pressed="false" onclick="toggleAdmin()">
         🔑 Mode Pemilik
       </button>
 
-      <button id="themeToggleBtn" class="btn-theme" onclick="toggleTheme()">
+      <button type="button" id="themeToggleBtn" class="btn-theme" aria-label="Ganti tema" aria-pressed="false" onclick="toggleTheme()">
         Dark
       </button>
     </div>
   </div>
 
   <div class="status-bar-container">
-    <div id="statusBar" class="status-bar">
+    <div id="statusBar" class="status-bar" role="status" aria-live="polite" aria-atomic="true">
       Memuat data online...
     </div>
 
-    <div id="dataCounter" class="data-counter">
+    <div id="dataCounter" class="data-counter" aria-live="polite" aria-atomic="true">
       0 Data
     </div>
   </div>
 
-  <div class="tabs">
+  <div class="tabs" role="tablist" aria-label="Kategori database">
     <button
+      type="button"
       class="tab-btn active"
       id="tabRekening"
-      onclick="switchTab('rekening')">
+      role="tab"
+      aria-selected="true"
+      tabindex="0"
+      onclick="switchTab('rekening')"
+      onkeydown="handleTabKeyDown(event)">
       LIST REK SCAMMER
     </button>
 
     <button
+      type="button"
       class="tab-btn"
       id="tabGenshin"
-      onclick="switchTab('genshin')">
+      role="tab"
+      aria-selected="false"
+      tabindex="-1"
+      onclick="switchTab('genshin')"
+      onkeydown="handleTabKeyDown(event)">
       LIST UID HB
     </button>
   </div>
@@ -688,6 +720,7 @@
 
         <select
           id="metaSelectInput"
+          aria-label="Pilih bank atau game"
           style="flex: 1.2;"
           onchange="handleMetaSelectChange(this)">
         </select>
@@ -695,12 +728,15 @@
         <input
           type="text"
           id="metaCustomInput"
+          aria-label="Nama bank atau game lainnya"
           style="flex: 1; display: none;"
           placeholder="Nama Bank/Game Lain...">
 
         <input
           type="text"
           id="newNumberInput"
+          aria-label="Nomor rekening atau UID baru"
+          inputmode="numeric"
           style="flex: 1.5;"
           placeholder="Nomor/UID baru..."
           onkeydown="handleInputKeyDown(event)">
@@ -708,12 +744,14 @@
         <input
           type="date"
           id="newDateInput"
+          aria-label="Tanggal dilaporkan"
           style="flex: 1;"
           title="Tanggal Dilaporkan">
 
       </div>
 
       <button
+        type="button"
         class="btn btn-add"
         id="btnAdd"
         onclick="addNumber()">
@@ -732,12 +770,12 @@
       autocomplete="off">
   </div>
 
-  <div id="loadingIndicator" class="loading-indicator">
+  <div id="loadingIndicator" class="loading-indicator" role="status" aria-live="polite" aria-atomic="true">
     <span class="loading-spinner"></span>
     <span id="loadingText">Memuat...</span>
   </div>
 
-  <ul class="result-list" id="resultList"></ul>
+  <ul class="result-list" id="resultList" aria-label="Hasil pencarian database"></ul>
 
   <div class="donation-section">
     <div class="donation-text">
@@ -752,7 +790,13 @@
         src="https://www.image2url.com/r2/default/images/1786971411556-c9bfbe24-e071-424f-b555-dc1d949db21d.jpg"
         alt="Scan QRIS"
         class="qris-img"
+        role="button"
+        tabindex="0"
+        aria-label="Perbesar QRIS"
+        aria-haspopup="dialog"
+        aria-controls="qrisModal"
         onclick="openQrisModal(this.src)"
+        onkeydown="handleQrisKeyDown(event, this.src)"
         title="Perbesar QRIS">
 
       <a
@@ -772,6 +816,11 @@
 <div
   id="adminModal"
   class="qris-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="adminModalTitle"
+  aria-describedby="adminModalDesc"
   style="display: none;"
   onclick="closeAdminModal()">
 
@@ -779,17 +828,19 @@
     class="admin-modal-content"
     onclick="event.stopPropagation()">
 
-    <h3 style="color: var(--text-title); font-size: 0.95rem; margin-bottom: 10px;">
+    <h3 id="adminModalTitle" style="color: var(--text-title); font-size: 0.95rem; margin-bottom: 10px;">
       🔑 Autentikasi Pemilik
     </h3>
 
-    <p style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 12px;">
+    <p id="adminModalDesc" style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 12px;">
       Masukkan password admin untuk mengakses panel kontrol.
     </p>
 
     <input
       type="password"
       id="adminPasswordInput"
+      aria-label="Password admin"
+      autocomplete="current-password"
       placeholder="Password admin..."
       style="width: 100%; padding: 10px 14px; font-size: 0.825rem; background: var(--input-bg); color: var(--text-title); border: 1px solid var(--input-border); border-radius: 10px; outline: none; margin-bottom: 12px;"
       onkeydown="handleAdminModalKeyDown(event)">
@@ -797,6 +848,7 @@
     <div style="display: flex; gap: 8px;">
 
       <button
+        type="button"
         class="btn btn-confirm-cancel"
         style="flex: 1;"
         onclick="closeAdminModal()">
@@ -804,6 +856,7 @@
       </button>
 
       <button
+        type="button"
         class="btn btn-add"
         style="flex: 1;"
         onclick="submitAdminLogin()">
@@ -818,6 +871,11 @@
 <div
   id="confirmModal"
   class="qris-modal"
+  role="alertdialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="confirmTitle"
+  aria-describedby="confirmMessage"
   style="display: none;"
   onclick="closeConfirmModal(false)">
 
@@ -836,12 +894,14 @@
     <div class="confirm-actions">
 
       <button
+        type="button"
         class="btn btn-confirm-cancel"
         onclick="closeConfirmModal(false)">
         Batal
       </button>
 
       <button
+        type="button"
         class="btn btn-confirm-danger"
         id="confirmOkBtn"
         onclick="closeConfirmModal(true)">
@@ -856,6 +916,11 @@
 <div
   id="qrisModal"
   class="qris-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-label="Pratinjau QRIS"
+  tabindex="-1"
   onclick="closeQrisModal()">
 
   <img
@@ -866,7 +931,7 @@
 
 </div>
 
-<div id="toast" class="toast">
+<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
   Berhasil disalin!
 </div>
 
@@ -889,6 +954,112 @@ let renderLimit = PAGE_SIZE;
 
 let adminSessionActive = false;
 let isLoading = false;
+
+const modalPreviousFocus = new Map();
+
+function handleActivationKey(event, action) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    action();
+  }
+}
+
+function handleQrisKeyDown(event, src) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    openQrisModal(src);
+  }
+}
+
+function getFocusableElements(container) {
+  return Array.from(
+    container.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter(el => el.offsetParent !== null);
+}
+
+function openModalAccessible(modalId, focusSelector = null) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  modalPreviousFocus.set(modalId, document.activeElement);
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+
+  requestAnimationFrame(() => {
+    const target = focusSelector
+      ? modal.querySelector(focusSelector)
+      : getFocusableElements(modal)[0];
+
+    if (target) {
+      target.focus();
+    } else {
+      modal.focus();
+    }
+  });
+}
+
+function closeModalAccessible(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+
+  const previous = modalPreviousFocus.get(modalId);
+  modalPreviousFocus.delete(modalId);
+
+  if (previous && typeof previous.focus === 'function') {
+    previous.focus();
+  }
+}
+
+function trapFocus(event, modal) {
+  if (event.key !== 'Tab') return;
+
+  const focusable = getFocusableElements(modal);
+  if (focusable.length === 0) {
+    event.preventDefault();
+    return;
+  }
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function handleTabKeyDown(event) {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const tabs = [
+    document.getElementById('tabRekening'),
+    document.getElementById('tabGenshin')
+  ];
+
+  let index = tabs.indexOf(event.currentTarget);
+
+  if (event.key === 'Home') index = 0;
+  else if (event.key === 'End') index = tabs.length - 1;
+  else if (event.key === 'ArrowRight') index = (index + 1) % tabs.length;
+  else if (event.key === 'ArrowLeft') index = (index - 1 + tabs.length) % tabs.length;
+
+  const next = tabs[index];
+  switchTab(next.id === 'tabRekening' ? 'rekening' : 'genshin');
+  next.focus();
+}
+
 
 const BANK_OPTIONS = [
   "BCA",
@@ -1092,6 +1263,11 @@ function toggleTheme() {
 
   document.getElementById('themeToggleBtn').textContent =
     isDark ? 'Light' : 'Dark';
+
+  document.getElementById('themeToggleBtn').setAttribute(
+    'aria-pressed',
+    String(isDark)
+  );
 }
 
 if (localStorage.getItem('theme') === 'dark') {
@@ -1100,6 +1276,11 @@ if (localStorage.getItem('theme') === 'dark') {
 
   document.getElementById('themeToggleBtn').textContent =
     'Light';
+
+  document.getElementById('themeToggleBtn').setAttribute(
+    'aria-pressed',
+    'true'
+  );
 }
 
 /* =========================
@@ -1171,6 +1352,22 @@ function checkUrlParams() {
         'active',
         activeTab === 'genshin'
       );
+
+    document.getElementById('tabRekening').setAttribute(
+      'aria-selected',
+      String(activeTab === 'rekening')
+    );
+
+    document.getElementById('tabGenshin').setAttribute(
+      'aria-selected',
+      String(activeTab === 'genshin')
+    );
+
+    document.getElementById('tabRekening').tabIndex =
+      activeTab === 'rekening' ? 0 : -1;
+
+    document.getElementById('tabGenshin').tabIndex =
+      activeTab === 'genshin' ? 0 : -1;
   }
 
   if (searchQuery) {
@@ -1373,6 +1570,11 @@ function exitAdminMode() {
   document.getElementById('authBtn').innerText =
     "🔑 Mode Pemilik";
 
+  document.getElementById('authBtn').setAttribute(
+    'aria-pressed',
+    'false'
+  );
+
   document.getElementById('addBox').style.display =
     "none";
 
@@ -1383,16 +1585,17 @@ async function toggleAdmin() {
 
   if (!isAdmin) {
 
-    document.getElementById('adminModal').style.display =
-      'flex';
-
     const pwdInput =
       document.getElementById(
         'adminPasswordInput'
       );
 
     pwdInput.value = '';
-    pwdInput.focus();
+
+    openModalAccessible(
+      'adminModal',
+      '#adminPasswordInput'
+    );
 
   } else {
 
@@ -1443,6 +1646,11 @@ async function restoreAdminSession() {
     document.getElementById('authBtn').innerText =
       "🔓 Keluar Mode";
 
+    document.getElementById('authBtn').setAttribute(
+      'aria-pressed',
+      'true'
+    );
+
     document.getElementById('addBox').style.display =
       "flex";
 
@@ -1460,9 +1668,7 @@ async function restoreAdminSession() {
 }
 
 function closeAdminModal() {
-
-  document.getElementById('adminModal').style.display =
-    'none';
+  closeModalAccessible('adminModal');
 }
 
 function handleAdminModalKeyDown(e) {
@@ -1560,6 +1766,11 @@ async function submitAdminLogin() {
 
     document.getElementById('authBtn').innerText =
       "🔓 Keluar Mode";
+
+    document.getElementById('authBtn').setAttribute(
+      'aria-pressed',
+      'true'
+    );
 
     document.getElementById('addBox').style.display =
       "flex";
@@ -1909,17 +2120,16 @@ function showConfirm({
         ? "btn btn-confirm-danger"
         : "btn btn-add";
 
-    document.getElementById(
-      'confirmModal'
-    ).style.display = 'flex';
+    openModalAccessible(
+      'confirmModal',
+      '#confirmOkBtn'
+    );
   });
 }
 
 function closeConfirmModal(result) {
 
-  document.getElementById(
-    'confirmModal'
-  ).style.display = 'none';
+  closeModalAccessible('confirmModal');
 
   if (confirmResolver) {
 
@@ -2089,6 +2299,28 @@ function switchTab(tab) {
       tab === 'genshin'
     );
 
+  const tabRekening =
+    document.getElementById('tabRekening');
+
+  const tabGenshin =
+    document.getElementById('tabGenshin');
+
+  tabRekening.setAttribute(
+    'aria-selected',
+    String(tab === 'rekening')
+  );
+
+  tabGenshin.setAttribute(
+    'aria-selected',
+    String(tab === 'genshin')
+  );
+
+  tabRekening.tabIndex =
+    tab === 'rekening' ? 0 : -1;
+
+  tabGenshin.tabIndex =
+    tab === 'genshin' ? 0 : -1;
+
   const input =
     document.getElementById(
       'searchInput'
@@ -2205,6 +2437,37 @@ document
           nomorStr,
           `Disalin: ${nomorStr}`
         );
+      }
+    }
+  );
+
+/* =========================
+   KEYBOARD RESULT ITEM
+========================= */
+
+document
+  .getElementById('resultList')
+  .addEventListener(
+    'keydown',
+    (e) => {
+      if (
+        (e.key === 'Enter' || e.key === ' ') &&
+        e.target.classList.contains('number')
+      ) {
+        e.preventDefault();
+
+        const itemEl =
+          e.target.closest('.result-item');
+
+        const nomorStr =
+          itemEl?.dataset?.nomor || '';
+
+        if (nomorStr) {
+          copyToClipboard(
+            nomorStr,
+            `Disalin: ${nomorStr}`
+          );
+        }
       }
     }
   );
@@ -2444,6 +2707,18 @@ function filterData() {
       numberSpan.className =
         'number';
 
+      numberSpan.setAttribute(
+        'role',
+        'button'
+      );
+
+      numberSpan.tabIndex = 0;
+
+      numberSpan.setAttribute(
+        'aria-label',
+        `Salin nomor ${nomorStr}`
+      );
+
       numberSpan.textContent =
         nomorStr;
 
@@ -2520,7 +2795,7 @@ function filterData() {
 
       copyBtn.setAttribute(
         'aria-label',
-        'Salin Template Laporan'
+        `Salin template laporan untuk ${nomorStr}`
       );
 
       copyBtn.textContent =
@@ -2542,6 +2817,11 @@ function filterData() {
 
         deleteBtn.textContent =
           'Hapus';
+
+        deleteBtn.setAttribute(
+          'aria-label',
+          `Hapus data ${nomorStr}`
+        );
 
         rightContent.appendChild(
           deleteBtn
@@ -2840,19 +3120,47 @@ function openQrisModal(src) {
     'modalImg'
   ).src = src;
 
-  document.getElementById(
-    'qrisModal'
-  ).style.display =
-    'flex';
+  openModalAccessible('qrisModal');
 }
 
 function closeQrisModal() {
-
-  document.getElementById(
-    'qrisModal'
-  ).style.display =
-    'none';
+  closeModalAccessible('qrisModal');
 }
+
+/* =========================
+   ACCESSIBLE MODAL KEYBOARD
+========================= */
+
+document.addEventListener(
+  'keydown',
+  (event) => {
+    const openModal = [
+      'confirmModal',
+      'adminModal',
+      'qrisModal'
+    ]
+      .map(id => document.getElementById(id))
+      .find(modal => modal && modal.style.display === 'flex');
+
+    if (!openModal) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+
+      if (openModal.id === 'confirmModal') {
+        closeConfirmModal(false);
+      } else if (openModal.id === 'adminModal') {
+        closeAdminModal();
+      } else if (openModal.id === 'qrisModal') {
+        closeQrisModal();
+      }
+
+      return;
+    }
+
+    trapFocus(event, openModal);
+  }
+);
 
 /* =========================
    INITIAL LOAD
