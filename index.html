@@ -9,11 +9,10 @@
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="author" content="Capllang">
   <meta name="application-name" content="UID HB & No Scammer">
-  <meta name="theme-color" content="#1e293b">
+  <meta name="theme-color" content="#f4f7fb">
 
   <link rel="canonical" href="https://capllang-list.vercel.app/">
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="id_ID">
   <meta property="og:site_name" content="Capllang">
@@ -21,277 +20,309 @@
   <meta property="og:description" content="Cek daftar rekening yang dilaporkan scammer dan UID HB dalam database Capllang sebelum melakukan transaksi atau pengecekan akun.">
   <meta property="og:url" content="https://capllang-list.vercel.app/">
 
-  <!-- X / Twitter -->
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Cek Rekening Scammer & UID HB | Capllang">
   <meta name="twitter:description" content="Cek daftar rekening yang dilaporkan scammer dan UID HB dalam database Capllang sebelum melakukan transaksi atau pengecekan akun.">
-<link rel="stylesheet" href="/styles.css">
+
+  <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body>
+  <main class="site-shell">
+    <section class="hero-panel" aria-labelledby="heroHeading">
+      <div class="hero-topline">
+        <div
+          id="homeTitle"
+          class="brand-lockup"
+          role="button"
+          tabindex="0"
+          aria-label="Kembali ke halaman utama"
+          title="Kembali ke Halaman Utama">
+          <span class="brand-mark" aria-hidden="true">C</span>
+          <span class="brand-copy">
+            <strong>CAPLLANG</strong>
+            <small>TRUST CHECK</small>
+          </span>
+        </div>
 
-<div class="container">
-
-  <div class="header-area">
-    <h2
-      id="homeTitle"
-      role="button"
-      tabindex="0"
-      aria-label="Kembali ke halaman utama"
-      title="Kembali ke Halaman Utama">
-      🛡️ UID HB & NO SCAMMER
-    </h2>
-
-    <div class="header-actions">
-      <button type="button" id="authBtn" class="btn-header-admin" aria-pressed="false">
-        🔑 Mode Pemilik
-      </button>
-
-      <button type="button" id="themeToggleBtn" class="btn-theme" aria-label="Ganti tema" aria-pressed="false">
-        Dark
-      </button>
-    </div>
-  </div>
-
-  <div class="status-bar-container">
-    <div id="statusBar" class="status-bar" role="status" aria-live="polite" aria-atomic="true">
-      Memuat data online...
-    </div>
-
-    <div id="dataCounter" class="data-counter" aria-live="polite" aria-atomic="true">
-      0 Data
-    </div>
-  </div>
-
-  <div class="tabs" role="tablist" aria-label="Kategori database">
-    <button
-      type="button"
-      class="tab-btn active"
-      id="tabRekening"
-      role="tab"
-      aria-selected="true"
-      tabindex="0">
-      LIST REK SCAMMER
-    </button>
-
-    <button
-      type="button"
-      class="tab-btn"
-      id="tabGenshin"
-      role="tab"
-      aria-selected="false"
-      tabindex="-1">
-      LIST UID HB
-    </button>
-  </div>
-
-  <div class="admin-panel">
-    <div id="addBox" class="admin-box is-hidden">
-
-      <div class="admin-inputs">
-
-        <select
-          id="metaSelectInput"
-          aria-label="Pilih bank atau game"
-          class="meta-select-flex">
-        </select>
-
-        <input
-          type="text"
-          id="metaCustomInput"
-          aria-label="Nama bank atau game lainnya"
-          class="meta-custom-flex is-hidden"
-          placeholder="Nama Bank/Game Lain...">
-
-        <input
-          type="text"
-          id="newNumberInput"
-          aria-label="Nomor rekening atau UID baru"
-          inputmode="numeric"
-          class="number-input-flex"
-          placeholder="Nomor/UID baru...">
-
-        <input
-          type="date"
-          id="newDateInput"
-          aria-label="Tanggal dilaporkan"
-          class="date-input-flex"
-          title="Tanggal Dilaporkan">
-
+        <span class="hero-pill">PUBLIC DATABASE</span>
       </div>
 
-      <button
-        type="button"
-        class="btn btn-add"
-        id="btnAdd">
-        + Simpan Data
-      </button>
+      <div class="hero-content">
+        <div class="shield-stage" aria-hidden="true">
+          <div class="shield-glow"></div>
+          <svg class="shield-visual" viewBox="0 0 240 280" role="presentation" focusable="false">
+            <path class="shield-shadow" d="M120 8 215 43v78c0 68-38 118-95 151C63 239 25 189 25 121V43L120 8Z"/>
+            <path class="shield-body" d="M120 18 205 49v71c0 61-33 106-85 137-52-31-85-76-85-137V49l85-31Z"/>
+            <path class="shield-inner" d="M120 43 183 66v54c0 46-23 81-63 107-40-26-63-61-63-107V66l63-23Z"/>
+            <path class="shield-check" d="m88 128 21 22 47-54"/>
+          </svg>
+          <div class="shield-orbit orbit-one"></div>
+          <div class="shield-orbit orbit-two"></div>
+        </div>
 
-    </div>
-  </div>
+        <div class="hero-copy">
+          <p class="eyebrow">CEK SEBELUM TRANSAKSI</p>
+          <h1 id="heroHeading">Satu pengecekan kecil.<br><span>Risiko yang jauh lebih kecil.</span></h1>
+          <p class="hero-description">
+            Cari nomor rekening terlapor scammer atau UID HB dari database Capllang sebelum melanjutkan transaksi.
+          </p>
+        </div>
 
-  <div class="search-box">
-    <input
-      type="text"
-      id="searchInput"
-      aria-label="Cari Rekening atau UID"
-      placeholder="Tulis nomor rekening di sini..."
-      autocomplete="off">
-  </div>
+        <div class="trust-grid" aria-label="Fitur utama">
+          <div class="trust-item">
+            <span class="trust-icon" aria-hidden="true">01</span>
+            <div>
+              <strong>Rekening terlapor</strong>
+              <span>Pencarian cepat berbasis database.</span>
+            </div>
+          </div>
+          <div class="trust-item">
+            <span class="trust-icon" aria-hidden="true">02</span>
+            <div>
+              <strong>UID HB</strong>
+              <span>Periksa UID game yang sudah terdata.</span>
+            </div>
+          </div>
+          <div class="trust-item">
+            <span class="trust-icon" aria-hidden="true">03</span>
+            <div>
+              <strong>Offline-ready</strong>
+              <span>Cache lokal tetap membantu saat koneksi turun.</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <div id="loadingIndicator" class="loading-indicator" role="status" aria-live="polite" aria-atomic="true">
-    <span class="loading-spinner"></span>
-    <span id="loadingText">Memuat...</span>
-  </div>
+      <div class="hero-footer">
+        <span>Community-maintained • Capllang</span>
+        <span class="hero-footer-dot" aria-hidden="true"></span>
+        <span>Gunakan hasil sebagai referensi, bukan jaminan.</span>
+      </div>
+    </section>
 
-  <ul class="result-list" id="resultList" aria-label="Hasil pencarian database"></ul>
+    <section class="app-panel" aria-labelledby="appHeading">
+      <div class="app-card">
+        <header class="app-header">
+          <div>
+            <p class="app-kicker">DATABASE CHECKER</p>
+            <h2 id="appHeading">Cari data</h2>
+          </div>
 
-  <div class="donation-section">
-    <div class="donation-text">
-      <span class="donation-title">
-        ☕ Sawer Capllang
-      </span>
-    </div>
+          <div class="header-actions">
+            <button type="button" id="authBtn" class="btn-header-admin" aria-pressed="false">
+              🔑 Mode Pemilik
+            </button>
 
-    <div class="donation-action">
+            <button type="button" id="themeToggleBtn" class="btn-theme" aria-label="Ganti tema" aria-pressed="false">
+              Dark
+            </button>
+          </div>
+        </header>
 
-      <img
-        src="/assets/qris.jpg"
-        id="qrisThumb"
-        alt="Scan QRIS"
-        class="qris-img"
-        role="button"
-        tabindex="0"
-        aria-label="Perbesar QRIS"
-        aria-haspopup="dialog"
-        aria-controls="qrisModal"
-        title="Perbesar QRIS">
+        <div class="status-bar-container">
+          <div id="statusBar" class="status-bar" role="status" aria-live="polite" aria-atomic="true">
+            Memuat data online...
+          </div>
 
-      <a
-        href="https://saweria.co/capllang/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn-donate-link">
-        Saweria
-      </a>
+          <div id="dataCounter" class="data-counter" aria-live="polite" aria-atomic="true">
+            0 Data
+          </div>
+        </div>
 
-    </div>
-  </div>
+        <div class="tabs" role="tablist" aria-label="Kategori database">
+          <button
+            type="button"
+            class="tab-btn active"
+            id="tabRekening"
+            role="tab"
+            aria-selected="true"
+            tabindex="0">
+            REK SCAMMER
+          </button>
 
-</div>
+          <button
+            type="button"
+            class="tab-btn"
+            id="tabGenshin"
+            role="tab"
+            aria-selected="false"
+            tabindex="-1">
+            UID HB
+          </button>
+        </div>
 
-<!-- ADMIN LOGIN MODAL -->
-<div
-  id="adminModal"
-  class="qris-modal"
-  role="dialog"
-  aria-modal="true"
-  aria-hidden="true"
-  aria-labelledby="adminModalTitle"
-  aria-describedby="adminModalDesc">
+        <div class="search-box">
+          <label class="search-label" for="searchInput">Masukkan nomor yang ingin diperiksa</label>
+          <div class="search-field">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input
+              type="text"
+              id="searchInput"
+              aria-label="Cari Rekening atau UID"
+              placeholder="Tulis nomor rekening di sini..."
+              autocomplete="off">
+            <kbd class="search-shortcut" aria-hidden="true">/</kbd>
+          </div>
+        </div>
+
+        <div class="admin-panel">
+          <div id="addBox" class="admin-box is-hidden">
+            <div class="admin-box-heading">
+              <div>
+                <span class="admin-eyebrow">OWNER CONTROL</span>
+                <strong>Tambah data baru</strong>
+              </div>
+              <span class="admin-session-dot" aria-hidden="true"></span>
+            </div>
+
+            <div class="admin-inputs">
+              <select
+                id="metaSelectInput"
+                aria-label="Pilih bank atau game"
+                class="meta-select-flex">
+              </select>
+
+              <input
+                type="text"
+                id="metaCustomInput"
+                aria-label="Nama bank atau game lainnya"
+                class="meta-custom-flex is-hidden"
+                placeholder="Nama Bank/Game Lain...">
+
+              <input
+                type="text"
+                id="newNumberInput"
+                aria-label="Nomor rekening atau UID baru"
+                inputmode="numeric"
+                class="number-input-flex"
+                placeholder="Nomor/UID baru...">
+
+              <input
+                type="date"
+                id="newDateInput"
+                aria-label="Tanggal dilaporkan"
+                class="date-input-flex"
+                title="Tanggal Dilaporkan">
+            </div>
+
+            <button type="button" class="btn btn-add" id="btnAdd">
+              + Simpan Data
+            </button>
+          </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading-indicator" role="status" aria-live="polite" aria-atomic="true">
+          <span class="loading-spinner"></span>
+          <span id="loadingText">Memuat...</span>
+        </div>
+
+        <div class="results-heading" aria-hidden="true">
+          <span>Hasil pencarian</span>
+          <span>Klik nomor untuk menyalin</span>
+        </div>
+
+        <ul class="result-list" id="resultList" aria-label="Hasil pencarian database"></ul>
+
+        <div class="donation-section">
+          <div class="donation-text">
+            <span class="donation-label">SUPPORT PROJECT</span>
+            <span class="donation-title">☕ Sawer Capllang</span>
+          </div>
+
+          <div class="donation-action">
+            <img
+              src="/assets/qris.jpg"
+              id="qrisThumb"
+              alt="Scan QRIS"
+              class="qris-img"
+              role="button"
+              tabindex="0"
+              aria-label="Perbesar QRIS"
+              aria-haspopup="dialog"
+              aria-controls="qrisModal"
+              title="Perbesar QRIS">
+
+            <a
+              href="https://saweria.co/capllang/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-donate-link">
+              Saweria
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <div
-    class="admin-modal-content">
+    id="adminModal"
+    class="qris-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="adminModalTitle"
+    aria-describedby="adminModalDesc">
 
-    <h3 id="adminModalTitle" class="modal-title">
-      🔑 Autentikasi Pemilik
-    </h3>
+    <div class="admin-modal-content">
+      <div class="modal-icon" aria-hidden="true">↳</div>
+      <h3 id="adminModalTitle" class="modal-title">Autentikasi Pemilik</h3>
+      <p id="adminModalDesc" class="modal-description">
+        Masukkan password admin untuk mengakses panel kontrol.
+      </p>
 
-    <p id="adminModalDesc" class="modal-description">
-      Masukkan password admin untuk mengakses panel kontrol.
-    </p>
+      <input
+        type="password"
+        id="adminPasswordInput"
+        aria-label="Password admin"
+        autocomplete="current-password"
+        placeholder="Password admin..."
+        class="admin-password-input">
 
-    <input
-      type="password"
-      id="adminPasswordInput"
-      aria-label="Password admin"
-      autocomplete="current-password"
-      placeholder="Password admin..."
-      class="admin-password-input">
-
-    <div class="modal-actions">
-
-      <button
-        type="button"
-        class="btn btn-confirm-cancel flex-1"
-        id="adminCancelBtn">
-        Batal
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-add flex-1"
-        id="adminLoginBtn">
-        Masuk
-      </button>
-
+      <div class="modal-actions">
+        <button type="button" class="btn btn-confirm-cancel flex-1" id="adminCancelBtn">Batal</button>
+        <button type="button" class="btn btn-add flex-1" id="adminLoginBtn">Masuk</button>
+      </div>
     </div>
   </div>
-</div>
-
-<!-- CONFIRM MODAL -->
-<div
-  id="confirmModal"
-  class="qris-modal"
-  role="alertdialog"
-  aria-modal="true"
-  aria-hidden="true"
-  aria-labelledby="confirmTitle"
-  aria-describedby="confirmMessage">
 
   <div
-    class="confirm-modal-content">
+    id="confirmModal"
+    class="qris-modal"
+    role="alertdialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-labelledby="confirmTitle"
+    aria-describedby="confirmMessage">
 
-    <div class="confirm-title" id="confirmTitle">
-      Konfirmasi
-    </div>
+    <div class="confirm-modal-content">
+      <div class="modal-icon modal-icon-danger" aria-hidden="true">!</div>
+      <div class="confirm-title" id="confirmTitle">Konfirmasi</div>
+      <div class="confirm-message" id="confirmMessage">Apakah Anda yakin?</div>
 
-    <div class="confirm-message" id="confirmMessage">
-      Apakah Anda yakin?
-    </div>
-
-    <div class="confirm-actions">
-
-      <button
-        type="button"
-        class="btn btn-confirm-cancel"
-        id="confirmCancelBtn">
-        Batal
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-confirm-danger"
-        id="confirmOkBtn">
-        Hapus
-      </button>
-
+      <div class="confirm-actions">
+        <button type="button" class="btn btn-confirm-cancel" id="confirmCancelBtn">Batal</button>
+        <button type="button" class="btn btn-confirm-danger" id="confirmOkBtn">Hapus</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- QRIS MODAL -->
-<div
-  id="qrisModal"
-  class="qris-modal"
-  role="dialog"
-  aria-modal="true"
-  aria-hidden="true"
-  aria-label="Pratinjau QRIS"
-  tabindex="-1">
+  <div
+    id="qrisModal"
+    class="qris-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-hidden="true"
+    aria-label="Pratinjau QRIS"
+    tabindex="-1">
+    <img id="modalImg" src="" alt="QRIS Preview">
+  </div>
 
-  <img
-    id="modalImg"
-    src=""
-    alt="QRIS Preview">
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+    Berhasil disalin!
+  </div>
 
-</div>
-
-<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
-  Berhasil disalin!
-</div>
-
-<script src="/app.js" defer></script>
-
+  <script src="/app.js" defer></script>
 </body>
 </html>
