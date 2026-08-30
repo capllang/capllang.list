@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capllang-shell-v2';
+const CACHE_NAME = 'capllang-shell-v1';
 
 const APP_SHELL = [
   '/',
@@ -43,12 +43,12 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // API tetap selalu melalui jaringan dan tidak pernah dicache Service Worker.
+  // API tidak boleh dicache oleh Service Worker.
   if (url.pathname.startsWith('/api/')) {
     return;
   }
 
-  // Navigasi: network-first, fallback ke shell offline.
+  // Navigasi: coba internet, jika gagal tampilkan shell dari cache.
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
