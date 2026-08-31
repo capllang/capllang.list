@@ -2893,52 +2893,17 @@ function filterData() {
         : `Status laporan: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`;
       rightContent.appendChild(statusBadge);
 
-      const provenanceDetail = document.createElement('span');
-      provenanceDetail.className = 'provenance-detail';
-      provenanceDetail.textContent = itemCategory === 'genshin'
-        ? 'Metode: verifikasi langsung admin'
-        : sourceType === 'legacy_archive'
-          ? 'Sumber: arsip Capllang'
-          : 'Bukti: screenshot laporan';
-      provenanceDetail.title = itemCategory === 'genshin'
-        ? `Metode verifikasi: ${getSourceTypeLabel(sourceType, itemCategory)}`
-        : `Jenis bukti/sumber: ${getSourceTypeLabel(sourceType, itemCategory)}`;
-      rightContent.appendChild(provenanceDetail);
-
+      // Provenance tetap disimpan dan tersedia di API/admin, tetapi tampilan publik
+      // hanya menampilkan satu status utama agar kartu tetap ringkas dan jelas.
       if (item?.source_ref && item.source_ref !== '-') {
         const sourceRef = document.createElement('span');
-        sourceRef.className = 'provenance-detail provenance-ref';
+        sourceRef.className = 'record-reference';
         sourceRef.textContent = `Ref: ${item.source_ref}`;
         sourceRef.title = itemCategory === 'genshin'
           ? `Referensi verifikasi: ${item.source_ref}`
           : `Referensi laporan/bukti: ${item.source_ref}`;
         rightContent.appendChild(sourceRef);
       }
-
-      const copyBtn =
-        document.createElement(
-          'button'
-        );
-
-      copyBtn.type = 'button';
-
-      copyBtn.className =
-        'btn-icon';
-
-      copyBtn.title =
-        'Salin Template Laporan';
-
-      copyBtn.setAttribute(
-        'aria-label',
-        `Salin template laporan untuk ${nomorStr}`
-      );
-
-      copyBtn.textContent =
-        '📢';
-
-      actionContent.appendChild(
-        copyBtn
-      );
 
       if (isAdmin) {
         const editBtn =
@@ -2987,9 +2952,11 @@ function filterData() {
         numberButton
       );
 
-      topRow.appendChild(
-        actionContent
-      );
+      if (actionContent.childElementCount > 0) {
+        topRow.appendChild(
+          actionContent
+        );
+      }
 
       li.appendChild(
         topRow
