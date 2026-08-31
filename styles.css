@@ -433,28 +433,49 @@
       background: var(--item-bg);
       border: 1px solid var(--card-border);
       border-left: 4px solid var(--item-border);
-      padding: 12px 14px;
+      padding: 11px 12px;
       border-radius: 12px;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.02);
       flex-shrink: 0;
       cursor: pointer;
+    }
+
+    .record-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
     }
 
     .result-item .number {
       appearance: none;
       border: 0;
       background: transparent;
-      padding: 4px 0;
+      padding: 3px 0;
       text-align: left;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      letter-spacing: 0.5px;
-      word-break: break-all;
+      font-weight: 700;
+      font-size: 0.96rem;
+      line-height: 1.2;
+      letter-spacing: 0.35px;
       color: var(--text-title);
+      white-space: nowrap;
+      word-break: normal;
+      overflow-wrap: normal;
+      min-width: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .record-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
     }
 
     .right-content {
@@ -462,15 +483,18 @@
       align-items: center;
       gap: 6px;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      min-width: 0;
+      padding-top: 7px;
+      border-top: 1px solid color-mix(in srgb, var(--input-border) 58%, transparent);
     }
 
     .badge-date {
       background: var(--date-badge-bg);
       color: var(--date-badge);
       border: 1px solid var(--input-border);
-      font-size: 0.75rem;
-      padding: 3px 8px;
+      font-size: 0.72rem;
+      padding: 3px 7px;
       border-radius: 20px;
       font-weight: 600;
       white-space: nowrap;
@@ -480,8 +504,8 @@
       background: var(--meta-badge-bg);
       color: var(--meta-badge);
       border: 1px solid var(--meta-badge-border);
-      font-size: 0.75rem;
-      padding: 3px 8px;
+      font-size: 0.72rem;
+      padding: 3px 7px;
       border-radius: 20px;
       font-weight: 700;
       white-space: nowrap;
@@ -490,7 +514,7 @@
 
     .badge-provenance {
       border: 1px solid var(--input-border);
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       padding: 3px 7px;
       border-radius: 20px;
       font-weight: 700;
@@ -528,18 +552,40 @@
       text-overflow: ellipsis;
     }
 
+    .provenance-detail {
+      color: var(--text-muted);
+      font-size: 0.71rem;
+      font-weight: 600;
+      line-height: 1.3;
+      white-space: normal;
+    }
+
+    .provenance-detail::before {
+      content: '•';
+      margin-right: 6px;
+      color: var(--date-badge);
+    }
+
+    .provenance-ref {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .btn-icon {
       background: transparent;
       border: 1px solid var(--input-border);
-      border-radius: 6px;
-      width: 36px;
-      height: 36px;
+      border-radius: 7px;
+      width: 34px;
+      height: 34px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.75rem;
       cursor: pointer;
       color: var(--text-muted);
+      flex-shrink: 0;
     }
 
     .btn-icon:hover {
@@ -776,6 +822,34 @@
     :focus-visible {
       outline: 3px solid var(--input-focus);
       outline-offset: 2px;
+    }
+
+    @media (max-width: 520px) {
+      .result-item {
+        padding: 10px 11px;
+      }
+
+      .record-top {
+        gap: 8px;
+      }
+
+      .result-item .number {
+        font-size: 0.92rem;
+      }
+
+      .right-content {
+        gap: 5px;
+      }
+
+      .provenance-detail {
+        flex-basis: 100%;
+      }
+
+      .record-actions .btn-edit,
+      .record-actions .btn-delete {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {

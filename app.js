@@ -2802,6 +2802,22 @@ function filterData() {
       numberButton.textContent =
         nomorStr;
 
+      const topRow =
+        document.createElement(
+          'div'
+        );
+
+      topRow.className =
+        'record-top';
+
+      const actionContent =
+        document.createElement(
+          'div'
+        );
+
+      actionContent.className =
+        'record-actions';
+
       const rightContent =
         document.createElement(
           'div'
@@ -2869,14 +2885,6 @@ function filterData() {
       const sourceType = provenance.source_type;
       const verificationStatus = provenance.verification_status;
 
-      const sourceBadge = document.createElement('span');
-      sourceBadge.className = 'badge-provenance badge-source';
-      sourceBadge.textContent = getSourceTypeLabel(sourceType, itemCategory);
-      sourceBadge.title = itemCategory === 'genshin'
-        ? `Metode verifikasi: ${getSourceTypeLabel(sourceType, itemCategory)}`
-        : `Jenis bukti: ${getSourceTypeLabel(sourceType, itemCategory)}`;
-      rightContent.appendChild(sourceBadge);
-
       const statusBadge = document.createElement('span');
       statusBadge.className = `badge-provenance badge-status-${verificationStatus}`;
       statusBadge.textContent = getVerificationStatusLabel(verificationStatus, itemCategory);
@@ -2885,14 +2893,26 @@ function filterData() {
         : `Status laporan: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`;
       rightContent.appendChild(statusBadge);
 
+      const provenanceDetail = document.createElement('span');
+      provenanceDetail.className = 'provenance-detail';
+      provenanceDetail.textContent = itemCategory === 'genshin'
+        ? 'Metode: verifikasi langsung admin'
+        : sourceType === 'legacy_archive'
+          ? 'Sumber: arsip Capllang'
+          : 'Bukti: screenshot laporan';
+      provenanceDetail.title = itemCategory === 'genshin'
+        ? `Metode verifikasi: ${getSourceTypeLabel(sourceType, itemCategory)}`
+        : `Jenis bukti/sumber: ${getSourceTypeLabel(sourceType, itemCategory)}`;
+      rightContent.appendChild(provenanceDetail);
+
       if (item?.source_ref && item.source_ref !== '-') {
-        const sourceRefBadge = document.createElement('span');
-        sourceRefBadge.className = 'badge-provenance badge-source-ref';
-        sourceRefBadge.textContent = `Ref: ${item.source_ref}`;
-        sourceRefBadge.title = itemCategory === 'genshin'
+        const sourceRef = document.createElement('span');
+        sourceRef.className = 'provenance-detail provenance-ref';
+        sourceRef.textContent = `Ref: ${item.source_ref}`;
+        sourceRef.title = itemCategory === 'genshin'
           ? `Referensi verifikasi: ${item.source_ref}`
           : `Referensi laporan/bukti: ${item.source_ref}`;
-        rightContent.appendChild(sourceRefBadge);
+        rightContent.appendChild(sourceRef);
       }
 
       const copyBtn =
@@ -2916,7 +2936,7 @@ function filterData() {
       copyBtn.textContent =
         '📢';
 
-      rightContent.appendChild(
+      actionContent.appendChild(
         copyBtn
       );
 
@@ -2936,7 +2956,7 @@ function filterData() {
           `Edit data ${nomorStr}`
         );
 
-        rightContent.appendChild(
+        actionContent.appendChild(
           editBtn
         );
 
@@ -2958,13 +2978,21 @@ function filterData() {
           `Hapus data ${nomorStr}`
         );
 
-        rightContent.appendChild(
+        actionContent.appendChild(
           deleteBtn
         );
       }
 
-      li.appendChild(
+      topRow.appendChild(
         numberButton
+      );
+
+      topRow.appendChild(
+        actionContent
+      );
+
+      li.appendChild(
+        topRow
       );
 
       li.appendChild(
