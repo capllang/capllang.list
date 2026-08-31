@@ -216,18 +216,18 @@ function hasUsableLocalData() {
 function getDefaultStatusText() {
   switch (connectionState) {
     case 'online':
-      return "🟢 Koneksi aktif — data terbaru tersedia.";
+      return "● Online";
     case 'offline-cache':
-      return "🟡 Offline — menampilkan data terakhir yang sudah dimuat.";
+      return "● Offline — menampilkan cache";
     case 'offline-empty':
-      return "🔴 Offline — data tersimpan tidak tersedia.";
+      return "● Offline — cache tidak tersedia";
     case 'server-error-cache':
-      return "🟠 D1 tidak dapat dihubungi — menampilkan data terakhir yang tersedia.";
+      return "● Server tidak tersedia — menampilkan cache";
     case 'server-error-empty':
-      return "🔴 D1 tidak dapat diakses — data terbaru belum tersedia.";
+      return "● Server tidak tersedia";
     case 'checking':
     default:
-      return "⏳ Memeriksa koneksi dan data...";
+      return "● Memeriksa koneksi...";
   }
 }
 
@@ -251,6 +251,7 @@ function refreshStatusBarIfIdle() {
 function setConnectionState(nextState) {
   connectionState = nextState;
   offlineMode = nextState !== 'online';
+  document.body.dataset.connectionState = nextState;
   refreshStatusBarIfIdle();
 }
 
@@ -776,17 +777,14 @@ function toggleTheme() {
   );
 }
 
-if (safeStorageGet('theme') === 'dark') {
-
+const savedTheme = safeStorageGet('theme');
+if (savedTheme !== 'light') {
   document.body.classList.add('dark-mode');
-
-  document.getElementById('themeToggleBtn').textContent =
-    'Light';
-
-  document.getElementById('themeToggleBtn').setAttribute(
-    'aria-pressed',
-    'true'
-  );
+  document.getElementById('themeToggleBtn').textContent = 'Light';
+  document.getElementById('themeToggleBtn').setAttribute('aria-pressed', 'true');
+} else {
+  document.getElementById('themeToggleBtn').textContent = 'Dark';
+  document.getElementById('themeToggleBtn').setAttribute('aria-pressed', 'false');
 }
 
 /* =========================
@@ -884,8 +882,8 @@ function checkUrlParams() {
   const searchInput = document.getElementById('searchInput');
   searchInput.placeholder =
     activeTab === 'rekening'
-      ? 'Tulis nomor rekening di sini...'
-      : 'Tulis UID game di sini...';
+      ? 'Cari nomor rekening...'
+      : 'Cari UID...';
 
   if (searchQuery) {
     searchInput.value = searchQuery;
@@ -2440,8 +2438,8 @@ async function switchTab(tab) {
 
   input.placeholder =
     tab === 'rekening'
-      ? "Tulis nomor rekening di sini..."
-      : "Tulis UID game di sini...";
+      ? "Cari nomor rekening..."
+      : "Cari UID...";
 
   updateMetaSelectOptions();
   populateProvenanceControls(tab);
@@ -2751,13 +2749,14 @@ function filterData() {
       const cachedTotal =
         Number(state.total || 0);
 
+      const categoryLabel = activeTab === 'rekening' ? 'Rekening' : 'UID';
       counter.textContent =
         cachedTotal > visibleData.length
-          ? `${visibleData.length}/${cachedTotal} Cache`
-          : `${visibleData.length} Data`;
+          ? `${visibleData.length}/${cachedTotal} ${categoryLabel}`
+          : `${visibleData.length} ${categoryLabel}`;
     } else {
-      counter.textContent =
-        `${state.total} Data`;
+      const categoryLabel = activeTab === 'rekening' ? 'Rekening' : 'UID';
+      counter.textContent = `${state.total} ${categoryLabel}`;
     }
 
     if (
@@ -2873,9 +2872,10 @@ function filterData() {
         );
 
       rightContent.className =
-        'right-content';
+        `right-content right-content-${itemCategory}`;
 
       if (
+        itemCategory === 'rekening' &&
         metaStr &&
         metaStr !== '-'
       ) {
