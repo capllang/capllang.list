@@ -1,9 +1,10 @@
-const CACHE_NAME = 'capllang-shell-v2';
+const CACHE_NAME = 'capllang-shell-v3';
 const APP_SHELL = [
   '/',
   '/index.html',
   '/styles.css',
   '/app.js',
+  '/favicon.ico',
   '/assets/qris.jpg'
 ];
 

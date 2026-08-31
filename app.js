@@ -18,6 +18,40 @@ const PAGE_SIZE = 50;
 
 let adminSessionActive = false;
 let offlineMode = false;
+let statusResetTimer = null;
+
+function getDefaultStatusText() {
+  if (!offlineMode) {
+    return "🟢 Terhubung ke D1 — data dimuat bertahap.";
+  }
+
+  return database.lastUpdated
+    ? "🟡 Mode Offline: cache lokal maksimal 12 jam."
+    : "🔴 Mode Offline: cache tidak tersedia atau kedaluwarsa.";
+}
+
+function restoreDefaultStatusBar() {
+  if (statusResetTimer) {
+    clearTimeout(statusResetTimer);
+    statusResetTimer = null;
+  }
+
+  const status = document.getElementById('statusBar');
+  if (status) status.textContent = getDefaultStatusText();
+}
+
+function showTransientStatus(message, duration = 3000) {
+  const status = document.getElementById('statusBar');
+  if (!status) return;
+
+  if (statusResetTimer) clearTimeout(statusResetTimer);
+  status.textContent = message;
+
+  statusResetTimer = setTimeout(() => {
+    statusResetTimer = null;
+    restoreDefaultStatusBar();
+  }, duration);
+}
 
 const paginationState = {
   rekening: {
@@ -972,6 +1006,7 @@ function exitAdminMode() {
   document.getElementById('addBox').classList.add('is-hidden');
 
   filterData();
+  restoreDefaultStatusBar();
 }
 
 async function toggleAdmin() {
@@ -1478,8 +1513,7 @@ async function addNumber() {
 
     filterData();
 
-    document.getElementById('statusBar').innerText =
-      "🟢 Tersimpan di D1!";
+    showTransientStatus("🟢 Tersimpan di D1!");
 
     showToast(
       "Data berhasil ditambahkan!"
@@ -1500,8 +1534,7 @@ async function addNumber() {
       danger: false
     });
 
-    document.getElementById('statusBar').innerText =
-      "⚠️ Simpan gagal";
+    showTransientStatus("⚠️ Simpan gagal", 4000);
 
   } finally {
 
@@ -1699,8 +1732,7 @@ async function deleteNumber(
 
     filterData();
 
-    document.getElementById('statusBar').innerText =
-      "🟢 Data dihapus dari D1!";
+    showTransientStatus("🟢 Data dihapus dari D1!");
 
     showToast(
       "Data dihapus!"
