@@ -1374,3 +1374,420 @@ body {
     font-size: 0.73rem;
   }
 }
+
+/* =============================================================
+   PRIORITAS 6 — COMPACT UI V5
+   Public result rows: compact, single-line first, status-led.
+   ============================================================= */
+
+/* Return the app to a focused dashboard width on desktop. */
+.container {
+  width: min(100%, 620px);
+  max-width: 620px;
+  height: min(92dvh, 850px);
+  max-height: 850px;
+  min-height: 540px;
+  padding: 17px;
+  gap: 9px;
+}
+
+.home-title-button {
+  font-size: 0.98rem;
+}
+
+.btn-theme,
+.btn-header-admin {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.69rem;
+}
+
+.status-bar,
+.data-counter {
+  font-size: 0.72rem;
+}
+
+.tab-btn {
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 0.76rem;
+}
+
+.search-box input,
+.admin-box input,
+.admin-box select {
+  min-height: 40px;
+  font-size: 0.8rem;
+}
+
+.result-list {
+  gap: 6px;
+  padding-right: 3px;
+}
+
+/* One record = one compact horizontal row in normal/public use. */
+.result-item {
+  min-height: 48px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 9px;
+}
+
+.record-top {
+  flex: 1 1 auto;
+  min-width: 125px;
+  min-height: 0;
+  gap: 6px;
+}
+
+.result-item .number {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+  font-size: 0.88rem;
+  line-height: 1.15;
+  letter-spacing: 0.015em;
+  font-weight: 720;
+  white-space: nowrap;
+}
+
+.right-content {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding-top: 0;
+  border-top: 0;
+  gap: 5px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+/* Bank/game and date are metadata, not competing status badges. */
+.badge-meta,
+.badge-date {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  font-weight: 650;
+}
+
+.badge-meta {
+  color: var(--meta-badge);
+  max-width: 82px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-date {
+  color: var(--text-muted);
+  font-weight: 550;
+}
+
+.badge-date::before {
+  content: '•';
+  margin-right: 5px;
+  color: var(--text-muted);
+  opacity: 0.65;
+}
+
+.badge-provenance {
+  min-height: 22px;
+  padding: 3px 6px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  line-height: 1.05;
+  font-weight: 720;
+}
+
+/* Internal provenance/reference remains available to API/admin, not public rows. */
+.badge-source,
+.provenance-detail,
+.provenance-ref,
+.record-reference,
+.btn-icon {
+  display: none !important;
+}
+
+.record-actions {
+  gap: 5px;
+}
+
+.record-actions .btn-edit,
+.record-actions .btn-delete {
+  min-height: 28px;
+  padding: 4px 7px;
+  font-size: 0.64rem;
+}
+
+.trust-note {
+  max-width: 540px;
+  padding: 0 4px;
+  font-size: 0.63rem;
+  line-height: 1.35;
+}
+
+.donation-section {
+  padding: 9px 11px;
+}
+
+.donation-title {
+  font-size: 0.75rem;
+}
+
+.qris-img {
+  width: 34px;
+  height: 34px;
+}
+
+.btn-donate-link {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 0.68rem;
+}
+
+@media (min-width: 900px) {
+  body {
+    padding: 22px;
+  }
+
+  .container {
+    width: min(620px, calc(100vw - 44px));
+    height: min(88dvh, 850px);
+    border-radius: 22px;
+    padding: 18px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  body {
+    padding: 16px;
+  }
+
+  .container {
+    width: min(600px, calc(100vw - 32px));
+    height: min(92dvh, 850px);
+    border-radius: 20px;
+    padding: 16px;
+  }
+
+  .result-item {
+    min-height: 46px;
+  }
+}
+
+@media (max-width: 599px) {
+  body {
+    padding:
+      max(6px, env(safe-area-inset-top))
+      max(6px, env(safe-area-inset-right))
+      max(6px, env(safe-area-inset-bottom))
+      max(6px, env(safe-area-inset-left));
+  }
+
+  .container {
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - 12px);
+    max-height: none;
+    min-height: 0;
+    border-radius: 15px;
+    padding: 10px;
+    gap: 7px;
+  }
+
+  .home-title-button {
+    font-size: 0.88rem;
+  }
+
+  .btn-theme,
+  .btn-header-admin {
+    min-height: 32px;
+    padding: 5px 7px;
+    font-size: 0.62rem;
+  }
+
+  .status-bar,
+  .data-counter {
+    padding: 6px 8px;
+    font-size: 0.66rem;
+  }
+
+  .tab-btn {
+    min-height: 36px;
+    padding: 7px 5px;
+    font-size: 0.69rem;
+  }
+
+  .search-box input {
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+  }
+
+  .result-item {
+    min-height: 44px;
+    padding: 6px 8px;
+    gap: 7px;
+  }
+
+  .record-top {
+    min-width: 104px;
+    flex: 1 1 auto;
+  }
+
+  .result-item .number {
+    font-size: clamp(0.76rem, 3.45vw, 0.84rem);
+    letter-spacing: 0;
+  }
+
+  .right-content {
+    gap: 4px;
+  }
+
+  .badge-meta,
+  .badge-date {
+    font-size: 0.59rem;
+  }
+
+  .badge-meta {
+    max-width: 58px;
+  }
+
+  .badge-date::before {
+    margin-right: 3px;
+  }
+
+  .badge-provenance {
+    min-height: 20px;
+    padding: 2px 5px;
+    font-size: 0.58rem;
+  }
+
+  .trust-note {
+    font-size: 0.59rem;
+    line-height: 1.3;
+  }
+
+  .donation-section {
+    padding: 7px 9px;
+  }
+
+  .qris-img {
+    width: 31px;
+    height: 31px;
+  }
+
+  .btn-donate-link {
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 0.64rem;
+  }
+}
+
+/* Narrow phones: allow only the metadata group to wrap if a very long number forces it. */
+@media (max-width: 390px) {
+  .result-item {
+    align-items: center;
+  }
+
+  .record-top {
+    min-width: 96px;
+  }
+
+  .right-content {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+
+  .badge-meta {
+    max-width: 52px;
+  }
+}
+
+/* =========================================================
+   PRIORITAS 6 v6 — COMPACT PAYMENT BRAND MARKS
+   Ikon kecil tepat di kiri nama bank/e-wallet.
+   ========================================================= */
+.badge-meta.payment-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 112px;
+  overflow: visible;
+}
+
+.payment-brand-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payment-brand-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 4px;
+  background: #64748b;
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  font-size: 6px;
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  overflow: hidden;
+}
+
+.payment-brand-bca,
+.payment-brand-bri,
+.payment-brand-dana,
+.payment-brand-blu { background: #1677c8; }
+.payment-brand-mandiri { background: #e3ad1b; color: #14213d; }
+.payment-brand-bni,
+.payment-brand-shopeepay { background: #e87522; }
+.payment-brand-bsi,
+.payment-brand-gopay { background: #138a72; }
+.payment-brand-ovo { background: #6d4bc3; }
+.payment-brand-seabank { background: #d84b3e; }
+.payment-brand-jago { background: #e4b820; color: #2b2445; }
+.payment-brand-generic {
+  background: var(--tab-bg);
+  color: var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--input-border);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+@media (max-width: 599px) {
+  .badge-meta.payment-brand {
+    gap: 3px;
+    max-width: 78px;
+  }
+
+  .payment-brand-icon {
+    width: 14px;
+    height: 14px;
+    flex-basis: 14px;
+    border-radius: 3px;
+    font-size: 5px;
+  }
+
+  .payment-brand-generic {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 390px) {
+  .badge-meta.payment-brand {
+    max-width: 68px;
+  }
+}

@@ -420,6 +420,50 @@ const GAME_OPTIONS = [
   "Lainnya..."
 ];
 
+const PAYMENT_BRAND_MARKS = {
+  bca: { label: 'BCA', mark: 'BCA' },
+  bri: { label: 'BRI', mark: 'BRI' },
+  mandiri: { label: 'Mandiri', mark: 'M' },
+  bni: { label: 'BNI', mark: 'BNI' },
+  bsi: { label: 'BSI', mark: 'BSI' },
+  dana: { label: 'DANA', mark: 'D' },
+  ovo: { label: 'OVO', mark: 'O' },
+  gopay: { label: 'GoPay', mark: 'G' },
+  shopeepay: { label: 'ShopeePay', mark: 'S' },
+  seabank: { label: 'Seabank', mark: 'S' },
+  jago: { label: 'Jago', mark: 'J' },
+  blu: { label: 'Blu', mark: 'B' }
+};
+
+function getPaymentBrandKey(value) {
+  const normalized = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+
+  if (normalized === 'bankmandiri' || normalized === 'mandiri') return 'mandiri';
+  if (normalized === 'bankjago' || normalized === 'jago') return 'jago';
+  if (normalized === 'bankseabank' || normalized === 'seabank') return 'seabank';
+  if (normalized === 'blu' || normalized === 'blubybcadigital') return 'blu';
+  if (PAYMENT_BRAND_MARKS[normalized]) return normalized;
+  return 'generic';
+}
+
+function createPaymentBrandIcon(metaValue) {
+  const key = getPaymentBrandKey(metaValue);
+  const span = document.createElement('span');
+  span.className = `payment-brand-icon payment-brand-${key}`;
+  span.setAttribute('aria-hidden', 'true');
+
+  if (key === 'generic') {
+    span.textContent = '▥';
+  } else {
+    span.textContent = PAYMENT_BRAND_MARKS[key].mark;
+  }
+
+  return span;
+}
+
 function safeStorageGet(key) {
   try {
     return localStorage.getItem(key);
@@ -2765,6 +2809,11 @@ function filterData() {
             )
           : '-';
 
+      const itemCategory =
+        item?.category === 'genshin'
+          ? 'genshin'
+          : activeTab;
+
       const li =
         document.createElement(
           'li'
@@ -2838,8 +2887,19 @@ function filterData() {
         metaSpan.className =
           'badge-meta';
 
-        metaSpan.textContent =
-          metaStr;
+        if (itemCategory === 'rekening') {
+          metaSpan.classList.add('payment-brand');
+          metaSpan.appendChild(
+            createPaymentBrandIcon(metaStr)
+          );
+
+          const metaLabel = document.createElement('span');
+          metaLabel.className = 'payment-brand-name';
+          metaLabel.textContent = metaStr;
+          metaSpan.appendChild(metaLabel);
+        } else {
+          metaSpan.textContent = metaStr;
+        }
 
         rightContent.appendChild(
           metaSpan
@@ -2876,7 +2936,6 @@ function filterData() {
         );
       }
 
-      const itemCategory = item?.category === 'genshin' ? 'genshin' : activeTab;
       const provenance = normalizeProvenance(
         itemCategory,
         item?.source_type,
