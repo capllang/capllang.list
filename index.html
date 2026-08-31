@@ -130,6 +130,34 @@
           class="date-input-flex"
           title="Tanggal Dilaporkan">
 
+        <select
+          id="sourceTypeInput"
+          aria-label="Jenis bukti rekening"
+          class="provenance-select-flex"
+          title="Jenis bukti rekening">
+          <option value="community_screenshot" selected>Screenshot Laporan</option>
+          <option value="legacy_archive">Arsip Capllang</option>
+        </select>
+
+        <select
+          id="verificationStatusInput"
+          aria-label="Status provenance"
+          class="provenance-select-flex"
+          title="Status provenance">
+          <option value="report_recorded">Laporan Tercatat</option>
+          <option value="evidence_reviewed" selected>Bukti Ditinjau</option>
+          <option value="multi_report">Laporan Multi-Sumber</option>
+        </select>
+
+        <input
+          type="text"
+          id="sourceRefInput"
+          aria-label="Referensi sumber opsional"
+          class="source-ref-flex"
+          maxlength="80"
+          autocomplete="off"
+          placeholder="Ref laporan/SS opsional (tanpa data pribadi)">
+
       </div>
 
       <button
@@ -171,7 +199,7 @@
   </div>
 
   <p class="trust-note">
-    Data di situs ini berasal dari laporan/daftar yang terdata dan bukan keputusan hukum. Verifikasi kembali informasi sebelum bertransaksi atau mengambil tindakan.
+    Untuk rekening, status menjelaskan pencatatan dan telaah bukti screenshot—bukan penetapan bersalah. Untuk UID HB, status verifikasi menunjukkan hasil pemeriksaan langsung admin terhadap UID pada saat verifikasi. Tetap lakukan pengecekan sesuai kebutuhan sebelum mengambil tindakan.
   </p>
 
   <div class="donation-section">
@@ -306,6 +334,26 @@
       <input
         type="date"
         id="editDateInput">
+
+      <label for="editSourceTypeInput">Bukti / metode verifikasi</label>
+      <select id="editSourceTypeInput">
+        <option value="community_screenshot">Screenshot Laporan</option>
+        <option value="legacy_archive">Arsip Capllang</option>
+      </select>
+
+      <label for="editVerificationStatusInput">Status provenance</label>
+      <select id="editVerificationStatusInput">
+        <option value="report_recorded">Laporan Tercatat</option>
+        <option value="evidence_reviewed">Bukti Ditinjau</option>
+        <option value="multi_report">Laporan Multi-Sumber</option>
+      </select>
+
+      <label for="editSourceRefInput">Referensi bukti/verifikasi (opsional, tanpa data pribadi)</label>
+      <input
+        type="text"
+        id="editSourceRefInput"
+        maxlength="80"
+        autocomplete="off">
     </div>
 
     <div class="modal-actions">

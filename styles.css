@@ -29,6 +29,15 @@
       --meta-badge: #4338ca;
       --meta-badge-bg: #eef2ff;
       --meta-badge-border: #c7d2fe;
+      --source-badge: #075985;
+      --source-badge-bg: #e0f2fe;
+      --source-badge-border: #bae6fd;
+      --status-report-recorded: #92400e;
+      --status-report-recorded-bg: #fffbeb;
+      --status-evidence-reviewed: #166534;
+      --status-evidence-reviewed-bg: #f0fdf4;
+      --status-multi-report: #5b21b6;
+      --status-multi-report-bg: #f5f3ff;
 
       --btn-primary: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
@@ -69,6 +78,15 @@
       --meta-badge: #a5b4fc;
       --meta-badge-bg: rgba(99, 102, 241, 0.18);
       --meta-badge-border: #4338ca;
+      --source-badge: #7dd3fc;
+      --source-badge-bg: rgba(14, 116, 144, 0.18);
+      --source-badge-border: #0e7490;
+      --status-report-recorded: #fcd34d;
+      --status-report-recorded-bg: rgba(146, 64, 14, 0.22);
+      --status-evidence-reviewed: #86efac;
+      --status-evidence-reviewed-bg: rgba(22, 101, 52, 0.22);
+      --status-multi-report: #c4b5fd;
+      --status-multi-report-bg: rgba(91, 33, 182, 0.22);
 
       --btn-primary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
       --btn-admin: linear-gradient(135deg, #334155 0%, #1e293b 100%);
@@ -326,6 +344,16 @@
       font-size: 0.78rem;
     }
 
+    .provenance-select-flex {
+      flex: 1 1 145px;
+      min-width: 0;
+    }
+
+    .source-ref-flex {
+      flex: 1 1 210px;
+      min-width: 0;
+    }
+
     .search-box input:focus,
     .admin-box input:focus,
     .admin-box select:focus {
@@ -458,6 +486,46 @@
       font-weight: 700;
       white-space: nowrap;
       text-transform: uppercase;
+    }
+
+    .badge-provenance {
+      border: 1px solid var(--input-border);
+      font-size: 0.68rem;
+      padding: 3px 7px;
+      border-radius: 20px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-source {
+      color: var(--source-badge);
+      background: var(--source-badge-bg);
+      border-color: var(--source-badge-border);
+    }
+
+    .badge-status-report_recorded {
+      color: var(--status-report-recorded);
+      background: var(--status-report-recorded-bg);
+    }
+
+    .badge-status-evidence_reviewed,
+    .badge-status-admin_verified {
+      color: var(--status-evidence-reviewed);
+      background: var(--status-evidence-reviewed-bg);
+    }
+
+    .badge-status-multi_report,
+    .badge-status-reverified {
+      color: var(--status-multi-report);
+      background: var(--status-multi-report-bg);
+    }
+
+    .badge-source-ref {
+      color: var(--text-muted);
+      background: var(--date-badge-bg);
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .btn-icon {

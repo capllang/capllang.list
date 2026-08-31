@@ -19,7 +19,7 @@ function apiUrl(path, params = null) {
 
   return `${API_PROXY_URL}?${query.toString()}`;
 }
-const CACHE_KEY = "cached_scammer_db_v2";
+const CACHE_KEY = "cached_scammer_db_v4";
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
 let database = {
@@ -35,6 +35,166 @@ let searchTimeout = null;
 let toastTimer = null;
 
 const PAGE_SIZE = 50;
+
+const PROVENANCE_CONFIG = {
+  rekening: {
+    sourceTypes: {
+      community_screenshot: 'Screenshot Laporan',
+      legacy_archive: 'Arsip Capllang'
+    },
+    statuses: {
+      report_recorded: 'Laporan Tercatat',
+      evidence_reviewed: 'Bukti Ditinjau',
+      multi_report: 'Laporan Multi-Sumber'
+    },
+    defaultSource: 'community_screenshot',
+    defaultStatus: 'evidence_reviewed'
+  },
+  genshin: {
+    sourceTypes: {
+      admin_direct_check: 'Verifikasi Langsung Admin'
+    },
+    statuses: {
+      admin_verified: 'Terverifikasi Admin',
+      reverified: 'Diverifikasi Ulang'
+    },
+    defaultSource: 'admin_direct_check',
+    defaultStatus: 'admin_verified'
+  }
+};
+
+const SOURCE_TYPE_LABELS = {
+  ...PROVENANCE_CONFIG.rekening.sourceTypes,
+  ...PROVENANCE_CONFIG.genshin.sourceTypes
+};
+
+const VERIFICATION_STATUS_LABELS = {
+  ...PROVENANCE_CONFIG.rekening.statuses,
+  ...PROVENANCE_CONFIG.genshin.statuses
+};
+
+function getProvenanceConfig(category) {
+  return PROVENANCE_CONFIG[category === 'genshin' ? 'genshin' : 'rekening'];
+}
+
+function normalizeProvenance(category, sourceType, verificationStatus) {
+  const normalizedCategory = category === 'genshin' ? 'genshin' : 'rekening';
+  const config = getProvenanceConfig(normalizedCategory);
+
+  if (normalizedCategory === 'genshin') {
+    return {
+      source_type: 'admin_direct_check',
+      verification_status:
+        verificationStatus === 'reverified'
+          ? 'reverified'
+          : 'admin_verified'
+    };
+  }
+
+  const legacySource = sourceType === 'legacy_archive';
+  const mappedStatus = {
+    reported: 'report_recorded',
+    reviewed: 'evidence_reviewed',
+    corroborated: 'multi_report'
+  }[verificationStatus];
+
+  const status = config.statuses[verificationStatus]
+    ? verificationStatus
+    : (mappedStatus || 'report_recorded');
+
+  return {
+    source_type: config.sourceTypes[sourceType]
+      ? sourceType
+      : (legacySource ? 'legacy_archive' : 'community_screenshot'),
+    verification_status: status
+  };
+}
+
+function getSourceTypeLabel(value, category = activeTab) {
+  const normalized = normalizeProvenance(category, value, null);
+  return SOURCE_TYPE_LABELS[normalized.source_type] || 'Provenance tidak tersedia';
+}
+
+function getVerificationStatusLabel(value, category = activeTab) {
+  const normalized = normalizeProvenance(category, null, value);
+  return VERIFICATION_STATUS_LABELS[normalized.verification_status] || 'Status tidak tersedia';
+}
+
+function isProvenanceCombinationValid(category, sourceType, status) {
+  const config = getProvenanceConfig(category);
+  return Boolean(config.sourceTypes[sourceType] && config.statuses[status]);
+}
+
+function populateProvenanceControls(category, { edit = false, sourceType = null, status = null } = {}) {
+  const config = getProvenanceConfig(category);
+  const sourceSelect = document.getElementById(edit ? 'editSourceTypeInput' : 'sourceTypeInput');
+  const statusSelect = document.getElementById(edit ? 'editVerificationStatusInput' : 'verificationStatusInput');
+  const sourceRefInput = document.getElementById(edit ? 'editSourceRefInput' : 'sourceRefInput');
+
+  if (!sourceSelect || !statusSelect) return;
+
+  const normalized =
+    sourceType === null && status === null
+      ? {
+          source_type: config.defaultSource,
+          verification_status: config.defaultStatus
+        }
+      : normalizeProvenance(category, sourceType, status);
+  const selectedSource = config.sourceTypes[normalized.source_type]
+    ? normalized.source_type
+    : config.defaultSource;
+  const selectedStatus = config.statuses[normalized.verification_status]
+    ? normalized.verification_status
+    : config.defaultStatus;
+
+  sourceSelect.replaceChildren();
+  Object.entries(config.sourceTypes).forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    option.selected = value === selectedSource;
+    sourceSelect.appendChild(option);
+  });
+
+  statusSelect.replaceChildren();
+  Object.entries(config.statuses).forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    option.selected = value === selectedStatus;
+    statusSelect.appendChild(option);
+  });
+
+  sourceSelect.setAttribute(
+    'aria-label',
+    category === 'genshin' ? 'Metode verifikasi UID' : 'Jenis bukti rekening'
+  );
+  sourceSelect.title =
+    category === 'genshin' ? 'Metode verifikasi UID' : 'Jenis bukti rekening';
+  statusSelect.setAttribute('aria-label', 'Status provenance');
+  statusSelect.title = 'Status provenance';
+
+  if (sourceRefInput) {
+    sourceRefInput.placeholder =
+      category === 'genshin'
+        ? 'Ref verifikasi opsional (tanpa data pribadi)'
+        : 'Ref laporan/SS opsional (tanpa data pribadi)';
+  }
+
+  const dateInput = document.getElementById(edit ? 'editDateInput' : 'newDateInput');
+  if (dateInput) {
+    const dateLabel = category === 'genshin' ? 'Tanggal verifikasi' : 'Tanggal laporan';
+    dateInput.setAttribute('aria-label', dateLabel);
+    dateInput.title = dateLabel;
+  }
+
+  if (edit) {
+    const editDateLabel = document.querySelector('label[for="editDateInput"]');
+    if (editDateLabel) {
+      editDateLabel.textContent = category === 'genshin' ? 'Tanggal verifikasi' : 'Tanggal laporan';
+    }
+  }
+}
 
 let adminSessionActive = false;
 let adminSessionExpiresAt = null;
@@ -326,7 +486,11 @@ function migrateData(dataArray, fallbackCategory = "") {
           category: fallbackCategory,
           nomor: String(item),
           tanggal: "-",
-          meta: "-"
+          meta: "-",
+          ...normalizeProvenance(fallbackCategory, "legacy_archive", "report_recorded"),
+          source_ref: "-",
+          provenance_updated_at: null,
+          created_at: null
         };
       }
 
@@ -355,7 +519,24 @@ function migrateData(dataArray, fallbackCategory = "") {
         meta:
           (item.meta || item.bank || item.game)
             ? String(item.meta || item.bank || item.game)
-            : "-"
+            : "-",
+        ...normalizeProvenance(
+          item.category ? String(item.category) : fallbackCategory,
+          item.source_type,
+          item.verification_status
+        ),
+        source_ref:
+          item.source_ref && String(item.source_ref).trim()
+            ? String(item.source_ref).trim()
+            : "-",
+        provenance_updated_at:
+          Number.isFinite(Number(item.provenance_updated_at))
+            ? Number(item.provenance_updated_at)
+            : null,
+        created_at:
+          item.created_at === null || item.created_at === undefined
+            ? null
+            : item.created_at
       };
     })
     .filter(item => item && item.nomor);
@@ -1394,6 +1575,10 @@ async function addNumber() {
       'metaCustomInput'
     );
 
+  const sourceTypeInput = document.getElementById('sourceTypeInput');
+  const verificationStatusInput = document.getElementById('verificationStatusInput');
+  const sourceRefInput = document.getElementById('sourceRefInput');
+
   if (!isAdmin || !adminSessionActive) {
     await showConfirm({
       title: "Sesi Admin Berakhir",
@@ -1415,6 +1600,21 @@ async function addNumber() {
 
   const dateVal =
     dateInput.value;
+
+  const provenanceConfig = getProvenanceConfig(activeTab);
+  const sourceType = sourceTypeInput?.value || provenanceConfig.defaultSource;
+  const verificationStatus = verificationStatusInput?.value || provenanceConfig.defaultStatus;
+  const sourceRef = sourceRefInput?.value.trim() || '-';
+
+  if (!isProvenanceCombinationValid(activeTab, sourceType, verificationStatus)) {
+    showToast("⚠️ Status provenance tidak sesuai dengan kategori data.");
+    return;
+  }
+
+  if (sourceRef.length > 80) {
+    showToast("⚠️ Referensi sumber maksimal 80 karakter.");
+    return;
+  }
 
   if (!rawVal) {
 
@@ -1510,7 +1710,10 @@ async function addNumber() {
           category: activeTab,
           nomor: cleanVal,
           tanggal: dateVal,
-          meta: selectedMeta
+          meta: selectedMeta,
+          source_type: sourceType,
+          source_ref: sourceRef,
+          verification_status: verificationStatus
         })
       }
     );
@@ -1567,6 +1770,8 @@ async function addNumber() {
 
     input.value = "";
     customMetaInput.value = "";
+    populateProvenanceControls(activeTab);
+    if (sourceRefInput) sourceRefInput.value = '';
 
     updateMetaSelectOptions();
 
@@ -1741,6 +1946,15 @@ function openEditRecord(itemObj) {
     itemObj.tanggal && itemObj.tanggal !== '-'
       ? String(itemObj.tanggal)
       : getLocalDateInputValue();
+  populateProvenanceControls(category, {
+    edit: true,
+    sourceType: itemObj.source_type,
+    status: itemObj.verification_status
+  });
+  document.getElementById('editSourceRefInput').value =
+    itemObj.source_ref && itemObj.source_ref !== '-'
+      ? String(itemObj.source_ref)
+      : '';
 
   openModalAccessible(
     'editRecordModal',
@@ -1786,6 +2000,10 @@ async function saveEditedRecord() {
   const metaRaw =
     document.getElementById('editMetaInput').value.trim();
   const meta = metaRaw || '-';
+  const sourceType = document.getElementById('editSourceTypeInput').value;
+  const verificationStatus = document.getElementById('editVerificationStatusInput').value;
+  const sourceRefRaw = document.getElementById('editSourceRefInput').value.trim();
+  const sourceRef = sourceRefRaw || '-';
 
   if (!['rekening', 'genshin'].includes(category)) {
     showToast("⚠️ Kategori tidak valid.");
@@ -1816,6 +2034,16 @@ async function saveEditedRecord() {
     return;
   }
 
+  if (!isProvenanceCombinationValid(category, sourceType, verificationStatus)) {
+    showToast("⚠️ Status provenance tidak sesuai dengan kategori data.");
+    return;
+  }
+
+  if (sourceRef.length > 80) {
+    showToast("⚠️ Referensi sumber maksimal 80 karakter.");
+    return;
+  }
+
   const saveBtn = document.getElementById('editSaveBtn');
   saveBtn.disabled = true;
   saveBtn.textContent = "Menyimpan...";
@@ -1834,7 +2062,10 @@ async function saveEditedRecord() {
           category,
           nomor,
           tanggal,
-          meta
+          meta,
+          source_type: sourceType,
+          source_ref: sourceRef,
+          verification_status: verificationStatus
         })
       }
     );
@@ -2169,6 +2400,7 @@ async function switchTab(tab) {
       : "Tulis UID game di sini...";
 
   updateMetaSelectOptions();
+  populateProvenanceControls(tab);
 
   const query =
     getSearchQuery();
@@ -2333,14 +2565,14 @@ function copyReportTemplate(itemObj) {
       ? itemObj.nomor
       : itemObj;
 
+  const category =
+    typeof itemObj === 'object' && itemObj.category === 'genshin'
+      ? 'genshin'
+      : 'rekening';
+
   const metaStr =
     typeof itemObj === 'object'
-      ? (
-          itemObj.meta ||
-          itemObj.bank ||
-          itemObj.game ||
-          '-'
-        )
+      ? (itemObj.meta || itemObj.bank || itemObj.game || '-')
       : '-';
 
   const tanggalStr =
@@ -2348,18 +2580,43 @@ function copyReportTemplate(itemObj) {
       ? itemObj.tanggal
       : '-';
 
+  const normalized = normalizeProvenance(
+    category,
+    typeof itemObj === 'object' ? itemObj.source_type : null,
+    typeof itemObj === 'object' ? itemObj.verification_status : null
+  );
+
+  const sourceLabel = getSourceTypeLabel(normalized.source_type, category);
+  const statusLabel = getVerificationStatusLabel(normalized.verification_status, category);
+
+  const sourceRef =
+    typeof itemObj === 'object' && itemObj.source_ref && itemObj.source_ref !== '-'
+      ? String(itemObj.source_ref)
+      : '-';
+
+  const isUid = category === 'genshin';
+  const heading = isUid ? '🛡️ VERIFIKASI UID HB' : '🚨 CATATAN LAPORAN REKENING';
+  const dateLabel = isUid ? 'Tanggal Verifikasi' : 'Tanggal Laporan';
+  const provenanceLabel = isUid ? 'Metode Verifikasi' : 'Jenis Bukti';
+  const disclaimer = isUid
+    ? 'Status menunjukkan hasil pemeriksaan langsung admin pada tanggal verifikasi.'
+    : 'Status menjelaskan dokumentasi/telaah bukti dan bukan penetapan bersalah.';
+
   const template =
-`🚨 LAPORAN PENIPUAN 🚨
+`${heading}
 
 Nomor/UID: ${nomorStr}
 Platform/Bank: ${metaStr}
-Tanggal Terdata: ${tanggalStr}
+${dateLabel}: ${tanggalStr}
+${provenanceLabel}: ${sourceLabel}
+Status: ${statusLabel}
+Referensi: ${sourceRef}
 
-Hati-hati terhadap modus penipuan dengan informasi di atas!`;
+Catatan: ${disclaimer}`;
 
   copyToClipboard(
     template,
-    'Template laporan disalin!'
+    isUid ? 'Template verifikasi disalin!' : 'Template laporan disalin!'
   );
 }
 
@@ -2601,6 +2858,41 @@ function filterData() {
         rightContent.appendChild(
           dateSpan
         );
+      }
+
+      const itemCategory = item?.category === 'genshin' ? 'genshin' : activeTab;
+      const provenance = normalizeProvenance(
+        itemCategory,
+        item?.source_type,
+        item?.verification_status
+      );
+      const sourceType = provenance.source_type;
+      const verificationStatus = provenance.verification_status;
+
+      const sourceBadge = document.createElement('span');
+      sourceBadge.className = 'badge-provenance badge-source';
+      sourceBadge.textContent = getSourceTypeLabel(sourceType, itemCategory);
+      sourceBadge.title = itemCategory === 'genshin'
+        ? `Metode verifikasi: ${getSourceTypeLabel(sourceType, itemCategory)}`
+        : `Jenis bukti: ${getSourceTypeLabel(sourceType, itemCategory)}`;
+      rightContent.appendChild(sourceBadge);
+
+      const statusBadge = document.createElement('span');
+      statusBadge.className = `badge-provenance badge-status-${verificationStatus}`;
+      statusBadge.textContent = getVerificationStatusLabel(verificationStatus, itemCategory);
+      statusBadge.title = itemCategory === 'genshin'
+        ? `Status verifikasi UID: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`
+        : `Status laporan: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`;
+      rightContent.appendChild(statusBadge);
+
+      if (item?.source_ref && item.source_ref !== '-') {
+        const sourceRefBadge = document.createElement('span');
+        sourceRefBadge.className = 'badge-provenance badge-source-ref';
+        sourceRefBadge.textContent = `Ref: ${item.source_ref}`;
+        sourceRefBadge.title = itemCategory === 'genshin'
+          ? `Referensi verifikasi: ${item.source_ref}`
+          : `Referensi laporan/bukti: ${item.source_ref}`;
+        rightContent.appendChild(sourceRefBadge);
       }
 
       const copyBtn =
@@ -3020,6 +3312,11 @@ function bindStaticEvents() {
   });
   document.getElementById('editCancelBtn')
     ?.addEventListener('click', closeEditRecordModal);
+  document.getElementById('editCategoryInput')
+    ?.addEventListener('change', event => {
+      const category = event.currentTarget.value === 'genshin' ? 'genshin' : 'rekening';
+      populateProvenanceControls(category, { edit: true });
+    });
   document.getElementById('editSaveBtn')
     ?.addEventListener('click', saveEditedRecord);
   document.getElementById('editNumberInput')
@@ -3046,6 +3343,7 @@ function bindStaticEvents() {
 }
 
 bindStaticEvents();
+populateProvenanceControls(activeTab);
 
 /* =========================
    ACCESSIBLE MODAL KEYBOARD
