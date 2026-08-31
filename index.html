@@ -43,7 +43,7 @@
         class="home-title-button"
         aria-label="Kembali ke halaman utama"
         title="Kembali ke Halaman Utama">
-        🛡️ CEK SCAMMER & UID HB
+        🛡️ UID HB & NO SCAMMER
       </button>
     </h1>
 
@@ -255,6 +255,72 @@
         Masuk
       </button>
 
+    </div>
+  </div>
+</div>
+
+<!-- EDIT RECORD MODAL -->
+<div
+  id="editRecordModal"
+  class="qris-modal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+  aria-labelledby="editRecordTitle"
+  aria-describedby="editRecordDesc">
+
+  <div class="edit-modal-content">
+    <h3 id="editRecordTitle" class="modal-title">
+      ✏️ Edit Data
+    </h3>
+
+    <p id="editRecordDesc" class="modal-description">
+      Perbarui data yang salah tanpa menghapus record lama.
+    </p>
+
+    <div class="edit-form">
+      <label for="editCategoryInput">Kategori</label>
+      <select id="editCategoryInput">
+        <option value="rekening">Rekening / E-Wallet</option>
+        <option value="genshin">UID Game</option>
+      </select>
+
+      <label for="editNumberInput">Nomor / UID</label>
+      <input
+        type="text"
+        id="editNumberInput"
+        inputmode="numeric"
+        maxlength="40"
+        autocomplete="off"
+        spellcheck="false">
+
+      <label for="editMetaInput">Bank / Game</label>
+      <input
+        type="text"
+        id="editMetaInput"
+        maxlength="100"
+        autocomplete="off">
+
+      <label for="editDateInput">Tanggal dilaporkan</label>
+      <input
+        type="date"
+        id="editDateInput">
+    </div>
+
+    <div class="modal-actions">
+      <button
+        type="button"
+        class="btn btn-confirm-cancel flex-1"
+        id="editCancelBtn">
+        Batal
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-add flex-1"
+        id="editSaveBtn">
+        Simpan Perubahan
+      </button>
     </div>
   </div>
 </div>

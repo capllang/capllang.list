@@ -19,10 +19,11 @@ const PAGE_SIZE = 50;
 let adminSessionActive = false;
 let offlineMode = false;
 let statusResetTimer = null;
+let editingRecord = null;
 
 function getDefaultStatusText() {
   if (!offlineMode) {
-    return "🟢 Koneksi aktif — data terbaru tersedia.";
+    return "🟢 Terhubung ke D1 — data dimuat bertahap.";
   }
 
   return database.lastUpdated
@@ -851,7 +852,7 @@ async function fetchOnlineDatabase() {
     offlineMode = false;
 
     status.innerText =
-      "🟢 Koneksi aktif — data terbaru tersedia.";
+      "🟢 Terhubung ke D1 — data dimuat bertahap.";
 
     // Isi cache kategori lain tanpa menunda tampilan awal.
     // Hormati Data Saver agar tidak membuat request tambahan yang tidak perlu.
@@ -1607,6 +1608,242 @@ function closeConfirmModal(result) {
 }
 
 /* =========================
+   EDIT RECORD
+========================= */
+
+function openEditRecord(itemObj) {
+  if (!isAdmin || !adminSessionActive) {
+    showToast("⚠️ Sesi admin tidak aktif.");
+    exitAdminMode();
+    return;
+  }
+
+  const id = Number(itemObj?.id || 0);
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    showToast("⚠️ ID data tidak tersedia. Muat ulang halaman.");
+    return;
+  }
+
+  editingRecord = { ...itemObj, id };
+
+  const category =
+    itemObj.category === 'genshin'
+      ? 'genshin'
+      : 'rekening';
+
+  document.getElementById('editCategoryInput').value = category;
+  document.getElementById('editNumberInput').value = String(itemObj.nomor || '');
+  document.getElementById('editMetaInput').value =
+    itemObj.meta && itemObj.meta !== '-'
+      ? String(itemObj.meta)
+      : '';
+  document.getElementById('editDateInput').value =
+    itemObj.tanggal && itemObj.tanggal !== '-'
+      ? String(itemObj.tanggal)
+      : getLocalDateInputValue();
+
+  openModalAccessible(
+    'editRecordModal',
+    '#editNumberInput'
+  );
+}
+
+function closeEditRecordModal() {
+  closeModalAccessible('editRecordModal');
+  editingRecord = null;
+}
+
+async function saveEditedRecord() {
+  if (!isAdmin || !adminSessionActive) {
+    await showConfirm({
+      title: "Sesi Admin Berakhir",
+      message: "Sesi admin tidak lagi aktif. Silakan login kembali.",
+      confirmText: "OK",
+      danger: false
+    });
+    closeEditRecordModal();
+    exitAdminMode();
+    return;
+  }
+
+  const recordBeforeEdit = editingRecord;
+  const id = Number(recordBeforeEdit?.id || 0);
+
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    showToast("⚠️ Data edit tidak valid.");
+    closeEditRecordModal();
+    return;
+  }
+
+  const category =
+    document.getElementById('editCategoryInput').value;
+  const nomor = document
+    .getElementById('editNumberInput')
+    .value
+    .replace(/\D/g, '');
+  const tanggal =
+    document.getElementById('editDateInput').value;
+  const metaRaw =
+    document.getElementById('editMetaInput').value.trim();
+  const meta = metaRaw || '-';
+
+  if (!['rekening', 'genshin'].includes(category)) {
+    showToast("⚠️ Kategori tidak valid.");
+    return;
+  }
+
+  const nomorValid =
+    category === 'genshin'
+      ? /^\d{5,12}$/.test(nomor)
+      : /^\d{5,25}$/.test(nomor);
+
+  if (!nomorValid) {
+    showToast(
+      category === 'genshin'
+        ? "⚠️ UID harus 5 - 12 digit."
+        : "⚠️ Nomor harus 5 - 25 digit."
+    );
+    return;
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) {
+    showToast("⚠️ Tanggal wajib diisi.");
+    return;
+  }
+
+  if (meta.length > 100) {
+    showToast("⚠️ Bank/Game maksimal 100 karakter.");
+    return;
+  }
+
+  const saveBtn = document.getElementById('editSaveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Menyimpan...";
+  setLoading(true, "Memperbarui data...");
+
+  try {
+    const res = await fetch(
+      `${PROXY_URL}/records/${id}`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          category,
+          nomor,
+          tanggal,
+          meta
+        })
+      }
+    );
+
+    let responseData = {};
+    try {
+      responseData = await res.json();
+    } catch (_) {}
+
+    if (res.status === 401 || res.status === 403) {
+      await showConfirm({
+        title: "Akses Ditolak",
+        message: "Sesi Admin telah berakhir atau akses ditolak oleh server.",
+        confirmText: "OK",
+        danger: false
+      });
+      closeEditRecordModal();
+      exitAdminMode();
+      return;
+    }
+
+    if (res.status === 409) {
+      showToast("⚠️ Nomor/UID sudah dipakai data lain.");
+      return;
+    }
+
+    if (res.status === 404) {
+      showToast("⚠️ Data sudah tidak ditemukan. Muat ulang halaman.");
+      closeEditRecordModal();
+      await fetchCategoryRecords(activeTab, {
+        reset: true,
+        query: getSearchQuery(),
+        silent: true
+      });
+      filterData();
+      return;
+    }
+
+    if (!res.ok || !responseData.record) {
+      throw new Error(
+        responseData.error ||
+        "Gagal memperbarui data"
+      );
+    }
+
+    const updatedRecord =
+      migrateData(
+        [responseData.record],
+        category
+      )[0];
+
+    if (!updatedRecord) {
+      throw new Error("Respons record tidak valid");
+    }
+
+    closeEditRecordModal();
+
+    if (category !== activeTab) {
+      paginationState[category].query = null;
+      paginationState[category].hasMore = false;
+      paginationState[category].nextCursor = null;
+    }
+
+    const currentQuery = getSearchQuery();
+    const refreshed = await fetchCategoryRecords(
+      activeTab,
+      {
+        reset: true,
+        query: currentQuery,
+        silent: true
+      }
+    );
+
+    if (!refreshed) {
+      for (const key of ['rekening', 'genshin']) {
+        database[key] = database[key].filter(
+          item => Number(item.id) !== id
+        );
+      }
+
+      if (category === activeTab && !currentQuery) {
+        database[category].unshift(updatedRecord);
+        sortRecords(database[category]);
+      }
+
+      cacheDatabase();
+    }
+
+    filterData();
+    showTransientStatus("🟢 Data berhasil diperbarui di D1!");
+    showToast("Data berhasil diperbarui!");
+
+  } catch (err) {
+    console.error("Edit record error:", err);
+
+    await showConfirm({
+      title: "Pembaruan Gagal",
+      message: "Data gagal diperbarui karena masalah jaringan atau server.",
+      confirmText: "OK",
+      danger: false
+    });
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Simpan Perubahan";
+    setLoading(false);
+  }
+}
+
+/* =========================
    DELETE
 ========================= */
 
@@ -1932,6 +2169,18 @@ document
         );
 
       if (
+        target.classList.contains(
+          'btn-edit'
+        )
+      ) {
+
+        e.stopPropagation();
+
+        openEditRecord(
+          itemObj
+        );
+
+      } else if (
         target.classList.contains(
           'btn-delete'
         )
@@ -2273,6 +2522,25 @@ function filterData() {
       );
 
       if (isAdmin) {
+        const editBtn =
+          document.createElement(
+            'button'
+          );
+
+        editBtn.type = 'button';
+        editBtn.className =
+          'btn btn-edit';
+        editBtn.textContent =
+          'Edit';
+        editBtn.setAttribute(
+          'aria-label',
+          `Edit data ${nomorStr}`
+        );
+
+        rightContent.appendChild(
+          editBtn
+        );
+
         const deleteBtn =
           document.createElement(
             'button'
@@ -2639,6 +2907,19 @@ function bindStaticEvents() {
   document.getElementById('adminLoginBtn')
     ?.addEventListener('click', submitAdminLogin);
 
+  const editRecordModal = document.getElementById('editRecordModal');
+  editRecordModal?.addEventListener('click', event => {
+    if (event.target === event.currentTarget) closeEditRecordModal();
+  });
+  document.getElementById('editCancelBtn')
+    ?.addEventListener('click', closeEditRecordModal);
+  document.getElementById('editSaveBtn')
+    ?.addEventListener('click', saveEditedRecord);
+  document.getElementById('editNumberInput')
+    ?.addEventListener('keydown', event => {
+      if (event.key === 'Enter') saveEditedRecord();
+    });
+
   const confirmModal = document.getElementById('confirmModal');
   confirmModal?.addEventListener('click', event => {
     if (event.target === event.currentTarget) closeConfirmModal(false);
@@ -2668,6 +2949,7 @@ document.addEventListener(
   (event) => {
     const openModal = [
       'confirmModal',
+      'editRecordModal',
       'adminModal',
       'qrisModal'
     ]
@@ -2681,6 +2963,8 @@ document.addEventListener(
 
       if (openModal.id === 'confirmModal') {
         closeConfirmModal(false);
+      } else if (openModal.id === 'editRecordModal') {
+        closeEditRecordModal();
       } else if (openModal.id === 'adminModal') {
         closeAdminModal();
       } else if (openModal.id === 'qrisModal') {

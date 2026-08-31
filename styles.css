@@ -358,6 +358,13 @@
       padding: 8px 16px;
     }
 
+    .btn-edit {
+      background: var(--btn-primary);
+      padding: 5px 8px;
+      font-size: 0.7rem;
+      border-radius: 6px;
+    }
+
     .btn-delete {
       background: var(--btn-delete);
       padding: 5px 8px;
@@ -560,6 +567,7 @@
     }
 
     .admin-modal-content,
+    .edit-modal-content,
     .confirm-modal-content {
       background: var(--card-bg);
       backdrop-filter: blur(18px);
@@ -570,6 +578,41 @@
       width: 90%;
       max-width: 320px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }
+
+    .edit-modal-content {
+      max-width: 380px;
+    }
+
+    .edit-form {
+      display: grid;
+      gap: 6px;
+      margin: 14px 0 16px;
+    }
+
+    .edit-form label {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .edit-form input,
+    .edit-form select {
+      width: 100%;
+      padding: 9px 11px;
+      font-size: 0.8rem;
+      background: var(--input-bg);
+      color: var(--text-title);
+      border: 1px solid var(--input-border);
+      border-radius: 9px;
+      outline: none;
+    }
+
+    .edit-form input:focus,
+    .edit-form select:focus {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
 
     .confirm-modal-content {
