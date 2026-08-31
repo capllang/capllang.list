@@ -18,17 +18,35 @@ const PAGE_SIZE = 50;
 
 let adminSessionActive = false;
 let offlineMode = false;
+let connectionState = 'checking';
 let statusResetTimer = null;
+let connectionRecoveryInProgress = false;
 let editingRecord = null;
 
-function getDefaultStatusText() {
-  if (!offlineMode) {
-    return "🟢 Terhubung ke D1 — data dimuat bertahap.";
-  }
+function hasUsableLocalData() {
+  return Boolean(
+    database.lastUpdated ||
+    database.rekening.length ||
+    database.genshin.length
+  );
+}
 
-  return database.lastUpdated
-    ? "🟡 Mode Offline: cache lokal maksimal 12 jam."
-    : "🔴 Mode Offline: cache tidak tersedia atau kedaluwarsa.";
+function getDefaultStatusText() {
+  switch (connectionState) {
+    case 'online':
+      return "🟢 Koneksi aktif — data terbaru tersedia.";
+    case 'offline-cache':
+      return "🟡 Offline — menampilkan data terakhir yang sudah dimuat.";
+    case 'offline-empty':
+      return "🔴 Offline — data tersimpan tidak tersedia.";
+    case 'server-error-cache':
+      return "🟠 D1 tidak dapat dihubungi — menampilkan data terakhir yang tersedia.";
+    case 'server-error-empty':
+      return "🔴 D1 tidak dapat diakses — data terbaru belum tersedia.";
+    case 'checking':
+    default:
+      return "⏳ Memeriksa koneksi dan data...";
+  }
 }
 
 function restoreDefaultStatusBar() {
@@ -39,6 +57,32 @@ function restoreDefaultStatusBar() {
 
   const status = document.getElementById('statusBar');
   if (status) status.textContent = getDefaultStatusText();
+}
+
+function refreshStatusBarIfIdle() {
+  if (statusResetTimer) return;
+
+  const status = document.getElementById('statusBar');
+  if (status) status.textContent = getDefaultStatusText();
+}
+
+function setConnectionState(nextState) {
+  connectionState = nextState;
+  offlineMode = nextState !== 'online';
+  refreshStatusBarIfIdle();
+}
+
+function markConnectionFailure(error = null) {
+  const hasLocalData = hasUsableLocalData();
+  const browserOffline =
+    navigator.onLine === false ||
+    error?.connectionKind === 'offline';
+
+  setConnectionState(
+    browserOffline
+      ? (hasLocalData ? 'offline-cache' : 'offline-empty')
+      : (hasLocalData ? 'server-error-cache' : 'server-error-empty')
+  );
 }
 
 function showTransientStatus(message, duration = 3000) {
@@ -716,17 +760,21 @@ async function fetchCategoryRecords(
     );
 
     if (!res.ok) {
-      throw new Error(
+      const error = new Error(
         `Gagal mengambil data (${res.status})`
       );
+      error.connectionKind = 'server';
+      throw error;
     }
 
     const data = await res.json();
 
     if (!Array.isArray(data.records)) {
-      throw new Error(
+      const error = new Error(
         "Format data D1 tidak sesuai"
       );
+      error.connectionKind = 'server';
+      throw error;
     }
 
     const incoming = migrateData(
@@ -779,10 +827,10 @@ async function fetchCategoryRecords(
       state.total = database[category].length;
     }
 
-    offlineMode = false;
     database.lastUpdated =
       new Date().toISOString();
 
+    setConnectionState('online');
     cacheDatabase();
 
     return true;
@@ -800,6 +848,7 @@ async function fetchCategoryRecords(
       err
     );
 
+    markConnectionFailure(err);
     return false;
 
   } finally {
@@ -831,8 +880,15 @@ async function fetchOnlineDatabase() {
   );
 
   try {
+    setConnectionState('checking');
     status.innerText =
-      "⏳ Mengambil data dari D1...";
+      "⏳ Memeriksa koneksi ke D1...";
+
+    if (navigator.onLine === false) {
+      const error = new Error("Browser sedang offline");
+      error.connectionKind = 'offline';
+      throw error;
+    }
 
     const initialOk = await fetchCategoryRecords(
       activeTab,
@@ -849,10 +905,8 @@ async function fetchOnlineDatabase() {
       );
     }
 
-    offlineMode = false;
-
-    status.innerText =
-      "🟢 Terhubung ke D1 — data dimuat bertahap.";
+    setConnectionState('online');
+    status.innerText = getDefaultStatusText();
 
     // Isi cache kategori lain tanpa menunda tampilan awal.
     // Hormati Data Saver agar tidak membuat request tambahan yang tidak perlu.
@@ -894,10 +948,9 @@ async function fetchOnlineDatabase() {
       };
 
       restorePaginationState(parsed);
-      offlineMode = true;
 
-      status.innerText =
-        "🟡 Mode Offline: cache lokal maksimal 12 jam.";
+      markConnectionFailure(err);
+      status.innerText = getDefaultStatusText();
     } else {
       database = {
         rekening: [],
@@ -920,10 +973,8 @@ async function fetchOnlineDatabase() {
         nextCursor: null
       };
 
-      offlineMode = true;
-
-      status.innerText =
-        "🔴 Mode Offline: cache tidak tersedia atau kedaluwarsa.";
+      markConnectionFailure(err);
+      status.innerText = getDefaultStatusText();
     }
 
   } finally {
@@ -934,9 +985,9 @@ async function fetchOnlineDatabase() {
 }
 
 async function loadMoreRecords() {
-  if (offlineMode) {
+  if (navigator.onLine === false) {
     showToast(
-      "Mode offline: data tambahan membutuhkan koneksi."
+      "Data tambahan membutuhkan koneksi aktif."
     );
     return;
   }
@@ -964,8 +1015,8 @@ async function runServerSearch() {
 
   updateUrlParam(query);
 
-  if (offlineMode) {
-    // Saat offline, pencarian hanya pada cache yang tersedia.
+  if (navigator.onLine === false) {
+    // Saat benar-benar offline, pencarian hanya pada data lokal yang tersedia.
     filterData();
     return;
   }
@@ -1454,6 +1505,8 @@ async function addNumber() {
       );
     }
 
+    setConnectionState('online');
+
     const newItem =
       migrateData(
         [responseData.record],
@@ -1535,6 +1588,7 @@ async function addNumber() {
       danger: false
     });
 
+    markConnectionFailure(err);
     showTransientStatus("⚠️ Simpan gagal", 4000);
 
   } finally {
@@ -1780,6 +1834,8 @@ async function saveEditedRecord() {
       );
     }
 
+    setConnectionState('online');
+
     const updatedRecord =
       migrateData(
         [responseData.record],
@@ -1829,6 +1885,7 @@ async function saveEditedRecord() {
 
   } catch (err) {
     console.error("Edit record error:", err);
+    markConnectionFailure(err);
 
     await showConfirm({
       title: "Pembaruan Gagal",
@@ -1931,6 +1988,8 @@ async function deleteNumber(
       );
     }
 
+    setConnectionState('online');
+
     const currentQuery =
       getSearchQuery();
 
@@ -1981,6 +2040,8 @@ async function deleteNumber(
       "Delete record error:",
       err
     );
+
+    markConnectionFailure(err);
 
     await showConfirm({
       title: "Penghapusan Gagal",
@@ -2070,7 +2131,7 @@ async function switchTab(tab) {
     paginationState[tab];
 
   if (
-    !offlineMode &&
+    navigator.onLine !== false &&
     state.query !== query
   ) {
     const ok = await fetchCategoryRecords(
@@ -2578,7 +2639,7 @@ function filterData() {
     });
 
     if (
-      !offlineMode &&
+      navigator.onLine !== false &&
       state.hasMore
     ) {
       const loadMoreLi =
@@ -2977,6 +3038,66 @@ document.addEventListener(
     trapFocus(event, openModal);
   }
 );
+
+/* =========================
+   CONNECTION STATE
+========================= */
+
+function cancelActiveCategoryRequests() {
+  for (const category of ['rekening', 'genshin']) {
+    categoryControllers[category]?.abort();
+    categoryControllers[category] = null;
+  }
+}
+
+function handleBrowserOffline() {
+  cancelActiveCategoryRequests();
+  setConnectionState(
+    hasUsableLocalData()
+      ? 'offline-cache'
+      : 'offline-empty'
+  );
+  filterData();
+}
+
+async function handleBrowserOnline() {
+  if (connectionRecoveryInProgress) return;
+
+  connectionRecoveryInProgress = true;
+  setConnectionState('checking');
+
+  const status = document.getElementById('statusBar');
+  if (status) {
+    status.textContent =
+      "⏳ Koneksi kembali — menyinkronkan data D1...";
+  }
+
+  try {
+    const ok = await fetchCategoryRecords(
+      activeTab,
+      {
+        reset: true,
+        query: getSearchQuery(),
+        silent: true
+      }
+    );
+
+    if (ok) {
+      filterData();
+      showTransientStatus(
+        "🟢 Koneksi pulih — data terbaru tersedia.",
+        2500
+      );
+    } else {
+      restoreDefaultStatusBar();
+    }
+  } finally {
+    connectionRecoveryInProgress = false;
+  }
+}
+
+window.addEventListener('offline', handleBrowserOffline);
+window.addEventListener('online', handleBrowserOnline);
 
 /* =========================
    SERVICE WORKER
