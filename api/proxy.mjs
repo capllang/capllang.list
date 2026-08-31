@@ -14,6 +14,24 @@ function parseCookieHeader(header = '') {
   return out;
 }
 
+function getSessionToken(req) {
+  // Jalur resmi helper Vercel Node.js Function.
+  const helperToken = req?.cookies?.[SESSION_COOKIE];
+  if (typeof helperToken === 'string' && helperToken) {
+    return helperToken;
+  }
+
+  // Fallback untuk runtime/request yang menyediakan header Cookie langsung.
+  const cookieHeader = typeof req?.headers?.cookie === 'string'
+    ? req.headers.cookie
+    : '';
+
+  const headerToken = parseCookieHeader(cookieHeader)[SESSION_COOKIE];
+  return typeof headerToken === 'string' && headerToken
+    ? headerToken
+    : null;
+}
+
 export default async function handler(req, res) {
   try {
     const rawPath = Array.isArray(req.query?.path)
@@ -30,7 +48,9 @@ export default async function handler(req, res) {
     for (const [key, value] of Object.entries(req.query || {})) {
       if (key === 'path' || value === undefined || value === null) continue;
       if (Array.isArray(value)) {
-        for (const item of value) upstreamUrl.searchParams.append(key, String(item));
+        for (const item of value) {
+          upstreamUrl.searchParams.append(key, String(item));
+        }
       } else {
         upstreamUrl.searchParams.set(key, String(value));
       }
@@ -42,14 +62,13 @@ export default async function handler(req, res) {
       if (typeof value === 'string' && value) headers[name] = value;
     }
 
-    const cookieHeader = typeof req.headers?.cookie === 'string'
-      ? req.headers.cookie
-      : '';
-
-    if (cookieHeader) {
-      headers.cookie = cookieHeader;
-      const sessionToken = parseCookieHeader(cookieHeader)[SESSION_COOKIE];
-      if (sessionToken) headers['x-admin-session'] = sessionToken;
+    // Ambil session dari helper Vercel atau Cookie header, lalu kirim ulang
+    // ke Worker melalui dua jalur. Worker lama bisa membaca Cookie;
+    // Worker final juga bisa memakai X-Admin-Session sebagai fallback.
+    const sessionToken = getSessionToken(req);
+    if (sessionToken) {
+      headers.cookie = `${SESSION_COOKIE}=${sessionToken}`;
+      headers['x-admin-session'] = sessionToken;
     }
 
     // Worker memvalidasi Origin untuk route admin yang mengubah state.
@@ -90,6 +109,8 @@ export default async function handler(req, res) {
       if (value) res.setHeader(name, value);
     }
 
+    // Pertahankan Set-Cookie dari Worker agar login/logout tetap mengubah
+    // cookie HttpOnly pada domain frontend Vercel.
     if (typeof upstream.headers.getSetCookie === 'function') {
       const cookies = upstream.headers.getSetCookie();
       if (cookies.length) res.setHeader('Set-Cookie', cookies);
