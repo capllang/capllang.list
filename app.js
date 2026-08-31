@@ -1,4 +1,24 @@
-const PROXY_URL = "/api";
+const API_PROXY_URL = "/api/proxy";
+
+function apiUrl(path, params = null) {
+  const cleanPath = String(path || '').replace(/^\/+/, '');
+  const query = new URLSearchParams();
+  query.set('path', cleanPath);
+
+  if (params instanceof URLSearchParams) {
+    for (const [key, value] of params.entries()) {
+      query.append(key, value);
+    }
+  } else if (params && typeof params === 'object') {
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null) {
+        query.append(key, String(value));
+      }
+    }
+  }
+
+  return `${API_PROXY_URL}?${query.toString()}`;
+}
 const CACHE_KEY = "cached_scammer_db_v2";
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
@@ -17,6 +37,8 @@ let toastTimer = null;
 const PAGE_SIZE = 50;
 
 let adminSessionActive = false;
+let adminSessionExpiresAt = null;
+let adminSessionExpiryTimer = null;
 let offlineMode = false;
 let connectionState = 'checking';
 let statusResetTimer = null;
@@ -752,7 +774,7 @@ async function fetchCategoryRecords(
     }
 
     const res = await fetch(
-      `${PROXY_URL}/records?${params.toString()}`,
+      apiUrl('records', params),
       {
         signal: controller.signal,
         cache: 'no-store'
@@ -1046,6 +1068,12 @@ function exitAdminMode() {
 
   isAdmin = false;
   adminSessionActive = false;
+  adminSessionExpiresAt = null;
+
+  if (adminSessionExpiryTimer) {
+    clearTimeout(adminSessionExpiryTimer);
+    adminSessionExpiryTimer = null;
+  }
 
   document.getElementById('authBtn').innerText =
     "🔑 Mode Pemilik";
@@ -1081,7 +1109,7 @@ async function toggleAdmin() {
 
     try {
       const res = await fetch(
-        `${PROXY_URL}/auth/logout`,
+        apiUrl('auth/logout'),
         {
           method: 'POST',
           credentials: 'include'
@@ -1101,11 +1129,30 @@ async function toggleAdmin() {
   }
 }
 
+function scheduleAdminSessionExpiry(expiresAt) {
+  if (adminSessionExpiryTimer) {
+    clearTimeout(adminSessionExpiryTimer);
+    adminSessionExpiryTimer = null;
+  }
+
+  const exp = Number(expiresAt || 0);
+  adminSessionExpiresAt = Number.isFinite(exp) && exp > 0 ? exp : null;
+  if (!adminSessionExpiresAt) return;
+
+  const delay = Math.max(0, adminSessionExpiresAt * 1000 - Date.now());
+  adminSessionExpiryTimer = setTimeout(() => {
+    if (isAdmin || adminSessionActive) {
+      exitAdminMode();
+      showToast("Sesi Pemilik berakhir. Silakan login lagi.");
+    }
+  }, Math.min(delay + 250, 2147483647));
+}
+
 async function restoreAdminSession() {
 
   try {
     const res = await fetch(
-      `${PROXY_URL}/auth/me`,
+      apiUrl('auth/me'),
       {
         method: 'GET',
         credentials: 'include',
@@ -1113,14 +1160,21 @@ async function restoreAdminSession() {
       }
     );
 
-    if (!res.ok) return;
+    if (!res.ok) {
+      exitAdminMode();
+      return false;
+    }
 
     const data = await res.json();
 
-    if (!data.authenticated) return;
+    if (!data.authenticated) {
+      exitAdminMode();
+      return false;
+    }
 
     isAdmin = true;
     adminSessionActive = true;
+    scheduleAdminSessionExpiry(data.expiresAt);
 
     document.getElementById('authBtn').innerText =
       "🔓 Keluar Mode";
@@ -1136,12 +1190,15 @@ async function restoreAdminSession() {
       getLocalDateInputValue();
 
     updateMetaSelectOptions();
+    return true;
 
   } catch (err) {
     console.warn(
       'Tidak dapat memulihkan sesi admin:',
       err
     );
+    exitAdminMode();
+    return false;
   }
 }
 
@@ -1199,7 +1256,7 @@ async function submitAdminLogin() {
 
     const res =
       await fetch(
-        `${PROXY_URL}/auth/login`,
+        apiUrl('auth/login'),
         {
           method: 'POST',
           credentials: 'include',
@@ -1233,29 +1290,16 @@ async function submitAdminLogin() {
     }
 
     /*
-     * Tidak menyimpan password/token/session
-     * ke JavaScript.
-     *
-     * Session ditangani oleh cookie
-     * HttpOnly dari server.
+     * Jangan aktifkan UI admin hanya berdasarkan respons login.
+     * Cookie HttpOnly harus terbukti terbaca kembali oleh /auth/me.
      */
-    isAdmin = true;
-    adminSessionActive = true;
+    const sessionConfirmed = await restoreAdminSession();
 
-    document.getElementById('authBtn').innerText =
-      "🔓 Keluar Mode";
-
-    document.getElementById('authBtn').setAttribute(
-      'aria-pressed',
-      'true'
-    );
-
-    document.getElementById('addBox').classList.remove('is-hidden');
-
-    document.getElementById('newDateInput').value =
-      getLocalDateInputValue();
-
-    updateMetaSelectOptions();
+    if (!sessionConfirmed) {
+      throw new Error(
+        "Login diterima, tetapi sesi tidak dapat diverifikasi."
+      );
+    }
 
     closeAdminModal();
 
@@ -1273,7 +1317,9 @@ async function submitAdminLogin() {
     );
 
     showToast(
-      "⚠️ Gagal login: masalah jaringan/server."
+      err?.message?.includes("sesi tidak dapat diverifikasi")
+        ? "⚠️ Sesi login tidak tersimpan. Coba refresh lalu login lagi."
+        : "⚠️ Gagal login: masalah jaringan/server."
     );
 
   } finally {
@@ -1453,7 +1499,7 @@ async function addNumber() {
   try {
 
     const res = await fetch(
-      `${PROXY_URL}/records`,
+      apiUrl('records'),
       {
         method: 'POST',
         credentials: 'include',
@@ -1777,7 +1823,7 @@ async function saveEditedRecord() {
 
   try {
     const res = await fetch(
-      `${PROXY_URL}/records/${id}`,
+      apiUrl(`records/${id}`),
       {
         method: 'PUT',
         credentials: 'include',
@@ -1952,7 +1998,7 @@ async function deleteNumber(
   try {
 
     const res = await fetch(
-      `${PROXY_URL}/records/${itemObj.id}`,
+      apiUrl(`records/${itemObj.id}`),
       {
         method: 'DELETE',
         credentials: 'include'

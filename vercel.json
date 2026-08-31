@@ -1,27 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    {
-      "source": "/api/auth/:path*",
-      "destination": "/api/proxy?path=auth/:path*"
-    },
-    {
-      "source": "/api/admin/:path*",
-      "destination": "/api/proxy?path=admin/:path*"
-    },
-    {
-      "source": "/api/records",
-      "destination": "/api/proxy?path=records"
-    },
-    {
-      "source": "/api/records/:path*",
-      "destination": "/api/proxy?path=records/:path*"
-    },
-    {
-      "source": "/api/health",
-      "destination": "/api/proxy?path=health"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
