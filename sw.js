@@ -1,5 +1,4 @@
-const CACHE_NAME = 'capllang-shell-v1';
-
+const CACHE_NAME = 'capllang-shell-v2';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -19,13 +18,11 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys =>
-        Promise.all(
-          keys
-            .filter(key => key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-        )
-      )
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
@@ -33,58 +30,55 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
 
-  if (request.method !== 'GET') {
-    return;
-  }
+  if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
 
-  if (url.origin !== self.location.origin) {
-    return;
-  }
+  // Semua API selalu langsung ke jaringan.
+  if (url.pathname === '/api' || url.pathname.startsWith('/api/')) return;
 
-  // API tidak boleh dicache oleh Service Worker.
-  if (url.pathname.startsWith('/api/')) {
-    return;
-  }
-
-  // Navigasi: coba internet, jika gagal tampilkan shell dari cache.
+  // Navigasi: utamakan versi online, shell cache hanya sebagai fallback offline.
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
-        .then(response => response)
-        .catch(async () => {
-          return (
-            await caches.match('/index.html') ||
-            await caches.match('/')
-          );
+        .then(async response => {
+          if (response && response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put('/index.html', response.clone()).catch(() => {});
+          }
+          return response;
         })
+        .catch(async () =>
+          (await caches.match('/index.html')) ||
+          (await caches.match('/'))
+        )
     );
     return;
   }
 
-  // Asset statis: cache-first, lalu jaringan.
+  // Asset statis: tampilkan cache dengan cepat, tetapi selalu revalidasi
+  // agar app.js/styles.css tidak membeku pada versi lama.
+  const networkPromise = fetch(request)
+    .then(async response => {
+      if (
+        response &&
+        response.status === 200 &&
+        response.type === 'basic'
+      ) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    });
+
+  // Dipasang saat event masih aktif agar browser memberi waktu pada
+  // revalidasi background sampai selesai.
+  event.waitUntil(networkPromise.catch(() => undefined));
+
   event.respondWith(
     caches.match(request)
-      .then(cached => {
-        if (cached) return cached;
-
-        return fetch(request).then(response => {
-          if (
-            !response ||
-            response.status !== 200 ||
-            response.type !== 'basic'
-          ) {
-            return response;
-          }
-
-          const copy = response.clone();
-
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(request, copy));
-
-          return response;
-        });
-      })
+      .then(cached => cached || networkPromise)
+      .catch(() => networkPromise)
   );
 });

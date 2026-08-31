@@ -12,23 +12,25 @@ let database = {
 let isAdmin = false;
 let activeTab = 'rekening';
 let searchTimeout = null;
+let toastTimer = null;
 
 const PAGE_SIZE = 50;
 
 let adminSessionActive = false;
-let isLoading = false;
 let offlineMode = false;
 
 const paginationState = {
   rekening: {
     total: 0,
     query: null,
-    hasMore: false
+    hasMore: false,
+    nextCursor: null
   },
   genshin: {
     total: 0,
     query: null,
-    hasMore: false
+    hasMore: false,
+    nextCursor: null
   }
 };
 
@@ -38,20 +40,6 @@ const categoryControllers = {
 };
 
 const modalPreviousFocus = new Map();
-
-function handleActivationKey(event, action) {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    action();
-  }
-}
-
-function handleQrisKeyDown(event, src) {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    openQrisModal(src);
-  }
-}
 
 function getFocusableElements(container) {
   return Array.from(
@@ -171,13 +159,43 @@ const GAME_OPTIONS = [
   "Lainnya..."
 ];
 
+function safeStorageGet(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function safeStorageRemove(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Storage dapat diblokir oleh browser/privacy mode.
+  }
+}
+
+function getLocalDateInputValue(date = new Date()) {
+  const localTime = new Date(
+    date.getTime() - date.getTimezoneOffset() * 60 * 1000
+  );
+  return localTime.toISOString().slice(0, 10);
+}
+
 /* =========================
    LOADING STATE
 ========================= */
 
 function setLoading(state, text = "Memuat...") {
-  isLoading = state;
-
   const indicator = document.getElementById('loadingIndicator');
   const loadingText = document.getElementById('loadingText');
 
@@ -279,7 +297,7 @@ function cacheDatabase() {
     }
   };
 
-  localStorage.setItem(
+  safeStorageSet(
     CACHE_KEY,
     JSON.stringify({
       ...database,
@@ -290,7 +308,7 @@ function cacheDatabase() {
 }
 
 function readFreshCache() {
-  const raw = localStorage.getItem(CACHE_KEY);
+  const raw = safeStorageGet(CACHE_KEY);
   if (!raw) return null;
 
   try {
@@ -298,18 +316,18 @@ function readFreshCache() {
     const cachedAt = Number(parsed?.cachedAt || 0);
 
     if (!Number.isFinite(cachedAt) || cachedAt <= 0) {
-      localStorage.removeItem(CACHE_KEY);
+      safeStorageRemove(CACHE_KEY);
       return null;
     }
 
     if (Date.now() - cachedAt > CACHE_TTL_MS) {
-      localStorage.removeItem(CACHE_KEY);
+      safeStorageRemove(CACHE_KEY);
       return null;
     }
 
     return parsed;
   } catch {
-    localStorage.removeItem(CACHE_KEY);
+    safeStorageRemove(CACHE_KEY);
     return null;
   }
 }
@@ -345,6 +363,7 @@ function restorePaginationState(parsed) {
     // Cache hanya menyimpan halaman yang pernah dimuat.
     // Saat offline jangan menawarkan load-more yang membutuhkan server.
     paginationState[category].hasMore = false;
+    paginationState[category].nextCursor = null;
   }
 }
 
@@ -417,7 +436,7 @@ function toggleTheme() {
   const isDark =
     document.body.classList.contains('dark-mode');
 
-  localStorage.setItem(
+  safeStorageSet(
     'theme',
     isDark ? 'dark' : 'light'
   );
@@ -431,7 +450,7 @@ function toggleTheme() {
   );
 }
 
-if (localStorage.getItem('theme') === 'dark') {
+if (safeStorageGet('theme') === 'dark') {
 
   document.body.classList.add('dark-mode');
 
@@ -531,9 +550,19 @@ function checkUrlParams() {
       activeTab === 'genshin' ? 0 : -1;
   }
 
+  document.getElementById('resultPanel').setAttribute(
+    'aria-labelledby',
+    activeTab === 'rekening' ? 'tabRekening' : 'tabGenshin'
+  );
+
+  const searchInput = document.getElementById('searchInput');
+  searchInput.placeholder =
+    activeTab === 'rekening'
+      ? 'Tulis nomor rekening di sini...'
+      : 'Tulis UID game di sini...';
+
   if (searchQuery) {
-    document.getElementById('searchInput').value =
-      searchQuery;
+    searchInput.value = searchQuery;
   }
 }
 
@@ -564,6 +593,23 @@ function updateUrlParam(query) {
   );
 }
 
+function updateTabUrlParam(tab) {
+  const url = new URL(window.location.href);
+
+  if (tab === 'genshin') {
+    url.searchParams.set('tab', 'genshin');
+  } else {
+    // rekening adalah default; URL lebih bersih tanpa parameter.
+    url.searchParams.delete('tab');
+  }
+
+  window.history.replaceState(
+    {},
+    '',
+    url.pathname + (url.search ? url.search : '') + url.hash
+  );
+}
+
 /* =========================
    SERVER-SIDE PAGINATION
 ========================= */
@@ -587,14 +633,9 @@ async function fetchCategoryRecords(
     reset ||
     state.query !== cleanQuery;
 
-  if (!shouldReset && !state.hasMore) {
+  if (!shouldReset && (!state.hasMore || !state.nextCursor)) {
     return true;
   }
-
-  const offset =
-    shouldReset
-      ? 0
-      : database[category].length;
 
   if (categoryControllers[category]) {
     categoryControllers[category].abort();
@@ -612,7 +653,7 @@ async function fetchCategoryRecords(
   if (!silent) {
     setLoading(
       true,
-      reset ? "Memuat data..." : "Memuat data berikutnya..."
+      shouldReset ? "Memuat data..." : "Memuat data berikutnya..."
     );
   }
 
@@ -620,8 +661,12 @@ async function fetchCategoryRecords(
     const params = new URLSearchParams({
       category,
       limit: String(PAGE_SIZE),
-      offset: String(offset)
+      includeTotal: shouldReset ? '1' : '0'
     });
+
+    if (!shouldReset && state.nextCursor) {
+      params.set('cursor', state.nextCursor);
+    }
 
     if (cleanQuery) {
       params.set('q', cleanQuery);
@@ -682,10 +727,22 @@ async function fetchCategoryRecords(
       }
     }
 
-    state.total = Number(data.total || 0);
+    if (shouldReset && Number.isSafeInteger(Number(data.total))) {
+      state.total = Math.max(0, Number(data.total));
+    }
+
     state.query = cleanQuery;
-    state.hasMore =
-      database[category].length < state.total;
+    state.nextCursor =
+      typeof data.nextCursor === 'string' && data.nextCursor
+        ? data.nextCursor
+        : null;
+    state.hasMore = Boolean(state.nextCursor);
+
+    // Jika backend tidak mengirim total pada halaman lanjutan,
+    // pertahankan total halaman pertama agar counter tetap stabil.
+    if (state.total < database[category].length) {
+      state.total = database[category].length;
+    }
 
     offlineMode = false;
     database.lastUpdated =
@@ -742,29 +799,18 @@ async function fetchOnlineDatabase() {
     status.innerText =
       "⏳ Mengambil data dari D1...";
 
-    const [rekeningOk, genshinOk] =
-      await Promise.all([
-        fetchCategoryRecords(
-          'rekening',
-          {
-            reset: true,
-            query: initialQuery,
-            silent: true
-          }
-        ),
-        fetchCategoryRecords(
-          'genshin',
-          {
-            reset: true,
-            query: initialQuery,
-            silent: true
-          }
-        )
-      ]);
+    const initialOk = await fetchCategoryRecords(
+      activeTab,
+      {
+        reset: true,
+        query: initialQuery,
+        silent: true
+      }
+    );
 
-    if (!rekeningOk || !genshinOk) {
+    if (!initialOk) {
       throw new Error(
-        "Sebagian data gagal dimuat"
+        "Data awal gagal dimuat"
       );
     }
 
@@ -772,6 +818,21 @@ async function fetchOnlineDatabase() {
 
     status.innerText =
       "🟢 Terhubung ke D1 — data dimuat bertahap.";
+
+    // Isi cache kategori lain tanpa menunda tampilan awal.
+    // Hormati Data Saver agar tidak membuat request tambahan yang tidak perlu.
+    const saveData = Boolean(navigator.connection?.saveData);
+    if (!saveData) {
+      const inactiveCategory =
+        activeTab === 'rekening' ? 'genshin' : 'rekening';
+
+      void fetchCategoryRecords(
+        inactiveCategory,
+        { reset: true, query: '', silent: true }
+      ).then(ok => {
+        if (ok) cacheDatabase();
+      });
+    }
 
   } catch (err) {
     console.warn(
@@ -813,13 +874,15 @@ async function fetchOnlineDatabase() {
       paginationState.rekening = {
         total: 0,
         query: '',
-        hasMore: false
+        hasMore: false,
+        nextCursor: null
       };
 
       paginationState.genshin = {
         total: 0,
         query: '',
-        hasMore: false
+        hasMore: false,
+        nextCursor: null
       };
 
       offlineMode = true;
@@ -930,25 +993,24 @@ async function toggleAdmin() {
   } else {
 
     try {
-      await fetch(
+      const res = await fetch(
         `${PROXY_URL}/auth/logout`,
         {
           method: 'POST',
           credentials: 'include'
         }
       );
+
+      if (!res.ok) {
+        throw new Error(`Logout gagal (${res.status})`);
+      }
+
+      exitAdminMode();
+      showToast("Keluar Mode Pemilik");
     } catch (err) {
-      console.warn(
-        'Logout server gagal:',
-        err
-      );
+      console.warn('Logout server gagal:', err);
+      showToast("⚠️ Logout gagal. Coba lagi.");
     }
-
-    exitAdminMode();
-
-    showToast(
-      "Keluar Mode Pemilik"
-    );
   }
 }
 
@@ -983,8 +1045,8 @@ async function restoreAdminSession() {
 
     document.getElementById('addBox').classList.remove('is-hidden');
 
-    document.getElementById('newDateInput')
-      .valueAsDate = new Date();
+    document.getElementById('newDateInput').value =
+      getLocalDateInputValue();
 
     updateMetaSelectOptions();
 
@@ -1103,8 +1165,8 @@ async function submitAdminLogin() {
 
     document.getElementById('addBox').classList.remove('is-hidden');
 
-    document.getElementById('newDateInput')
-      .valueAsDate = new Date();
+    document.getElementById('newDateInput').value =
+      getLocalDateInputValue();
 
     updateMetaSelectOptions();
 
@@ -1146,6 +1208,30 @@ function handleInputKeyDown(e) {
   if (e.key === 'Enter') {
     addNumber();
   }
+}
+
+function normalizeNumberInput(rawValue) {
+  const raw = String(rawValue || '').trim();
+
+  if (!raw) {
+    return { ok: false, value: '', error: 'Nomor/UID wajib diisi.' };
+  }
+
+  // Izinkan separator visual umum, tetapi jangan diam-diam
+  // membuang huruf/simbol lain karena dapat mengubah data yang dimaksud.
+  if (!/^[0-9\s.\-]+$/.test(raw)) {
+    return {
+      ok: false,
+      value: '',
+      error: 'Nomor/UID hanya boleh berisi angka, spasi, titik, atau tanda hubung.'
+    };
+  }
+
+  return {
+    ok: true,
+    value: raw.replace(/[\s.\-]/g, ''),
+    error: ''
+  };
 }
 
 async function addNumber() {
@@ -1234,8 +1320,16 @@ async function addNumber() {
     return;
   }
 
+  const normalizedNumber =
+    normalizeNumberInput(rawVal);
+
+  if (!normalizedNumber.ok) {
+    showToast(`⚠️ ${normalizedNumber.error}`);
+    return;
+  }
+
   const cleanVal =
-    rawVal.replace(/\D/g, '');
+    normalizedNumber.value;
 
   if (activeTab === 'genshin') {
 
@@ -1376,9 +1470,8 @@ async function addNumber() {
           database[activeTab].length
         );
 
-      state.hasMore =
-        database[activeTab].length <
-        state.total;
+      state.hasMore = false;
+      state.nextCursor = null;
 
       cacheDatabase();
     }
@@ -1502,7 +1595,7 @@ async function deleteNumber(
     return;
   }
 
-  if (!itemObj || !Number.isSafeInteger(Number(itemObj.id))) {
+  if (!itemObj || !Number.isSafeInteger(Number(itemObj.id)) || Number(itemObj.id) <= 0) {
     showToast(
       "⚠️ ID data tidak tersedia. Muat ulang halaman."
     );
@@ -1598,9 +1691,8 @@ async function deleteNumber(
           state.total - 1
         );
 
-      state.hasMore =
-        database[activeTab].length <
-        state.total;
+      state.hasMore = false;
+      state.nextCursor = null;
 
       cacheDatabase();
     }
@@ -1644,7 +1736,10 @@ async function deleteNumber(
 ========================= */
 
 async function switchTab(tab) {
+  if (!['rekening', 'genshin'].includes(tab)) return;
+
   activeTab = tab;
+  updateTabUrlParam(tab);
 
   document
     .getElementById('tabRekening')
@@ -1681,6 +1776,11 @@ async function switchTab(tab) {
 
   tabGenshin.tabIndex =
     tab === 'genshin' ? 0 : -1;
+
+  document.getElementById('resultPanel').setAttribute(
+    'aria-labelledby',
+    tab === 'rekening' ? 'tabRekening' : 'tabGenshin'
+  );
 
   const input =
     document.getElementById(
@@ -1758,11 +1858,20 @@ document
         )
       ) {
 
+        const originalText = target.textContent;
         target.disabled = true;
-        target.textContent =
-          "Memuat...";
+        target.textContent = "Memuat...";
 
-        await loadMoreRecords();
+        try {
+          await loadMoreRecords();
+        } finally {
+          // Bila render gagal/permintaan gagal dan tombol lama masih ada,
+          // pulihkan agar pengguna dapat mencoba lagi.
+          if (target.isConnected) {
+            target.disabled = false;
+            target.textContent = originalText;
+          }
+        }
 
         return;
       }
@@ -1821,37 +1930,6 @@ document
           nomorStr,
           `Disalin: ${nomorStr}`
         );
-      }
-    }
-  );
-
-/* =========================
-   KEYBOARD RESULT ITEM
-========================= */
-
-document
-  .getElementById('resultList')
-  .addEventListener(
-    'keydown',
-    (e) => {
-      if (
-        (e.key === 'Enter' || e.key === ' ') &&
-        e.target.classList.contains('number')
-      ) {
-        e.preventDefault();
-
-        const itemEl =
-          e.target.closest('.result-item');
-
-        const nomorStr =
-          itemEl?.dataset?.nomor || '';
-
-        if (nomorStr) {
-          copyToClipboard(
-            nomorStr,
-            `Disalin: ${nomorStr}`
-          );
-        }
       }
     }
   );
@@ -1964,22 +2042,18 @@ function filterData() {
               nomorStr
             );
 
+          const isNumericQuery = /^[0-9\s.\-]+$/.test(rawQuery);
+          const numericQuery = isNumericQuery
+            ? rawQuery.replace(/[^0-9]/g, '')
+            : '';
+          const numberMatches = numericQuery
+            ? nomorNormalized.startsWith(numericQuery)
+            : false;
+
           return (
-            nomorStr
-              .toLowerCase()
-              .includes(rawQuery) ||
-            (
-              cleanQuery &&
-              nomorNormalized.includes(
-                cleanQuery
-              )
-            ) ||
-            tanggalStr.includes(
-              rawQuery
-            ) ||
-            metaStr.includes(
-              rawQuery
-            )
+            numberMatches ||
+            tanggalStr.includes(rawQuery) ||
+            metaStr.includes(rawQuery)
           );
         });
     }
@@ -2065,27 +2139,22 @@ function filterData() {
       li.title =
         "Klik untuk menyalin nomor";
 
-      const numberSpan =
+      const numberButton =
         document.createElement(
-          'span'
+          'button'
         );
 
-      numberSpan.className =
+      numberButton.type = 'button';
+
+      numberButton.className =
         'number';
 
-      numberSpan.setAttribute(
-        'role',
-        'button'
-      );
-
-      numberSpan.tabIndex = 0;
-
-      numberSpan.setAttribute(
+      numberButton.setAttribute(
         'aria-label',
         `Salin nomor ${nomorStr}`
       );
 
-      numberSpan.textContent =
+      numberButton.textContent =
         nomorStr;
 
       const rightContent =
@@ -2151,6 +2220,8 @@ function filterData() {
           'button'
         );
 
+      copyBtn.type = 'button';
+
       copyBtn.className =
         'btn-icon';
 
@@ -2175,6 +2246,8 @@ function filterData() {
             'button'
           );
 
+        deleteBtn.type = 'button';
+
         deleteBtn.className =
           'btn btn-delete';
 
@@ -2192,7 +2265,7 @@ function filterData() {
       }
 
       li.appendChild(
-        numberSpan
+        numberButton
       );
 
       li.appendChild(
@@ -2220,6 +2293,8 @@ function filterData() {
         document.createElement(
           'button'
         );
+
+      loadMoreBtn.type = 'button';
 
       loadMoreBtn.className =
         'btn btn-load-more';
@@ -2451,16 +2526,15 @@ function showToast(message) {
   toast.textContent =
     message;
 
-  toast.classList.add(
-    'show'
-  );
+  toast.classList.add('show');
 
-  setTimeout(() => {
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+  }
 
-    toast.classList.remove(
-      'show'
-    );
-
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+    toastTimer = null;
   }, 3000);
 }
 
@@ -2489,9 +2563,6 @@ function closeQrisModal() {
 function bindStaticEvents() {
   const homeTitle = document.getElementById('homeTitle');
   homeTitle?.addEventListener('click', resetToHome);
-  homeTitle?.addEventListener('keydown', event =>
-    handleActivationKey(event, resetToHome)
-  );
 
   document.getElementById('authBtn')
     ?.addEventListener('click', toggleAdmin);
@@ -2519,10 +2590,10 @@ function bindStaticEvents() {
     ?.addEventListener('click', addNumber);
 
   const qrisThumb = document.getElementById('qrisThumb');
-  qrisThumb?.addEventListener('click', () => openQrisModal(qrisThumb.src));
-  qrisThumb?.addEventListener('keydown', event =>
-    handleQrisKeyDown(event, qrisThumb.src)
-  );
+  const qrisButton = document.getElementById('qrisButton');
+  qrisButton?.addEventListener('click', () => {
+    if (qrisThumb?.src) openQrisModal(qrisThumb.src);
+  });
 
   const adminModal = document.getElementById('adminModal');
   adminModal?.addEventListener('click', event => {
@@ -2544,6 +2615,9 @@ function bindStaticEvents() {
     ?.addEventListener('click', () => closeConfirmModal(false));
   document.getElementById('confirmOkBtn')
     ?.addEventListener('click', () => closeConfirmModal(true));
+
+  document.getElementById('qrisCloseBtn')
+    ?.addEventListener('click', closeQrisModal);
 
   const qrisModal = document.getElementById('qrisModal');
   qrisModal?.addEventListener('click', event => {

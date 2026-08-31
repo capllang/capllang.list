@@ -10,6 +10,8 @@
   <meta name="author" content="Capllang">
   <meta name="application-name" content="UID HB & No Scammer">
   <meta name="theme-color" content="#1e293b">
+  <meta name="color-scheme" content="light dark">
+  <meta name="format-detection" content="telephone=no">
 
   <link rel="canonical" href="https://capllang-list.vercel.app/">
 
@@ -33,14 +35,16 @@
 <div class="container">
 
   <div class="header-area">
-    <h2
-      id="homeTitle"
-      role="button"
-      tabindex="0"
-      aria-label="Kembali ke halaman utama"
-      title="Kembali ke Halaman Utama">
-      🛡️ UID HB & NO SCAMMER
-    </h2>
+    <h1 class="site-title">
+      <button
+        type="button"
+        id="homeTitle"
+        class="home-title-button"
+        aria-label="Kembali ke halaman utama"
+        title="Kembali ke Halaman Utama">
+        🛡️ UID HB & NO SCAMMER
+      </button>
+    </h1>
 
     <div class="header-actions">
       <button type="button" id="authBtn" class="btn-header-admin" aria-pressed="false">
@@ -70,6 +74,7 @@
       id="tabRekening"
       role="tab"
       aria-selected="true"
+      aria-controls="resultPanel"
       tabindex="0">
       LIST REK SCAMMER
     </button>
@@ -80,6 +85,7 @@
       id="tabGenshin"
       role="tab"
       aria-selected="false"
+      aria-controls="resultPanel"
       tabindex="-1">
       LIST UID HB
     </button>
@@ -101,6 +107,7 @@
           id="metaCustomInput"
           aria-label="Nama bank atau game lainnya"
           class="meta-custom-flex is-hidden"
+          maxlength="100"
           placeholder="Nama Bank/Game Lain...">
 
         <input
@@ -108,6 +115,9 @@
           id="newNumberInput"
           aria-label="Nomor rekening atau UID baru"
           inputmode="numeric"
+          maxlength="40"
+          autocomplete="off"
+          spellcheck="false"
           class="number-input-flex"
           placeholder="Nomor/UID baru...">
 
@@ -135,6 +145,9 @@
       type="text"
       id="searchInput"
       aria-label="Cari Rekening atau UID"
+      maxlength="100"
+      enterkeyhint="search"
+      spellcheck="false"
       placeholder="Tulis nomor rekening di sini..."
       autocomplete="off">
   </div>
@@ -144,7 +157,20 @@
     <span id="loadingText">Memuat...</span>
   </div>
 
-  <ul class="result-list" id="resultList" aria-label="Hasil pencarian database"></ul>
+  <div
+    id="resultPanel"
+    class="result-panel"
+    role="tabpanel"
+    aria-labelledby="tabRekening">
+    <ul
+      class="result-list"
+      id="resultList"
+      aria-label="Hasil pencarian database"></ul>
+  </div>
+
+  <p class="trust-note">
+    Data di situs ini berasal dari laporan/daftar yang terdata dan bukan keputusan hukum. Verifikasi kembali informasi sebelum bertransaksi atau mengambil tindakan.
+  </p>
 
   <div class="donation-section">
     <div class="donation-text">
@@ -155,17 +181,20 @@
 
     <div class="donation-action">
 
-      <img
-        src="/assets/qris.jpg"
-        id="qrisThumb"
-        alt="Scan QRIS"
-        class="qris-img"
-        role="button"
-        tabindex="0"
+      <button
+        type="button"
+        id="qrisButton"
+        class="qris-button"
         aria-label="Perbesar QRIS"
         aria-haspopup="dialog"
         aria-controls="qrisModal"
         title="Perbesar QRIS">
+        <img
+          src="/assets/qris.jpg"
+          id="qrisThumb"
+          alt="QRIS donasi Capllang"
+          class="qris-img">
+      </button>
 
       <a
         href="https://saweria.co/capllang/"
@@ -279,6 +308,14 @@
   aria-hidden="true"
   aria-label="Pratinjau QRIS"
   tabindex="-1">
+
+  <button
+    type="button"
+    id="qrisCloseBtn"
+    class="qris-close-btn"
+    aria-label="Tutup pratinjau QRIS">
+    ×
+  </button>
 
   <img
     id="modalImg"
