@@ -22,7 +22,7 @@ let statusResetTimer = null;
 
 function getDefaultStatusText() {
   if (!offlineMode) {
-    return "🟢 Terhubung ke D1 — data dimuat bertahap.";
+    return "🟢 Koneksi aktif — data terbaru tersedia.";
   }
 
   return database.lastUpdated
@@ -851,7 +851,7 @@ async function fetchOnlineDatabase() {
     offlineMode = false;
 
     status.innerText =
-      "🟢 Terhubung ke D1 — data dimuat bertahap.";
+      "🟢 Koneksi aktif — data terbaru tersedia.";
 
     // Isi cache kategori lain tanpa menunda tampilan awal.
     // Hormati Data Saver agar tidak membuat request tambahan yang tidak perlu.
