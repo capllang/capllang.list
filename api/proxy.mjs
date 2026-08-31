@@ -1,5 +1,18 @@
 const UPSTREAM_ORIGIN = 'https://jsonbin-proxy.awak-cot-u-sibak.workers.dev';
 const FRONTEND_ORIGIN = 'https://capllang-list.vercel.app';
+const SESSION_COOKIE = 'admin_session';
+
+function parseCookieHeader(header = '') {
+  const out = {};
+  for (const part of String(header).split(';')) {
+    const i = part.indexOf('=');
+    if (i < 0) continue;
+    const key = part.slice(0, i).trim();
+    const value = part.slice(i + 1).trim();
+    if (key) out[key] = value;
+  }
+  return out;
+}
 
 export default async function handler(req, res) {
   try {
@@ -14,7 +27,6 @@ export default async function handler(req, res) {
 
     const upstreamUrl = new URL(`/${rawPath}`, UPSTREAM_ORIGIN);
 
-    // Pertahankan query asli selain parameter internal `path`.
     for (const [key, value] of Object.entries(req.query || {})) {
       if (key === 'path' || value === undefined || value === null) continue;
       if (Array.isArray(value)) {
@@ -25,15 +37,19 @@ export default async function handler(req, res) {
     }
 
     const headers = {};
-    for (const name of [
-      'accept',
-      'accept-language',
-      'content-type',
-      'cookie',
-      'user-agent'
-    ]) {
+    for (const name of ['accept', 'accept-language', 'content-type', 'user-agent']) {
       const value = req.headers?.[name];
       if (typeof value === 'string' && value) headers[name] = value;
+    }
+
+    const cookieHeader = typeof req.headers?.cookie === 'string'
+      ? req.headers.cookie
+      : '';
+
+    if (cookieHeader) {
+      headers.cookie = cookieHeader;
+      const sessionToken = parseCookieHeader(cookieHeader)[SESSION_COOKIE];
+      if (sessionToken) headers['x-admin-session'] = sessionToken;
     }
 
     // Worker memvalidasi Origin untuk route admin yang mengubah state.
@@ -74,7 +90,6 @@ export default async function handler(req, res) {
       if (value) res.setHeader(name, value);
     }
 
-    // Teruskan cookie HttpOnly dari Worker ke browser same-origin.
     if (typeof upstream.headers.getSetCookie === 'function') {
       const cookies = upstream.headers.getSetCookie();
       if (cookies.length) res.setHeader('Set-Cookie', cookies);
