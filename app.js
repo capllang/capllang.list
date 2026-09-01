@@ -22,326 +22,6 @@ function apiUrl(path, params = null) {
 const CACHE_KEY = "cached_scammer_db_v4";
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
-
-/* =========================================================
-   ROTATING AD SYSTEM — CAPLLANG LIST v7.4
-
-   Tiga campaign selalu didistribusikan ke tiga placement:
-   - slot 1: banner utama
-   - slot 2: sidebar atas
-   - slot 3: sidebar bawah
-
-   Setiap AD_ROTATION_INTERVAL_MS, campaign bergeser satu slot.
-   Jika paid.active = false / belum mulai / sudah berakhir,
-   campaign otomatis kembali ke house ad bawaan.
-========================================================= */
-
-const AD_ROTATION_INTERVAL_MS = 12 * 1000;
-
-const AD_CAMPAIGNS = [
-  {
-    id: 'campaign-1',
-    theme: 'violet',
-    house: {
-      label: 'Banner Partner',
-      headline: 'SPACE IKLAN PREMIUM',
-      priceText: '◈ Mulai Rp25.000/hari',
-      ctaText: 'Pasang Iklan',
-      ctaUrl: '#adInfoStrip',
-      creativeUrl: '',
-      icon: '📣',
-      disclosure: 'Partner Slot'
-    },
-    paid: {
-      active: false,
-      sponsor: '',
-      label: 'Sponsored',
-      headline: '',
-      priceText: '',
-      ctaText: 'Kunjungi',
-      ctaUrl: '',
-      creativeUrl: '',
-      icon: '',
-      startAt: '',
-      endAt: ''
-    }
-  },
-  {
-    id: 'campaign-2',
-    theme: 'magenta',
-    house: {
-      label: 'Partner Slot',
-      headline: 'SPACE IKLAN PREMIUM',
-      priceText: 'Promosikan bisnis Anda',
-      ctaText: 'Pasang Iklan',
-      ctaUrl: '#adInfoStrip',
-      creativeUrl: '',
-      icon: '♛',
-      disclosure: 'Partner Slot'
-    },
-    paid: {
-      active: false,
-      sponsor: '',
-      label: 'Sponsored',
-      headline: '',
-      priceText: '',
-      ctaText: 'Kunjungi',
-      ctaUrl: '',
-      creativeUrl: '',
-      icon: '',
-      startAt: '',
-      endAt: ''
-    }
-  },
-  {
-    id: 'campaign-3',
-    theme: 'cyan',
-    house: {
-      label: 'Partner Slot',
-      headline: 'BOOST BISNIS LEBIH CEPAT',
-      priceText: 'Jangkau pengguna aktif',
-      ctaText: 'Pasang Iklan',
-      ctaUrl: '#adInfoStrip',
-      creativeUrl: '',
-      icon: '🚀',
-      disclosure: 'Partner Slot'
-    },
-    paid: {
-      active: false,
-      sponsor: '',
-      label: 'Sponsored',
-      headline: '',
-      priceText: '',
-      ctaText: 'Kunjungi',
-      ctaUrl: '',
-      creativeUrl: '',
-      icon: '',
-      startAt: '',
-      endAt: ''
-    }
-  }
-];
-
-let adRotationIndex = 0;
-let adRotationTimer = null;
-
-function parseAdScheduleDate(value) {
-  if (!value) return null;
-  const timestamp = new Date(value).getTime();
-  return Number.isFinite(timestamp) ? timestamp : null;
-}
-
-function isPaidAdInSchedule(ad, now = Date.now()) {
-  if (!ad?.active) return false;
-
-  const start = parseAdScheduleDate(ad.startAt);
-  const end = parseAdScheduleDate(ad.endAt);
-
-  return (!start || now >= start) && (!end || now <= end);
-}
-
-function getCampaignPresentation(campaign, now = Date.now()) {
-  const house = campaign?.house || {};
-  const paid = campaign?.paid || {};
-  const paidIsActive = isPaidAdInSchedule(paid, now);
-
-  if (!paidIsActive) {
-    return {
-      ...house,
-      isPaid: false,
-      sponsor: '',
-      disclosure: house.disclosure || 'Partner Slot'
-    };
-  }
-
-  const sponsor = String(paid.sponsor || '').trim();
-
-  return {
-    label: paid.label || 'Sponsored',
-    headline: paid.headline || sponsor || house.headline || 'Partner Capllang',
-    priceText: paid.priceText || sponsor || house.priceText || 'Partner Capllang List',
-    ctaText: paid.ctaText || 'Kunjungi',
-    ctaUrl: paid.ctaUrl || '#',
-    creativeUrl: paid.creativeUrl || '',
-    icon: paid.icon || house.icon || '✦',
-    disclosure: 'Sponsored',
-    sponsor,
-    isPaid: true
-  };
-}
-
-function setAdLink(link, href, { sponsored = false } = {}) {
-  if (!link) return;
-
-  const safeHref = String(href || '').trim();
-  link.setAttribute('href', safeHref || '#adInfoStrip');
-
-  if (/^https?:\/\//i.test(safeHref)) {
-    link.setAttribute('target', '_blank');
-    link.setAttribute(
-      'rel',
-      sponsored
-        ? 'noopener noreferrer sponsored'
-        : 'noopener noreferrer'
-    );
-  } else {
-    link.removeAttribute('target');
-    link.removeAttribute('rel');
-  }
-}
-
-function setAdCreative(visual, creativeUrl) {
-  if (!visual) return;
-
-  visual.classList.remove('has-creative');
-  visual.style.removeProperty('background-image');
-
-  const rawUrl = String(creativeUrl || '').trim();
-  if (!rawUrl) return;
-
-  try {
-    const parsed = new URL(rawUrl, window.location.href);
-    if (!['http:', 'https:'].includes(parsed.protocol)) return;
-
-    visual.style.backgroundImage = `url("${parsed.href.replace(/"/g, '%22')}")`;
-    visual.classList.add('has-creative');
-  } catch (_) {
-    // Creative invalid: fall back to built-in icon.
-  }
-}
-
-function getAdLinkElement(slot) {
-  if (!slot) return null;
-  if (slot.matches('a')) return slot;
-  return slot.querySelector('[data-ad-cta]');
-}
-
-function animateAdSwap(slot) {
-  if (!slot || typeof slot.animate !== 'function') return;
-
-  slot.animate(
-    [
-      { opacity: .78, transform: 'translateY(2px)' },
-      { opacity: 1, transform: 'translateY(0)' }
-    ],
-    {
-      duration: 320,
-      easing: 'ease-out'
-    }
-  );
-}
-
-function renderAdSlot(slot, campaign, campaignIndex) {
-  if (!slot || !campaign) return;
-
-  const physicalSlot = Number(slot.dataset.adPhysical || 1);
-  const presentation = getCampaignPresentation(campaign);
-  const visual = slot.querySelector('[data-ad-visual]');
-  const label = slot.querySelector('[data-ad-label]');
-  const headline = slot.querySelector('[data-ad-headline]');
-  const price = slot.querySelector('[data-ad-price]');
-  const cta = slot.querySelector('[data-ad-cta]');
-  const disclosure = slot.querySelector('[data-ad-disclosure]');
-  const icon = slot.querySelector('[data-ad-icon]');
-  const counter = slot.querySelector('[data-ad-slot-counter]');
-  const link = getAdLinkElement(slot);
-
-  slot.dataset.adTheme = campaign.theme || 'violet';
-  slot.dataset.campaignId = campaign.id || String(campaignIndex + 1);
-  slot.classList.toggle('is-paid', presentation.isPaid);
-
-  if (label) label.textContent = presentation.label || 'Partner Slot';
-  if (headline) headline.textContent = presentation.headline || 'SPACE IKLAN PREMIUM';
-  if (price) price.textContent = presentation.priceText || 'Promosikan bisnis Anda';
-  if (cta) cta.textContent = presentation.ctaText || 'Kunjungi';
-  if (disclosure) disclosure.textContent = presentation.disclosure || 'Partner Slot';
-  if (icon) icon.textContent = presentation.icon || '✦';
-  if (counter) counter.textContent = `Slot ${physicalSlot}/3`;
-
-  setAdCreative(visual, presentation.creativeUrl);
-  setAdLink(link, presentation.ctaUrl, { sponsored: presentation.isPaid });
-
-  slot.querySelectorAll('[data-ad-dot]').forEach(dot => {
-    dot.classList.toggle(
-      'active',
-      Number(dot.dataset.adDot) === campaignIndex
-    );
-  });
-
-  const accessibleName = presentation.sponsor
-    ? `Iklan sponsor ${presentation.sponsor}: ${presentation.headline}`
-    : `Slot iklan ${physicalSlot}: ${presentation.headline}`;
-
-  if (slot.matches('a')) {
-    slot.setAttribute('aria-label', accessibleName);
-  } else {
-    slot.setAttribute('aria-label', accessibleName);
-  }
-
-  if (slot.dataset.adSlot === 'main') {
-    const stripDisclosure = document.getElementById('adStripDisclosure');
-    if (stripDisclosure) {
-      stripDisclosure.textContent = presentation.isPaid
-        ? 'Sponsored'
-        : 'Partner Slot';
-    }
-  }
-
-  animateAdSwap(slot);
-}
-
-function renderRotatingAds() {
-  const slots = [
-    document.querySelector('[data-ad-slot="main"]'),
-    document.querySelector('[data-ad-slot="side-a"]'),
-    document.querySelector('[data-ad-slot="side-b"]')
-  ].filter(Boolean);
-
-  if (AD_CAMPAIGNS.length === 0 || slots.length === 0) return;
-
-  slots.forEach(slot => {
-    const physicalSlot = Math.max(1, Number(slot.dataset.adPhysical || 1));
-    const offset = physicalSlot - 1;
-    const campaignIndex = (adRotationIndex + offset) % AD_CAMPAIGNS.length;
-    renderAdSlot(slot, AD_CAMPAIGNS[campaignIndex], campaignIndex);
-  });
-}
-
-function initPremiumAd() {
-  if (adRotationTimer) {
-    clearInterval(adRotationTimer);
-    adRotationTimer = null;
-  }
-
-  renderRotatingAds();
-
-  if (AD_CAMPAIGNS.length <= 1) return;
-
-  adRotationTimer = window.setInterval(() => {
-    adRotationIndex = (adRotationIndex + 1) % AD_CAMPAIGNS.length;
-    renderRotatingAds();
-  }, Math.max(5000, AD_ROTATION_INTERVAL_MS));
-}
-
-function updateResultColumns(tab = activeTab) {
-  const normalizedTab = tab === 'genshin' ? 'genshin' : 'rekening';
-  const columns = document.getElementById('resultColumns');
-  const columnsRight = document.getElementById('resultColumnsRight');
-  const numberHeading = document.getElementById('resultNumberHeading');
-
-  if (!columns || !columnsRight || !numberHeading) return;
-
-  columns.classList.toggle('result-columns-rekening', normalizedTab === 'rekening');
-  columns.classList.toggle('result-columns-genshin', normalizedTab === 'genshin');
-
-  columnsRight.classList.toggle('result-columns-right-rekening', normalizedTab === 'rekening');
-  columnsRight.classList.toggle('result-columns-right-genshin', normalizedTab === 'genshin');
-
-  numberHeading.textContent = normalizedTab === 'rekening'
-    ? 'Nomor Rekening'
-    : 'UID Game';
-}
-
 let database = {
   rekening: [],
   genshin: [],
@@ -536,18 +216,18 @@ function hasUsableLocalData() {
 function getDefaultStatusText() {
   switch (connectionState) {
     case 'online':
-      return "Online — sistem berjalan normal";
+      return "● Online";
     case 'offline-cache':
-      return "Offline — menampilkan cache";
+      return "● Offline — menampilkan cache";
     case 'offline-empty':
-      return "Offline — cache tidak tersedia";
+      return "● Offline — cache tidak tersedia";
     case 'server-error-cache':
-      return "Server tidak tersedia — menampilkan cache";
+      return "● Server tidak tersedia — menampilkan cache";
     case 'server-error-empty':
-      return "Server tidak tersedia";
+      return "● Server tidak tersedia";
     case 'checking':
     default:
-      return "Memeriksa koneksi...";
+      return "● Memeriksa koneksi...";
   }
 }
 
@@ -1208,8 +888,6 @@ function checkUrlParams() {
   if (searchQuery) {
     searchInput.value = searchQuery;
   }
-
-  updateSidebarActive(activeTab);
 }
 
 function updateUrlParam(query) {
@@ -2710,7 +2388,6 @@ async function switchTab(tab) {
   if (!['rekening', 'genshin'].includes(tab)) return;
 
   activeTab = tab;
-  updateSidebarActive(tab);
   updateTabUrlParam(tab);
 
   document
@@ -2764,7 +2441,6 @@ async function switchTab(tab) {
       ? "Cari nomor rekening..."
       : "Cari UID...";
 
-  updateResultColumns(tab);
   updateMetaSelectOptions();
   populateProvenanceControls(tab);
 
@@ -2987,94 +2663,11 @@ Catatan: ${disclaimer}`;
 }
 
 /* =========================
-   DASHBOARD SIDEBAR + FILTERS
-========================= */
-
-function updateSidebarActive(tab = activeTab) {
-  const rekeningBtn = document.getElementById('sideRekeningBtn');
-  const genshinBtn = document.getElementById('sideGenshinBtn');
-
-  rekeningBtn?.classList.toggle('active', tab === 'rekening');
-  genshinBtn?.classList.toggle('active', tab === 'genshin');
-}
-
-function refreshFrontendFilters(data = []) {
-  const metaSelect = document.getElementById('metaFilterInput');
-  const statusSelect = document.getElementById('statusFilterInput');
-  if (!metaSelect || !statusSelect) return;
-
-  const previousMeta = metaSelect.value;
-  const previousStatus = statusSelect.value;
-
-  const metas = Array.from(new Set(
-    data
-      .map(item => String(item?.meta || item?.bank || item?.game || '').trim())
-      .filter(value => value && value !== '-')
-  )).sort((a, b) => a.localeCompare(b, 'id'));
-
-  const statuses = new Map();
-  data.forEach(item => {
-    const category = item?.category === 'genshin' ? 'genshin' : activeTab;
-    const normalized = normalizeProvenance(
-      category,
-      item?.source_type,
-      item?.verification_status
-    );
-    statuses.set(
-      normalized.verification_status,
-      getVerificationStatusLabel(normalized.verification_status, category)
-    );
-  });
-
-  metaSelect.replaceChildren();
-  const allMeta = document.createElement('option');
-  allMeta.value = '';
-  allMeta.textContent = activeTab === 'rekening' ? 'Semua bank' : 'Semua game';
-  metaSelect.appendChild(allMeta);
-  metas.forEach(meta => {
-    const option = document.createElement('option');
-    option.value = meta.toLowerCase();
-    option.textContent = meta;
-    metaSelect.appendChild(option);
-  });
-
-  statusSelect.replaceChildren();
-  const allStatus = document.createElement('option');
-  allStatus.value = '';
-  allStatus.textContent = 'Semua status';
-  statusSelect.appendChild(allStatus);
-  statuses.forEach((label, value) => {
-    const option = document.createElement('option');
-    option.value = value;
-    option.textContent = label;
-    statusSelect.appendChild(option);
-  });
-
-  if ([...metaSelect.options].some(option => option.value === previousMeta)) {
-    metaSelect.value = previousMeta;
-  }
-  if ([...statusSelect.options].some(option => option.value === previousStatus)) {
-    statusSelect.value = previousStatus;
-  }
-}
-
-function setFilterPanelOpen(open) {
-  const panel = document.getElementById('filterPanel');
-  const toggle = document.getElementById('filterToggleBtn');
-  if (!panel || !toggle) return;
-
-  panel.classList.toggle('is-hidden', !open);
-  toggle.setAttribute('aria-expanded', String(open));
-}
-
-/* =========================
    FILTER + PAGINATION
 ========================= */
 
 function filterData() {
   try {
-    updateResultColumns(activeTab);
-
     const rawQuery =
       getSearchQuery()
         .toLowerCase();
@@ -3110,17 +2703,6 @@ function filterData() {
 
     let visibleData =
       currentData;
-
-    refreshFrontendFilters(currentData);
-
-    const metaFilter =
-      String(document.getElementById('metaFilterInput')?.value || '').toLowerCase();
-
-    const statusFilter =
-      String(document.getElementById('statusFilterInput')?.value || '');
-
-    const hasFrontendFilter =
-      Boolean(metaFilter || statusFilter);
 
     // Hanya dipakai saat offline karena server tidak tersedia.
     if (offlineMode && rawQuery) {
@@ -3163,29 +2745,6 @@ function filterData() {
         });
     }
 
-    if (hasFrontendFilter) {
-      visibleData = visibleData.filter(item => {
-        const metaValue = String(
-          item?.meta || item?.bank || item?.game || ''
-        ).toLowerCase();
-
-        const category = item?.category === 'genshin' ? 'genshin' : activeTab;
-        const provenance = normalizeProvenance(
-          category,
-          item?.source_type,
-          item?.verification_status
-        );
-
-        const metaMatches =
-          !metaFilter || metaValue === metaFilter;
-
-        const statusMatches =
-          !statusFilter || provenance.verification_status === statusFilter;
-
-        return metaMatches && statusMatches;
-      });
-    }
-
     if (offlineMode) {
       const cachedTotal =
         Number(state.total || 0);
@@ -3197,9 +2756,7 @@ function filterData() {
           : `${visibleData.length} ${categoryLabel}`;
     } else {
       const categoryLabel = activeTab === 'rekening' ? 'Rekening' : 'UID';
-      counter.textContent = hasFrontendFilter
-        ? `${visibleData.length}/${state.total} ${categoryLabel}`
-        : `${state.total} ${categoryLabel}`;
+      counter.textContent = `${state.total} ${categoryLabel}`;
     }
 
     if (
@@ -3228,7 +2785,7 @@ function filterData() {
     const fragment =
       document.createDocumentFragment();
 
-    visibleData.forEach((item, rowIndex) => {
+    visibleData.forEach(item => {
       const nomorStr =
         typeof item === 'object'
           ? String(item.nomor)
@@ -3261,10 +2818,8 @@ function filterData() {
           'li'
         );
 
-      const rowTone = (rowIndex % 3) + 1;
-
       li.className =
-        `result-item row-tone-${rowTone}`;
+        'result-item';
 
       li.dataset.nomor =
         nomorStr;
@@ -3396,14 +2951,6 @@ function filterData() {
         ? `Status verifikasi UID: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`
         : `Status laporan: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`;
       rightContent.appendChild(statusBadge);
-
-      const detailsBtn = document.createElement('button');
-      detailsBtn.type = 'button';
-      detailsBtn.className = 'btn-icon';
-      detailsBtn.textContent = '⋯';
-      detailsBtn.title = 'Salin detail laporan';
-      detailsBtn.setAttribute('aria-label', `Salin detail laporan ${nomorStr}`);
-      rightContent.appendChild(detailsBtn);
 
       // Provenance tetap disimpan dan tersedia di API/admin, tetapi tampilan publik
       // hanya menampilkan satu status utama agar kartu tetap ringkas dan jelas.
@@ -3770,12 +3317,6 @@ function bindStaticEvents() {
   const homeTitle = document.getElementById('homeTitle');
   homeTitle?.addEventListener('click', resetToHome);
 
-  document.getElementById('sideHomeBtn')
-    ?.addEventListener('click', () => {
-      resetToHome();
-      document.querySelector('.container')?.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
   document.getElementById('authBtn')
     ?.addEventListener('click', toggleAdmin);
 
@@ -3853,60 +3394,9 @@ function bindStaticEvents() {
   qrisModal?.addEventListener('click', event => {
     if (event.target === event.currentTarget) closeQrisModal();
   });
-
-  document.getElementById('sideDashboardBtn')
-    ?.addEventListener('click', () => {
-      resetToHome();
-      document.querySelector('.container')?.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-  document.getElementById('sideRekeningBtn')
-    ?.addEventListener('click', () => switchTab('rekening'));
-
-  document.getElementById('sideGenshinBtn')
-    ?.addEventListener('click', () => switchTab('genshin'));
-
-  document.getElementById('sidePartnerBtn')
-    ?.addEventListener('click', () => {
-      document.getElementById('paidBanner')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-
-  document.getElementById('sideAboutBtn')
-    ?.addEventListener('click', () => {
-      document.querySelector('.trust-note')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-
-  document.getElementById('sideHelpBtn')
-    ?.addEventListener('click', () => {
-      document.querySelector('.donation-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      showToast('Bantuan & dukungan tersedia di bagian bawah.');
-    });
-
-  const filterToggle = document.getElementById('filterToggleBtn');
-  filterToggle?.addEventListener('click', () => {
-    setFilterPanelOpen(filterToggle.getAttribute('aria-expanded') !== 'true');
-  });
-
-  document.getElementById('metaFilterInput')
-    ?.addEventListener('change', filterData);
-
-  document.getElementById('statusFilterInput')
-    ?.addEventListener('change', filterData);
-
-  document.getElementById('clearFilterBtn')
-    ?.addEventListener('click', () => {
-      const metaFilter = document.getElementById('metaFilterInput');
-      const statusFilter = document.getElementById('statusFilterInput');
-      if (metaFilter) metaFilter.value = '';
-      if (statusFilter) statusFilter.value = '';
-      filterData();
-    });
 }
 
 bindStaticEvents();
-updateSidebarActive(activeTab);
-initPremiumAd();
-updateResultColumns(activeTab);
 populateProvenanceControls(activeTab);
 
 /* =========================
