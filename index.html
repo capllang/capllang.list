@@ -10,7 +10,7 @@
   <meta name="author" content="Capllang List">
   <meta name="application-name" content="Capllang List">
   <meta name="apple-mobile-web-app-title" content="Capllang List">
-  <meta name="theme-color" content="#071426">
+  <meta name="theme-color" content="#06142f">
   <meta name="color-scheme" content="light dark">
   <meta name="format-detection" content="telephone=no">
 
@@ -68,6 +68,46 @@
       0 Rekening
     </div>
   </div>
+
+  <section
+    id="paidBanner"
+    class="premium-ad"
+    aria-label="Promosi partner Capllang List">
+
+    <div class="premium-ad__visual" aria-hidden="true">
+      <svg class="premium-ad__megaphone" viewBox="0 0 96 96" role="presentation" focusable="false">
+        <defs>
+          <linearGradient id="adHorn" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0" stop-color="#7dd3fc"/>
+            <stop offset="1" stop-color="#a78bfa"/>
+          </linearGradient>
+        </defs>
+        <path d="M18 39h15l39-20v58L33 57H18z" fill="url(#adHorn)"/>
+        <path d="M33 39v18M22 57l7 20h17l-9-20" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M78 32l10-7M80 48h12M78 64l10 7" fill="none" stroke="#67e8f9" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="premium-ad__content">
+      <span id="adLabel" class="premium-ad__label">Banner Partner</span>
+      <strong id="adHeadline" class="premium-ad__headline">SPACE IKLAN PREMIUM</strong>
+
+      <div class="premium-ad__meta">
+        <span id="adPrice">◈ Mulai Rp25.000/hari</span>
+        <span>✦ Mudah dipasang</span>
+        <span>◉ Slot harian</span>
+      </div>
+    </div>
+
+    <a
+      id="adCta"
+      class="premium-ad__cta"
+      href="#adInfoStrip">
+      Pasang Iklan
+    </a>
+
+    <span id="adDisclosure" class="premium-ad__sponsored">Partner Slot</span>
+  </section>
 
   <div class="tabs" role="tablist" aria-label="Kategori database">
     <button
@@ -182,9 +222,33 @@
       autocomplete="off">
   </div>
 
+  <div id="adInfoStrip" class="ad-info-strip" role="note" aria-label="Informasi slot iklan">
+    <div class="ad-info-strip__main">
+      <span class="ad-info-icon" aria-hidden="true">✦</span>
+      <span>Slot promo harian tersedia</span>
+      <span class="ad-info-dot" aria-hidden="true">•</span>
+      <span>Instalasi cepat</span>
+    </div>
+
+    <span id="adStripDisclosure" class="ad-info-sponsored">Partner Slot</span>
+  </div>
+
   <div id="loadingIndicator" class="loading-indicator" role="status" aria-live="polite" aria-atomic="true">
     <span class="loading-spinner"></span>
     <span id="loadingText">Memuat...</span>
+  </div>
+
+  <div
+    id="resultColumns"
+    class="result-columns result-columns-rekening"
+    aria-hidden="true">
+    <span id="resultNumberHeading">Nomor Rekening</span>
+
+    <div id="resultColumnsRight" class="result-columns-right result-columns-right-rekening">
+      <span id="resultMetaHeading" class="result-meta-heading">Bank</span>
+      <span>Tanggal</span>
+      <span>Status</span>
+    </div>
   </div>
 
   <div

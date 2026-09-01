@@ -22,6 +22,154 @@ function apiUrl(path, params = null) {
 const CACHE_KEY = "cached_scammer_db_v4";
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
+
+/* =========================================================
+   PREMIUM AD CONFIG — CAPLLANG LIST v7.2
+
+   Untuk memasang iklan:
+   1) ubah active menjadi true
+   2) isi headline / ctaUrl / tanggal
+   3) deploy app.js
+
+   Setelah endAt terlewati, slot otomatis kembali menjadi
+   house ad "SPACE IKLAN PREMIUM".
+========================================================= */
+
+const PAID_AD = {
+  active: false,
+
+  sponsor: '',
+  label: 'Sponsored',
+  headline: '',
+  priceText: '',
+
+  ctaText: 'Kunjungi',
+  ctaUrl: '',
+
+  // Opsional: URL gambar/logo sponsor. Kosongkan untuk ikon default.
+  creativeUrl: '',
+
+  // Format ISO 8601, contoh: 2026-09-01T00:00:00+07:00
+  startAt: '',
+  endAt: ''
+};
+
+function parseAdScheduleDate(value) {
+  if (!value) return null;
+  const timestamp = new Date(value).getTime();
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+function isPaidAdInSchedule(ad = PAID_AD, now = Date.now()) {
+  if (!ad?.active) return false;
+
+  const start = parseAdScheduleDate(ad.startAt);
+  const end = parseAdScheduleDate(ad.endAt);
+
+  return (!start || now >= start) && (!end || now <= end);
+}
+
+function setAdCtaLink(cta, href, { sponsored = false } = {}) {
+  if (!cta) return;
+
+  const safeHref = String(href || '').trim();
+  cta.setAttribute('href', safeHref || '#adInfoStrip');
+
+  if (/^https?:\/\//i.test(safeHref)) {
+    cta.setAttribute('target', '_blank');
+    cta.setAttribute(
+      'rel',
+      sponsored
+        ? 'noopener noreferrer sponsored'
+        : 'noopener noreferrer'
+    );
+  } else {
+    cta.removeAttribute('target');
+    cta.removeAttribute('rel');
+  }
+}
+
+function setPremiumAdCreative(visual, creativeUrl) {
+  if (!visual) return;
+
+  visual.classList.remove('has-creative');
+  visual.style.removeProperty('background-image');
+
+  const rawUrl = String(creativeUrl || '').trim();
+  if (!rawUrl) return;
+
+  try {
+    const parsed = new URL(rawUrl, window.location.href);
+    if (!['http:', 'https:'].includes(parsed.protocol)) return;
+
+    visual.style.backgroundImage = `url("${parsed.href.replace(/"/g, '%22')}")`;
+    visual.classList.add('has-creative');
+  } catch (_) {
+    // URL kreatif invalid: gunakan ikon default.
+  }
+}
+
+function initPremiumAd() {
+  const banner = document.getElementById('paidBanner');
+  if (!banner) return;
+
+  const visual = banner.querySelector('.premium-ad__visual');
+  const label = document.getElementById('adLabel');
+  const headline = document.getElementById('adHeadline');
+  const price = document.getElementById('adPrice');
+  const cta = document.getElementById('adCta');
+  const disclosure = document.getElementById('adDisclosure');
+  const stripDisclosure = document.getElementById('adStripDisclosure');
+
+  const paidIsActive = isPaidAdInSchedule(PAID_AD);
+  banner.classList.toggle('is-paid', paidIsActive);
+
+  if (!paidIsActive) {
+    if (label) label.textContent = 'Banner Partner';
+    if (headline) headline.textContent = 'SPACE IKLAN PREMIUM';
+    if (price) price.textContent = '◈ Mulai Rp25.000/hari';
+    if (cta) cta.textContent = 'Pasang Iklan';
+    if (disclosure) disclosure.textContent = 'Partner Slot';
+    if (stripDisclosure) stripDisclosure.textContent = 'Partner Slot';
+
+    setPremiumAdCreative(visual, '');
+    setAdCtaLink(cta, '#adInfoStrip');
+    return;
+  }
+
+  const sponsor = String(PAID_AD.sponsor || '').trim();
+  const paidHeadline = String(PAID_AD.headline || '').trim();
+
+  if (label) label.textContent = PAID_AD.label || 'Sponsored';
+  if (headline) headline.textContent = paidHeadline || sponsor || 'Partner Capllang';
+  if (price) price.textContent = PAID_AD.priceText || sponsor || 'Partner Capllang List';
+  if (cta) cta.textContent = PAID_AD.ctaText || 'Kunjungi';
+  if (disclosure) disclosure.textContent = 'Sponsored';
+  if (stripDisclosure) stripDisclosure.textContent = 'Sponsored';
+
+  setPremiumAdCreative(visual, PAID_AD.creativeUrl);
+  setAdCtaLink(cta, PAID_AD.ctaUrl, { sponsored: true });
+}
+
+function updateResultColumns(tab = activeTab) {
+  const normalizedTab = tab === 'genshin' ? 'genshin' : 'rekening';
+  const columns = document.getElementById('resultColumns');
+  const columnsRight = document.getElementById('resultColumnsRight');
+  const numberHeading = document.getElementById('resultNumberHeading');
+
+  if (!columns || !columnsRight || !numberHeading) return;
+
+  columns.classList.toggle('result-columns-rekening', normalizedTab === 'rekening');
+  columns.classList.toggle('result-columns-genshin', normalizedTab === 'genshin');
+
+  columnsRight.classList.toggle('result-columns-right-rekening', normalizedTab === 'rekening');
+  columnsRight.classList.toggle('result-columns-right-genshin', normalizedTab === 'genshin');
+
+  numberHeading.textContent = normalizedTab === 'rekening'
+    ? 'Nomor Rekening'
+    : 'UID Game';
+}
+
 let database = {
   rekening: [],
   genshin: [],
@@ -2441,6 +2589,7 @@ async function switchTab(tab) {
       ? "Cari nomor rekening..."
       : "Cari UID...";
 
+  updateResultColumns(tab);
   updateMetaSelectOptions();
   populateProvenanceControls(tab);
 
@@ -2668,6 +2817,8 @@ Catatan: ${disclaimer}`;
 
 function filterData() {
   try {
+    updateResultColumns(activeTab);
+
     const rawQuery =
       getSearchQuery()
         .toLowerCase();
@@ -3397,6 +3548,8 @@ function bindStaticEvents() {
 }
 
 bindStaticEvents();
+initPremiumAd();
+updateResultColumns(activeTab);
 populateProvenanceControls(activeTab);
 
 /* =========================
