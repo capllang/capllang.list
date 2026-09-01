@@ -4148,3 +4148,521 @@ body.dark-mode .dashboard-shell .result-item .number {
     display: none !important;
   }
 }
+
+/* ============================================================
+   CAPLLANG LIST v7.3.1 — READABILITY + RESPONSIVE POLISH
+   - Sidebar brand becomes a real home button.
+   - Typography is enlarged for desktop/tablet/mobile.
+   - Mobile results switch from compressed table rows to readable cards.
+============================================================ */
+
+:root {
+  --font-family: "Segoe UI Variable Text", "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-family);
+  font-synthesis: none;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Sidebar home/brand */
+.side-brand-button {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.side-brand-button:hover {
+  background: rgba(37, 99, 235, .09);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, .08);
+  border-radius: 12px;
+  transform: translateY(-1px);
+}
+
+.side-brand-button:active {
+  transform: translateY(0);
+}
+
+.side-brand-button:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+.side-brand strong {
+  font-size: 1.08rem;
+  line-height: 1.25;
+  letter-spacing: -.02em;
+}
+
+.side-brand > span {
+  margin-top: 6px;
+  font-size: .72rem;
+  line-height: 1.35;
+  letter-spacing: .025em;
+}
+
+.side-nav-label {
+  font-size: .67rem;
+  line-height: 1.25;
+}
+
+.side-nav-item {
+  min-height: 46px;
+  padding: 10px 12px;
+  font-size: .84rem;
+  line-height: 1.3;
+}
+
+.side-nav-item > span:first-child {
+  font-size: 1rem;
+}
+
+.side-security-card {
+  padding: 17px 13px;
+}
+
+.side-security-card strong {
+  font-size: .82rem;
+  line-height: 1.3;
+}
+
+.side-security-card p {
+  font-size: .72rem;
+  line-height: 1.6;
+}
+
+.side-security-card > span {
+  font-size: .72rem;
+}
+
+.side-footer {
+  font-size: .66rem;
+  line-height: 1.45;
+}
+
+/* Main workspace type hierarchy */
+.dashboard-shell .home-title-button {
+  font-size: 1.28rem;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+}
+
+.site-subtitle {
+  margin-top: 3px;
+  font-size: .79rem;
+  line-height: 1.4;
+}
+
+.dashboard-shell .btn-header-admin,
+.dashboard-shell .btn-theme {
+  min-height: 44px;
+  font-size: .79rem;
+  line-height: 1.2;
+}
+
+.dashboard-shell .status-bar,
+.dashboard-shell .data-counter {
+  font-size: .88rem;
+  line-height: 1.35;
+}
+
+.dashboard-shell .tabs .tab-btn {
+  min-height: 48px;
+  font-size: .86rem;
+  line-height: 1.25;
+}
+
+.dashboard-shell .premium-ad__label {
+  font-size: .67rem;
+}
+
+.dashboard-shell .premium-ad__headline {
+  font-size: 1.16rem;
+  line-height: 1.15;
+}
+
+.dashboard-shell .premium-ad__meta {
+  font-size: .73rem;
+  line-height: 1.35;
+}
+
+.dashboard-shell .premium-ad__cta {
+  font-size: .82rem;
+}
+
+.dashboard-shell .premium-ad__sponsored {
+  font-size: .58rem;
+}
+
+.search-toolbar .search-box input {
+  font-size: .88rem;
+  line-height: 1.35;
+}
+
+.filter-toggle {
+  font-size: .81rem;
+}
+
+.filter-panel label {
+  font-size: .67rem;
+}
+
+.filter-panel select,
+.clear-filter-btn {
+  font-size: .78rem;
+}
+
+.dashboard-shell .ad-info-strip {
+  font-size: .75rem;
+  line-height: 1.35;
+}
+
+.dashboard-shell .result-columns {
+  font-size: .67rem;
+  line-height: 1.25;
+  letter-spacing: .035em;
+}
+
+.dashboard-shell .result-item {
+  min-height: 60px;
+}
+
+.dashboard-shell .result-item .number {
+  font-size: .91rem;
+  line-height: 1.3;
+  letter-spacing: .01em;
+}
+
+.dashboard-shell .badge-meta.payment-brand,
+.dashboard-shell .payment-brand-name {
+  font-size: .78rem;
+  line-height: 1.3;
+}
+
+.dashboard-shell .badge-date {
+  font-size: .76rem;
+  line-height: 1.3;
+}
+
+.dashboard-shell .badge-provenance {
+  min-height: 32px;
+  padding: 6px 11px;
+  font-size: .70rem;
+  line-height: 1.2;
+}
+
+.dashboard-shell .trust-note,
+.dashboard-shell .donation-section {
+  font-size: .75rem;
+  line-height: 1.55;
+}
+
+/* Keep tablet readable when sidebar disappears. */
+@media (max-width: 1040px) {
+  html {
+    font-size: 16px;
+  }
+
+  .dashboard-shell .container {
+    padding: 22px 24px;
+  }
+
+  .dashboard-shell .home-title-button {
+    font-size: 1.2rem;
+  }
+
+  .site-subtitle {
+    font-size: .76rem;
+  }
+
+  .dashboard-shell .result-item .number {
+    font-size: .88rem;
+  }
+}
+
+/* Tablet / large phone: stop compressing the table and use readable rows. */
+@media (max-width: 720px) {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    padding: 10px;
+  }
+
+  .dashboard-shell,
+  .dashboard-main,
+  .dashboard-shell .container {
+    width: 100%;
+  }
+
+  .dashboard-shell .container {
+    height: calc(100dvh - 20px);
+    min-height: 0;
+    padding: 15px;
+    border-radius: 20px;
+    gap: 11px;
+  }
+
+  .dashboard-shell .header-area {
+    gap: 10px;
+  }
+
+  .dashboard-shell .home-title-button {
+    font-size: 1.02rem;
+  }
+
+  .dashboard-shell .btn-header-admin,
+  .dashboard-shell .btn-theme {
+    min-height: 40px;
+    padding: 7px 10px;
+    font-size: .72rem;
+  }
+
+  .dashboard-shell .status-bar,
+  .dashboard-shell .data-counter {
+    min-height: 44px;
+    font-size: .78rem;
+  }
+
+  .dashboard-shell .tabs .tab-btn {
+    min-height: 44px;
+    padding-inline: 8px;
+    font-size: .78rem;
+  }
+
+  .search-toolbar .search-box input {
+    min-height: 46px;
+    font-size: .84rem;
+  }
+
+  .filter-toggle {
+    min-height: 46px;
+    font-size: .74rem;
+  }
+
+  .dashboard-shell .ad-info-strip {
+    font-size: .70rem;
+  }
+
+  .dashboard-shell .result-columns {
+    display: none;
+  }
+
+  .dashboard-shell .result-list {
+    border: 1px solid #e7e8ed;
+    border-radius: 12px;
+    gap: 0;
+  }
+
+  .dashboard-shell .result-item,
+  .dashboard-shell .result-item:nth-child(even) {
+    display: block;
+    min-height: 0;
+    padding: 12px 13px;
+    border-radius: 0;
+    background: #ffffff;
+  }
+
+  .dashboard-shell .result-item::before {
+    display: none;
+  }
+
+  .dashboard-shell .record-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+
+  .dashboard-shell .result-item .number {
+    font-size: .91rem;
+    line-height: 1.3;
+  }
+
+  .dashboard-shell .right-content,
+  .dashboard-shell .right-content-rekening,
+  .dashboard-shell .right-content-genshin {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto 28px;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .dashboard-shell .badge-meta.payment-brand,
+  .dashboard-shell .payment-brand-name {
+    font-size: .76rem;
+  }
+
+  .dashboard-shell .badge-date {
+    font-size: .73rem;
+  }
+
+  .dashboard-shell .badge-provenance {
+    font-size: .68rem;
+  }
+}
+
+/* Phone: stack status so text never has to shrink. */
+@media (max-width: 520px) {
+  body {
+    padding: 0;
+  }
+
+  .dashboard-shell .container {
+    height: 100dvh;
+    padding: 13px 12px;
+    border-radius: 0;
+  }
+
+  .dashboard-shell .header-area {
+    align-items: flex-start;
+  }
+
+  .dashboard-shell .home-title-button {
+    font-size: .98rem;
+  }
+
+  .dashboard-shell .header-actions {
+    gap: 5px;
+  }
+
+  .dashboard-shell .btn-header-admin,
+  .dashboard-shell .btn-theme {
+    min-height: 36px;
+    padding: 6px 8px;
+    font-size: .66rem;
+  }
+
+  .dashboard-shell .status-bar-container {
+    gap: 7px;
+  }
+
+  .dashboard-shell .status-bar,
+  .dashboard-shell .data-counter {
+    padding: 8px 9px;
+    font-size: .74rem;
+  }
+
+  .dashboard-shell .premium-ad__headline {
+    font-size: 1rem;
+  }
+
+  .dashboard-shell .premium-ad__meta {
+    font-size: .68rem;
+  }
+
+  .dashboard-shell .tabs .tab-btn {
+    font-size: .72rem;
+  }
+
+  .search-toolbar {
+    grid-template-columns: minmax(0, 1fr) 82px;
+  }
+
+  .search-toolbar .search-box input {
+    font-size: .82rem;
+  }
+
+  .filter-toggle {
+    font-size: .70rem;
+  }
+
+  .dashboard-shell .ad-info-strip {
+    font-size: .66rem;
+  }
+
+  .dashboard-shell .result-item {
+    padding: 12px;
+  }
+
+  .dashboard-shell .result-item .number {
+    font-size: .9rem;
+  }
+
+  .dashboard-shell .right-content,
+  .dashboard-shell .right-content-rekening,
+  .dashboard-shell .right-content-genshin {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 10px;
+  }
+
+  .dashboard-shell .badge-meta.payment-brand {
+    grid-column: 1;
+  }
+
+  .dashboard-shell .badge-date {
+    grid-column: 2;
+    justify-self: end;
+  }
+
+  .dashboard-shell .badge-provenance {
+    grid-column: 1 / -1;
+    justify-self: start;
+    font-size: .69rem;
+  }
+
+  .dashboard-shell .btn-icon {
+    display: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .dashboard-shell .home-title-button {
+    font-size: .91rem;
+  }
+
+  .dashboard-shell .btn-header-admin,
+  .dashboard-shell .btn-theme {
+    font-size: .62rem;
+  }
+
+  .dashboard-shell .result-item .number {
+    font-size: .86rem;
+  }
+
+  .dashboard-shell .badge-meta.payment-brand,
+  .dashboard-shell .payment-brand-name,
+  .dashboard-shell .badge-date {
+    font-size: .70rem;
+  }
+}
+
+body.dark-mode .side-brand-button:hover {
+  background: rgba(59, 130, 246, .12);
+}
+
+body.dark-mode .dashboard-shell .result-list {
+  border-color: rgba(126,145,174,.12);
+}
+
+@media (max-width: 720px) {
+  body.dark-mode .dashboard-shell .result-item,
+  body.dark-mode .dashboard-shell .result-item:nth-child(even) {
+    background: #0e1b2f;
+  }
+}

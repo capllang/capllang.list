@@ -3596,6 +3596,12 @@ function bindStaticEvents() {
   const homeTitle = document.getElementById('homeTitle');
   homeTitle?.addEventListener('click', resetToHome);
 
+  document.getElementById('sideHomeBtn')
+    ?.addEventListener('click', () => {
+      resetToHome();
+      document.querySelector('.container')?.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
   document.getElementById('authBtn')
     ?.addEventListener('click', toggleAdmin);
 
