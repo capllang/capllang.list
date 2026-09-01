@@ -24,35 +24,106 @@ const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
 
 /* =========================================================
-   PREMIUM AD CONFIG — CAPLLANG LIST v7.2
+   ROTATING AD SYSTEM — CAPLLANG LIST v7.4
 
-   Untuk memasang iklan:
-   1) ubah active menjadi true
-   2) isi headline / ctaUrl / tanggal
-   3) deploy app.js
+   Tiga campaign selalu didistribusikan ke tiga placement:
+   - slot 1: banner utama
+   - slot 2: sidebar atas
+   - slot 3: sidebar bawah
 
-   Setelah endAt terlewati, slot otomatis kembali menjadi
-   house ad "SPACE IKLAN PREMIUM".
+   Setiap AD_ROTATION_INTERVAL_MS, campaign bergeser satu slot.
+   Jika paid.active = false / belum mulai / sudah berakhir,
+   campaign otomatis kembali ke house ad bawaan.
 ========================================================= */
 
-const PAID_AD = {
-  active: false,
+const AD_ROTATION_INTERVAL_MS = 12 * 1000;
 
-  sponsor: '',
-  label: 'Sponsored',
-  headline: '',
-  priceText: '',
+const AD_CAMPAIGNS = [
+  {
+    id: 'campaign-1',
+    theme: 'violet',
+    house: {
+      label: 'Banner Partner',
+      headline: 'SPACE IKLAN PREMIUM',
+      priceText: '◈ Mulai Rp25.000/hari',
+      ctaText: 'Pasang Iklan',
+      ctaUrl: '#adInfoStrip',
+      creativeUrl: '',
+      icon: '📣',
+      disclosure: 'Partner Slot'
+    },
+    paid: {
+      active: false,
+      sponsor: '',
+      label: 'Sponsored',
+      headline: '',
+      priceText: '',
+      ctaText: 'Kunjungi',
+      ctaUrl: '',
+      creativeUrl: '',
+      icon: '',
+      startAt: '',
+      endAt: ''
+    }
+  },
+  {
+    id: 'campaign-2',
+    theme: 'magenta',
+    house: {
+      label: 'Partner Slot',
+      headline: 'SPACE IKLAN PREMIUM',
+      priceText: 'Promosikan bisnis Anda',
+      ctaText: 'Pasang Iklan',
+      ctaUrl: '#adInfoStrip',
+      creativeUrl: '',
+      icon: '♛',
+      disclosure: 'Partner Slot'
+    },
+    paid: {
+      active: false,
+      sponsor: '',
+      label: 'Sponsored',
+      headline: '',
+      priceText: '',
+      ctaText: 'Kunjungi',
+      ctaUrl: '',
+      creativeUrl: '',
+      icon: '',
+      startAt: '',
+      endAt: ''
+    }
+  },
+  {
+    id: 'campaign-3',
+    theme: 'cyan',
+    house: {
+      label: 'Partner Slot',
+      headline: 'BOOST BISNIS LEBIH CEPAT',
+      priceText: 'Jangkau pengguna aktif',
+      ctaText: 'Pasang Iklan',
+      ctaUrl: '#adInfoStrip',
+      creativeUrl: '',
+      icon: '🚀',
+      disclosure: 'Partner Slot'
+    },
+    paid: {
+      active: false,
+      sponsor: '',
+      label: 'Sponsored',
+      headline: '',
+      priceText: '',
+      ctaText: 'Kunjungi',
+      ctaUrl: '',
+      creativeUrl: '',
+      icon: '',
+      startAt: '',
+      endAt: ''
+    }
+  }
+];
 
-  ctaText: 'Kunjungi',
-  ctaUrl: '',
-
-  // Opsional: URL gambar/logo sponsor. Kosongkan untuk ikon default.
-  creativeUrl: '',
-
-  // Format ISO 8601, contoh: 2026-09-01T00:00:00+07:00
-  startAt: '',
-  endAt: ''
-};
+let adRotationIndex = 0;
+let adRotationTimer = null;
 
 function parseAdScheduleDate(value) {
   if (!value) return null;
@@ -60,7 +131,7 @@ function parseAdScheduleDate(value) {
   return Number.isFinite(timestamp) ? timestamp : null;
 }
 
-function isPaidAdInSchedule(ad = PAID_AD, now = Date.now()) {
+function isPaidAdInSchedule(ad, now = Date.now()) {
   if (!ad?.active) return false;
 
   const start = parseAdScheduleDate(ad.startAt);
@@ -69,27 +140,57 @@ function isPaidAdInSchedule(ad = PAID_AD, now = Date.now()) {
   return (!start || now >= start) && (!end || now <= end);
 }
 
-function setAdCtaLink(cta, href, { sponsored = false } = {}) {
-  if (!cta) return;
+function getCampaignPresentation(campaign, now = Date.now()) {
+  const house = campaign?.house || {};
+  const paid = campaign?.paid || {};
+  const paidIsActive = isPaidAdInSchedule(paid, now);
+
+  if (!paidIsActive) {
+    return {
+      ...house,
+      isPaid: false,
+      sponsor: '',
+      disclosure: house.disclosure || 'Partner Slot'
+    };
+  }
+
+  const sponsor = String(paid.sponsor || '').trim();
+
+  return {
+    label: paid.label || 'Sponsored',
+    headline: paid.headline || sponsor || house.headline || 'Partner Capllang',
+    priceText: paid.priceText || sponsor || house.priceText || 'Partner Capllang List',
+    ctaText: paid.ctaText || 'Kunjungi',
+    ctaUrl: paid.ctaUrl || '#',
+    creativeUrl: paid.creativeUrl || '',
+    icon: paid.icon || house.icon || '✦',
+    disclosure: 'Sponsored',
+    sponsor,
+    isPaid: true
+  };
+}
+
+function setAdLink(link, href, { sponsored = false } = {}) {
+  if (!link) return;
 
   const safeHref = String(href || '').trim();
-  cta.setAttribute('href', safeHref || '#adInfoStrip');
+  link.setAttribute('href', safeHref || '#adInfoStrip');
 
   if (/^https?:\/\//i.test(safeHref)) {
-    cta.setAttribute('target', '_blank');
-    cta.setAttribute(
+    link.setAttribute('target', '_blank');
+    link.setAttribute(
       'rel',
       sponsored
         ? 'noopener noreferrer sponsored'
         : 'noopener noreferrer'
     );
   } else {
-    cta.removeAttribute('target');
-    cta.removeAttribute('rel');
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
   }
 }
 
-function setPremiumAdCreative(visual, creativeUrl) {
+function setAdCreative(visual, creativeUrl) {
   if (!visual) return;
 
   visual.classList.remove('has-creative');
@@ -105,50 +206,121 @@ function setPremiumAdCreative(visual, creativeUrl) {
     visual.style.backgroundImage = `url("${parsed.href.replace(/"/g, '%22')}")`;
     visual.classList.add('has-creative');
   } catch (_) {
-    // URL kreatif invalid: gunakan ikon default.
+    // Creative invalid: fall back to built-in icon.
   }
 }
 
-function initPremiumAd() {
-  const banner = document.getElementById('paidBanner');
-  if (!banner) return;
+function getAdLinkElement(slot) {
+  if (!slot) return null;
+  if (slot.matches('a')) return slot;
+  return slot.querySelector('[data-ad-cta]');
+}
 
-  const visual = banner.querySelector('.premium-ad__visual');
-  const label = document.getElementById('adLabel');
-  const headline = document.getElementById('adHeadline');
-  const price = document.getElementById('adPrice');
-  const cta = document.getElementById('adCta');
-  const disclosure = document.getElementById('adDisclosure');
-  const stripDisclosure = document.getElementById('adStripDisclosure');
+function animateAdSwap(slot) {
+  if (!slot || typeof slot.animate !== 'function') return;
 
-  const paidIsActive = isPaidAdInSchedule(PAID_AD);
-  banner.classList.toggle('is-paid', paidIsActive);
+  slot.animate(
+    [
+      { opacity: .78, transform: 'translateY(2px)' },
+      { opacity: 1, transform: 'translateY(0)' }
+    ],
+    {
+      duration: 320,
+      easing: 'ease-out'
+    }
+  );
+}
 
-  if (!paidIsActive) {
-    if (label) label.textContent = 'Banner Partner';
-    if (headline) headline.textContent = 'SPACE IKLAN PREMIUM';
-    if (price) price.textContent = '◈ Mulai Rp25.000/hari';
-    if (cta) cta.textContent = 'Pasang Iklan';
-    if (disclosure) disclosure.textContent = 'Partner Slot';
-    if (stripDisclosure) stripDisclosure.textContent = 'Partner Slot';
+function renderAdSlot(slot, campaign, campaignIndex) {
+  if (!slot || !campaign) return;
 
-    setPremiumAdCreative(visual, '');
-    setAdCtaLink(cta, '#adInfoStrip');
-    return;
+  const physicalSlot = Number(slot.dataset.adPhysical || 1);
+  const presentation = getCampaignPresentation(campaign);
+  const visual = slot.querySelector('[data-ad-visual]');
+  const label = slot.querySelector('[data-ad-label]');
+  const headline = slot.querySelector('[data-ad-headline]');
+  const price = slot.querySelector('[data-ad-price]');
+  const cta = slot.querySelector('[data-ad-cta]');
+  const disclosure = slot.querySelector('[data-ad-disclosure]');
+  const icon = slot.querySelector('[data-ad-icon]');
+  const counter = slot.querySelector('[data-ad-slot-counter]');
+  const link = getAdLinkElement(slot);
+
+  slot.dataset.adTheme = campaign.theme || 'violet';
+  slot.dataset.campaignId = campaign.id || String(campaignIndex + 1);
+  slot.classList.toggle('is-paid', presentation.isPaid);
+
+  if (label) label.textContent = presentation.label || 'Partner Slot';
+  if (headline) headline.textContent = presentation.headline || 'SPACE IKLAN PREMIUM';
+  if (price) price.textContent = presentation.priceText || 'Promosikan bisnis Anda';
+  if (cta) cta.textContent = presentation.ctaText || 'Kunjungi';
+  if (disclosure) disclosure.textContent = presentation.disclosure || 'Partner Slot';
+  if (icon) icon.textContent = presentation.icon || '✦';
+  if (counter) counter.textContent = `Slot ${physicalSlot}/3`;
+
+  setAdCreative(visual, presentation.creativeUrl);
+  setAdLink(link, presentation.ctaUrl, { sponsored: presentation.isPaid });
+
+  slot.querySelectorAll('[data-ad-dot]').forEach(dot => {
+    dot.classList.toggle(
+      'active',
+      Number(dot.dataset.adDot) === campaignIndex
+    );
+  });
+
+  const accessibleName = presentation.sponsor
+    ? `Iklan sponsor ${presentation.sponsor}: ${presentation.headline}`
+    : `Slot iklan ${physicalSlot}: ${presentation.headline}`;
+
+  if (slot.matches('a')) {
+    slot.setAttribute('aria-label', accessibleName);
+  } else {
+    slot.setAttribute('aria-label', accessibleName);
   }
 
-  const sponsor = String(PAID_AD.sponsor || '').trim();
-  const paidHeadline = String(PAID_AD.headline || '').trim();
+  if (slot.dataset.adSlot === 'main') {
+    const stripDisclosure = document.getElementById('adStripDisclosure');
+    if (stripDisclosure) {
+      stripDisclosure.textContent = presentation.isPaid
+        ? 'Sponsored'
+        : 'Partner Slot';
+    }
+  }
 
-  if (label) label.textContent = PAID_AD.label || 'Sponsored';
-  if (headline) headline.textContent = paidHeadline || sponsor || 'Partner Capllang';
-  if (price) price.textContent = PAID_AD.priceText || sponsor || 'Partner Capllang List';
-  if (cta) cta.textContent = PAID_AD.ctaText || 'Kunjungi';
-  if (disclosure) disclosure.textContent = 'Sponsored';
-  if (stripDisclosure) stripDisclosure.textContent = 'Sponsored';
+  animateAdSwap(slot);
+}
 
-  setPremiumAdCreative(visual, PAID_AD.creativeUrl);
-  setAdCtaLink(cta, PAID_AD.ctaUrl, { sponsored: true });
+function renderRotatingAds() {
+  const slots = [
+    document.querySelector('[data-ad-slot="main"]'),
+    document.querySelector('[data-ad-slot="side-a"]'),
+    document.querySelector('[data-ad-slot="side-b"]')
+  ].filter(Boolean);
+
+  if (AD_CAMPAIGNS.length === 0 || slots.length === 0) return;
+
+  slots.forEach(slot => {
+    const physicalSlot = Math.max(1, Number(slot.dataset.adPhysical || 1));
+    const offset = physicalSlot - 1;
+    const campaignIndex = (adRotationIndex + offset) % AD_CAMPAIGNS.length;
+    renderAdSlot(slot, AD_CAMPAIGNS[campaignIndex], campaignIndex);
+  });
+}
+
+function initPremiumAd() {
+  if (adRotationTimer) {
+    clearInterval(adRotationTimer);
+    adRotationTimer = null;
+  }
+
+  renderRotatingAds();
+
+  if (AD_CAMPAIGNS.length <= 1) return;
+
+  adRotationTimer = window.setInterval(() => {
+    adRotationIndex = (adRotationIndex + 1) % AD_CAMPAIGNS.length;
+    renderRotatingAds();
+  }, Math.max(5000, AD_ROTATION_INTERVAL_MS));
 }
 
 function updateResultColumns(tab = activeTab) {
@@ -3056,7 +3228,7 @@ function filterData() {
     const fragment =
       document.createDocumentFragment();
 
-    visibleData.forEach(item => {
+    visibleData.forEach((item, rowIndex) => {
       const nomorStr =
         typeof item === 'object'
           ? String(item.nomor)
@@ -3089,8 +3261,10 @@ function filterData() {
           'li'
         );
 
+      const rowTone = (rowIndex % 3) + 1;
+
       li.className =
-        'result-item';
+        `result-item row-tone-${rowTone}`;
 
       li.dataset.nomor =
         nomorStr;

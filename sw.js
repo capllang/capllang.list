@@ -1,11 +1,12 @@
-const CACHE_NAME = 'capllang-shell-v19';
+const CACHE_NAME = 'capllang-shell-v20';
 const APP_SHELL = [
   '/',
   '/index.html',
   '/styles.css',
   '/app.js',
   '/favicon.ico',
-  '/assets/qris.jpg'
+  '/assets/qris.jpg',
+  '/assets/capllang-logo.jpg'
 ];
 
 self.addEventListener('install', event => {
