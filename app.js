@@ -364,18 +364,18 @@ function hasUsableLocalData() {
 function getDefaultStatusText() {
   switch (connectionState) {
     case 'online':
-      return "● Online";
+      return "Online — sistem berjalan normal";
     case 'offline-cache':
-      return "● Offline — menampilkan cache";
+      return "Offline — menampilkan cache";
     case 'offline-empty':
-      return "● Offline — cache tidak tersedia";
+      return "Offline — cache tidak tersedia";
     case 'server-error-cache':
-      return "● Server tidak tersedia — menampilkan cache";
+      return "Server tidak tersedia — menampilkan cache";
     case 'server-error-empty':
-      return "● Server tidak tersedia";
+      return "Server tidak tersedia";
     case 'checking':
     default:
-      return "● Memeriksa koneksi...";
+      return "Memeriksa koneksi...";
   }
 }
 
@@ -1036,6 +1036,8 @@ function checkUrlParams() {
   if (searchQuery) {
     searchInput.value = searchQuery;
   }
+
+  updateSidebarActive(activeTab);
 }
 
 function updateUrlParam(query) {
@@ -2536,6 +2538,7 @@ async function switchTab(tab) {
   if (!['rekening', 'genshin'].includes(tab)) return;
 
   activeTab = tab;
+  updateSidebarActive(tab);
   updateTabUrlParam(tab);
 
   document
@@ -2812,6 +2815,87 @@ Catatan: ${disclaimer}`;
 }
 
 /* =========================
+   DASHBOARD SIDEBAR + FILTERS
+========================= */
+
+function updateSidebarActive(tab = activeTab) {
+  const rekeningBtn = document.getElementById('sideRekeningBtn');
+  const genshinBtn = document.getElementById('sideGenshinBtn');
+
+  rekeningBtn?.classList.toggle('active', tab === 'rekening');
+  genshinBtn?.classList.toggle('active', tab === 'genshin');
+}
+
+function refreshFrontendFilters(data = []) {
+  const metaSelect = document.getElementById('metaFilterInput');
+  const statusSelect = document.getElementById('statusFilterInput');
+  if (!metaSelect || !statusSelect) return;
+
+  const previousMeta = metaSelect.value;
+  const previousStatus = statusSelect.value;
+
+  const metas = Array.from(new Set(
+    data
+      .map(item => String(item?.meta || item?.bank || item?.game || '').trim())
+      .filter(value => value && value !== '-')
+  )).sort((a, b) => a.localeCompare(b, 'id'));
+
+  const statuses = new Map();
+  data.forEach(item => {
+    const category = item?.category === 'genshin' ? 'genshin' : activeTab;
+    const normalized = normalizeProvenance(
+      category,
+      item?.source_type,
+      item?.verification_status
+    );
+    statuses.set(
+      normalized.verification_status,
+      getVerificationStatusLabel(normalized.verification_status, category)
+    );
+  });
+
+  metaSelect.replaceChildren();
+  const allMeta = document.createElement('option');
+  allMeta.value = '';
+  allMeta.textContent = activeTab === 'rekening' ? 'Semua bank' : 'Semua game';
+  metaSelect.appendChild(allMeta);
+  metas.forEach(meta => {
+    const option = document.createElement('option');
+    option.value = meta.toLowerCase();
+    option.textContent = meta;
+    metaSelect.appendChild(option);
+  });
+
+  statusSelect.replaceChildren();
+  const allStatus = document.createElement('option');
+  allStatus.value = '';
+  allStatus.textContent = 'Semua status';
+  statusSelect.appendChild(allStatus);
+  statuses.forEach((label, value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    statusSelect.appendChild(option);
+  });
+
+  if ([...metaSelect.options].some(option => option.value === previousMeta)) {
+    metaSelect.value = previousMeta;
+  }
+  if ([...statusSelect.options].some(option => option.value === previousStatus)) {
+    statusSelect.value = previousStatus;
+  }
+}
+
+function setFilterPanelOpen(open) {
+  const panel = document.getElementById('filterPanel');
+  const toggle = document.getElementById('filterToggleBtn');
+  if (!panel || !toggle) return;
+
+  panel.classList.toggle('is-hidden', !open);
+  toggle.setAttribute('aria-expanded', String(open));
+}
+
+/* =========================
    FILTER + PAGINATION
 ========================= */
 
@@ -2855,6 +2939,17 @@ function filterData() {
     let visibleData =
       currentData;
 
+    refreshFrontendFilters(currentData);
+
+    const metaFilter =
+      String(document.getElementById('metaFilterInput')?.value || '').toLowerCase();
+
+    const statusFilter =
+      String(document.getElementById('statusFilterInput')?.value || '');
+
+    const hasFrontendFilter =
+      Boolean(metaFilter || statusFilter);
+
     // Hanya dipakai saat offline karena server tidak tersedia.
     if (offlineMode && rawQuery) {
       visibleData =
@@ -2896,6 +2991,29 @@ function filterData() {
         });
     }
 
+    if (hasFrontendFilter) {
+      visibleData = visibleData.filter(item => {
+        const metaValue = String(
+          item?.meta || item?.bank || item?.game || ''
+        ).toLowerCase();
+
+        const category = item?.category === 'genshin' ? 'genshin' : activeTab;
+        const provenance = normalizeProvenance(
+          category,
+          item?.source_type,
+          item?.verification_status
+        );
+
+        const metaMatches =
+          !metaFilter || metaValue === metaFilter;
+
+        const statusMatches =
+          !statusFilter || provenance.verification_status === statusFilter;
+
+        return metaMatches && statusMatches;
+      });
+    }
+
     if (offlineMode) {
       const cachedTotal =
         Number(state.total || 0);
@@ -2907,7 +3025,9 @@ function filterData() {
           : `${visibleData.length} ${categoryLabel}`;
     } else {
       const categoryLabel = activeTab === 'rekening' ? 'Rekening' : 'UID';
-      counter.textContent = `${state.total} ${categoryLabel}`;
+      counter.textContent = hasFrontendFilter
+        ? `${visibleData.length}/${state.total} ${categoryLabel}`
+        : `${state.total} ${categoryLabel}`;
     }
 
     if (
@@ -3102,6 +3222,14 @@ function filterData() {
         ? `Status verifikasi UID: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`
         : `Status laporan: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`;
       rightContent.appendChild(statusBadge);
+
+      const detailsBtn = document.createElement('button');
+      detailsBtn.type = 'button';
+      detailsBtn.className = 'btn-icon';
+      detailsBtn.textContent = '⋯';
+      detailsBtn.title = 'Salin detail laporan';
+      detailsBtn.setAttribute('aria-label', `Salin detail laporan ${nomorStr}`);
+      rightContent.appendChild(detailsBtn);
 
       // Provenance tetap disimpan dan tersedia di API/admin, tetapi tampilan publik
       // hanya menampilkan satu status utama agar kartu tetap ringkas dan jelas.
@@ -3545,9 +3673,58 @@ function bindStaticEvents() {
   qrisModal?.addEventListener('click', event => {
     if (event.target === event.currentTarget) closeQrisModal();
   });
+
+  document.getElementById('sideDashboardBtn')
+    ?.addEventListener('click', () => {
+      resetToHome();
+      document.querySelector('.container')?.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+  document.getElementById('sideRekeningBtn')
+    ?.addEventListener('click', () => switchTab('rekening'));
+
+  document.getElementById('sideGenshinBtn')
+    ?.addEventListener('click', () => switchTab('genshin'));
+
+  document.getElementById('sidePartnerBtn')
+    ?.addEventListener('click', () => {
+      document.getElementById('paidBanner')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+  document.getElementById('sideAboutBtn')
+    ?.addEventListener('click', () => {
+      document.querySelector('.trust-note')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+  document.getElementById('sideHelpBtn')
+    ?.addEventListener('click', () => {
+      document.querySelector('.donation-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      showToast('Bantuan & dukungan tersedia di bagian bawah.');
+    });
+
+  const filterToggle = document.getElementById('filterToggleBtn');
+  filterToggle?.addEventListener('click', () => {
+    setFilterPanelOpen(filterToggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  document.getElementById('metaFilterInput')
+    ?.addEventListener('change', filterData);
+
+  document.getElementById('statusFilterInput')
+    ?.addEventListener('change', filterData);
+
+  document.getElementById('clearFilterBtn')
+    ?.addEventListener('click', () => {
+      const metaFilter = document.getElementById('metaFilterInput');
+      const statusFilter = document.getElementById('statusFilterInput');
+      if (metaFilter) metaFilter.value = '';
+      if (statusFilter) statusFilter.value = '';
+      filterData();
+    });
 }
 
 bindStaticEvents();
+updateSidebarActive(activeTab);
 initPremiumAd();
 updateResultColumns(activeTab);
 populateProvenanceControls(activeTab);
