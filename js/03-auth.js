@@ -117,7 +117,8 @@ async function restoreAdminSession() {
       getLocalDateInputValue();
 
     updateMetaSelectOptions();
-    return true;
+populateProvenanceControls(activeTab);
+return true;
 
   } catch (err) {
     console.warn(
