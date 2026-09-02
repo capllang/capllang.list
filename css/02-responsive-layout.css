@@ -1,0 +1,414 @@
+    .result-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
+
+
+/* =========================================================
+   PRIORITAS 6 V4 — RESPONSIVE VISUAL POLISH
+   Public cards show one primary status only. Provenance detail
+   remains in data/admin but does not compete with the result UI.
+   ========================================================= */
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  padding:
+    max(10px, env(safe-area-inset-top))
+    max(10px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom))
+    max(10px, env(safe-area-inset-left));
+}
+
+.container {
+  width: min(100%, 760px);
+  max-width: 760px;
+  height: min(92dvh, 900px);
+  max-height: 900px;
+  min-height: 560px;
+  padding: clamp(16px, 2.5vw, 26px);
+  gap: clamp(9px, 1.4vw, 13px);
+}
+
+.home-title-button {
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+.btn-theme,
+.btn-header-admin {
+  min-height: 38px;
+  padding: 7px 12px;
+  font-size: clamp(0.7rem, 1.2vw, 0.78rem);
+}
+
+.status-bar,
+.data-counter {
+  font-size: clamp(0.75rem, 1.25vw, 0.82rem);
+  line-height: 1.35;
+}
+
+.tab-btn {
+  min-height: 42px;
+  padding: 10px 12px;
+  font-size: clamp(0.78rem, 1.3vw, 0.88rem);
+  letter-spacing: 0.01em;
+}
+
+.search-box input,
+.admin-box input,
+.admin-box select {
+  min-height: 44px;
+  font-size: clamp(0.84rem, 1.35vw, 0.92rem);
+}
+
+.result-list {
+  gap: 9px;
+  padding-right: 4px;
+}
+
+.result-item {
+  padding: clamp(11px, 1.8vw, 15px) clamp(12px, 2vw, 16px);
+  border-radius: 13px;
+  gap: 8px;
+  cursor: default;
+}
+
+.record-top {
+  min-height: 30px;
+  align-items: center;
+}
+
+.result-item .number {
+  width: auto;
+  max-width: 100%;
+  font-size: clamp(0.98rem, 1.8vw, 1.12rem);
+  line-height: 1.25;
+  letter-spacing: 0.025em;
+  font-weight: 750;
+  cursor: copy;
+}
+
+.right-content {
+  padding-top: 8px;
+  gap: 6px 7px;
+  border-top-color: color-mix(in srgb, var(--input-border) 45%, transparent);
+}
+
+.badge-meta,
+.badge-date,
+.badge-provenance {
+  min-height: 26px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: clamp(0.7rem, 1.15vw, 0.77rem);
+  line-height: 1.15;
+}
+
+.badge-provenance {
+  font-weight: 750;
+}
+
+/* Source/provenance category stays in data but is deliberately hidden publicly. */
+.badge-source,
+.provenance-detail,
+.provenance-ref,
+.btn-icon {
+  display: none !important;
+}
+
+.record-reference {
+  flex-basis: 100%;
+  color: var(--text-muted);
+  font-size: clamp(0.68rem, 1.05vw, 0.74rem);
+  font-weight: 500;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.record-actions {
+  gap: 7px;
+}
+
+.record-actions .btn-edit,
+.record-actions .btn-delete {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+}
+
+.trust-note {
+  max-width: 640px;
+  margin-inline: auto;
+  padding: 1px 8px;
+  font-size: clamp(0.69rem, 1.1vw, 0.76rem);
+  line-height: 1.45;
+}
+
+.donation-section {
+  padding: clamp(10px, 1.6vw, 13px) clamp(12px, 2vw, 17px);
+}
+
+.donation-title {
+  font-size: clamp(0.78rem, 1.25vw, 0.86rem);
+}
+
+.btn-donate-link {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 13px;
+  font-size: clamp(0.72rem, 1.15vw, 0.78rem);
+}
+
+.qris-img {
+  width: 38px;
+  height: 38px;
+}
+
+/* Desktop: give the data room to breathe rather than forcing a phone-width card. */
+@media (min-width: 900px) {
+  body {
+    padding: 28px;
+  }
+
+  .container {
+    width: min(760px, calc(100vw - 56px));
+    height: min(88dvh, 900px);
+    border-radius: 26px;
+  }
+
+  .header-area {
+    padding-bottom: 10px;
+  }
+
+  .status-bar {
+    padding: 8px 13px;
+  }
+
+  .data-counter {
+    padding: 8px 12px;
+  }
+
+  .result-item {
+    padding-inline: 17px;
+  }
+
+  .right-content {
+    flex-wrap: nowrap;
+  }
+
+  .record-reference {
+    flex-basis: auto;
+    margin-left: 2px;
+    min-width: 0;
+  }
+}
+
+/* Tablet: spacious, but still compact enough for portrait mode. */
+@media (min-width: 600px) and (max-width: 899px) {
+  body {
+    padding: 20px;
+  }
+
+  .container {
+    width: min(680px, calc(100vw - 40px));
+    height: min(92dvh, 880px);
+    border-radius: 22px;
+    padding: 20px;
+  }
+
+  .admin-inputs > * {
+    flex-basis: calc(50% - 6px);
+  }
+
+  .source-ref-flex {
+    flex-basis: 100%;
+  }
+}
+
+/* Phones: full-width application surface, large touch targets, no clipped numbers. */
+@media (max-width: 599px) {
+  body {
+    align-items: flex-start;
+    padding:
+      max(7px, env(safe-area-inset-top))
+      max(7px, env(safe-area-inset-right))
+      max(7px, env(safe-area-inset-bottom))
+      max(7px, env(safe-area-inset-left));
+  }
+
+  .container {
+    width: 100%;
+    max-width: none;
+    height: calc(100dvh - 14px);
+    max-height: none;
+    min-height: 0;
+    border-radius: 17px;
+    padding: 12px;
+    gap: 9px;
+  }
+
+  .header-area {
+    gap: 8px;
+  }
+
+  .home-title-button {
+    font-size: clamp(0.92rem, 4vw, 1.02rem);
+    padding-inline: 0;
+  }
+
+  .header-actions {
+    gap: 5px;
+  }
+
+  .btn-theme,
+  .btn-header-admin {
+    min-height: 36px;
+    padding: 6px 9px;
+    font-size: 0.67rem;
+  }
+
+  .status-bar-container {
+    gap: 6px;
+  }
+
+  .status-bar {
+    padding: 7px 9px;
+    font-size: 0.72rem;
+  }
+
+  .data-counter {
+    padding: 7px 9px;
+    font-size: 0.72rem;
+  }
+
+  .tabs {
+    padding: 3px;
+  }
+
+  .tab-btn {
+    min-height: 40px;
+    padding: 9px 6px;
+    font-size: 0.76rem;
+  }
+
+  .search-box input {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 0.86rem;
+  }
+
+  .admin-inputs > *,
+  .meta-select-flex,
+  .meta-custom-flex,
+  .number-input-flex,
+  .date-input-flex,
+  .provenance-select-flex,
+  .source-ref-flex {
+    flex: 1 1 100%;
+  }
+
+  .result-item {
+    padding: 11px 12px;
+    gap: 7px;
+  }
+
+  .record-top {
+    gap: 7px;
+  }
+
+  .result-item .number {
+    font-size: clamp(0.94rem, 4vw, 1.02rem);
+    white-space: nowrap;
+  }
+
+  .right-content {
+    padding-top: 7px;
+    gap: 5px;
+  }
+
+  .badge-meta,
+  .badge-date,
+  .badge-provenance {
+    min-height: 25px;
+    padding: 4px 7px;
+    font-size: 0.69rem;
+  }
+
+  .record-reference {
+    font-size: 0.67rem;
+  }
+
+  .record-actions .btn-edit,
+  .record-actions .btn-delete {
+    min-height: 32px;
+    padding: 5px 8px;
+  }
+
+  .trust-note {
+    padding-inline: 4px;
+    font-size: 0.67rem;
+    line-height: 1.4;
+  }
+
+  .donation-section {
+    padding: 9px 11px;
+    gap: 8px;
+  }
+
+  .donation-action {
+    gap: 7px;
+  }
+
+  .qris-img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .btn-donate-link {
+    min-height: 34px;
+    padding: 6px 11px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Very narrow phones: preserve hierarchy instead of squeezing controls. */
+@media (max-width: 390px) {
+  .header-area {
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-theme,
+  .btn-header-admin {
+    min-height: 31px;
+    padding: 4px 8px;
+  }
+
+  .right-content {
+    align-items: flex-start;
+  }
+
+  .badge-provenance {
+    flex-basis: auto;
+  }
+
+  .donation-title {
+    font-size: 0.73rem;
+  }
+}
+

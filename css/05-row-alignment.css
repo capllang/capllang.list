@@ -1,0 +1,42 @@
+/* Rekening: bank = col 1, date = col 2, status = col 3. */
+.right-content-rekening > .badge-meta {
+  grid-column: 1;
+}
+
+.right-content-rekening > .badge-date {
+  grid-column: 2;
+}
+
+.right-content-rekening > .badge-provenance {
+  grid-column: 3;
+}
+
+/* UID: date = col 1, status = col 2. */
+.right-content-genshin > .badge-date {
+  grid-column: 1;
+}
+
+.right-content-genshin > .badge-provenance {
+  grid-column: 2;
+}
+
+/* Optional provenance reference must never shift the main columns. */
+.right-content > .record-reference {
+  grid-column: 1 / -1;
+}
+
+/* Keep visual alignment deterministic across all rows. */
+.right-content-rekening > .badge-date,
+.right-content-genshin > .badge-date {
+  justify-self: start;
+}
+
+.right-content-rekening > .badge-provenance,
+.right-content-genshin > .badge-provenance {
+  justify-self: end;
+}
+
+/* Empty bank slot stays visually empty; no artificial dash is shown. */
+.right-content-rekening {
+  grid-auto-flow: row;
+}
