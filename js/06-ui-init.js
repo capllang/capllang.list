@@ -279,7 +279,6 @@ function bindStaticEvents() {
 }
 
 bindStaticEvents();
-populateProvenanceControls(activeTab);
 
 /* =========================
    ACCESSIBLE MODAL KEYBOARD
