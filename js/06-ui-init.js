@@ -221,8 +221,14 @@ function bindStaticEvents() {
   const qrisThumb = document.getElementById('qrisThumb');
   const qrisButton = document.getElementById('qrisButton');
   qrisButton?.addEventListener('click', () => {
-    if (qrisThumb?.src) openQrisModal(qrisThumb.src);
-  });
+  const fullSrc =
+    qrisThumb?.dataset.fullSrc ||
+    qrisThumb?.src;
+
+  if (fullSrc) {
+    openQrisModal(fullSrc);
+  }
+});
 
   const adminModal = document.getElementById('adminModal');
   adminModal?.addEventListener('click', event => {
