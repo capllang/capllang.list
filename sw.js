@@ -1,13 +1,25 @@
-const CACHE_NAME = 'capllang-shell-v16';
+const CACHE_NAME = 'capllang-shell-v17';
+
 const APP_SHELL = [
   '/',
   '/index.html',
-  '/styles.css',
-  '/app.js',
+
+  '/css/01-foundation.css',
+  '/css/02-responsive-layout.css',
+  '/css/03-compact-dashboard.css',
+  '/css/04-visual-refresh.css',
+  '/css/05-row-alignment.css',
+
+  '/js/01-core.js',
+  '/js/02-data.js',
+  '/js/03-auth.js',
+  '/js/04-records.js',
+  '/js/05-render.js',
+  '/js/06-ui-init.js',
+
   '/favicon.ico',
   '/assets/qris.jpg'
 ];
-
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -59,7 +71,7 @@ self.addEventListener('fetch', event => {
   }
 
   // Asset statis: tampilkan cache dengan cepat, tetapi selalu revalidasi
-  // agar app.js/styles.css tidak membeku pada versi lama.
+  // agar asset CSS/JS tidak membeku pada versi lama.
   const networkPromise = fetch(request)
     .then(async response => {
       if (
