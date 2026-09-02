@@ -110,11 +110,19 @@ body {
 }
 
 body[data-connection-state="online"] .status-bar {
-  color: #22c55e;
+  color: #15803d;
 }
 
 body[data-connection-state="online"] .status-bar::first-letter {
-  color: #22c55e;
+  color: #15803d;
+}
+
+body.dark-mode[data-connection-state="online"] .status-bar {
+  color: #4ade80;
+}
+
+body.dark-mode[data-connection-state="online"] .status-bar::first-letter {
+  color: #4ade80;
 }
 
 .data-counter {
