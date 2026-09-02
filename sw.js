@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capllang-shell-v18';
+const CACHE_NAME = 'capllang-shell-v19';
 
 const APP_SHELL = [
   '/',
@@ -70,28 +70,25 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Asset statis: tampilkan cache dengan cepat, tetapi selalu revalidasi
-  // agar asset CSS/JS tidak membeku pada versi lama.
-  const networkPromise = fetch(request)
-    .then(async response => {
-      if (
-        response &&
-        response.status === 200 &&
-        response.type === 'basic'
-      ) {
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put(request, response.clone());
-      }
-      return response;
-    });
-
-  // Dipasang saat event masih aktif agar browser memberi waktu pada
-  // revalidasi background sampai selesai.
-  event.waitUntil(networkPromise.catch(() => undefined));
-
+  // Asset statis: utamakan jaringan agar HTML baru tidak dipasangkan
+  // dengan JS/CSS lama setelah deployment. Cache hanya menjadi fallback
+  // saat jaringan benar-benar gagal.
   event.respondWith(
-    caches.match(request)
-      .then(cached => cached || networkPromise)
-      .catch(() => networkPromise)
+    fetch(request)
+      .then(async response => {
+        if (
+          response &&
+          response.status === 200 &&
+          response.type === 'basic'
+        ) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(request, response.clone()).catch(() => {});
+        }
+        return response;
+      })
+      .catch(async () => {
+        const cached = await caches.match(request);
+        return cached || Response.error();
+      })
   );
 });
