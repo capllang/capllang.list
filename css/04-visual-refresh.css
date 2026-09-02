@@ -225,9 +225,7 @@ body.dark-mode[data-connection-state="online"] .status-bar::first-letter {
   display: grid;
   grid-template-columns: minmax(150px, 1.18fr) minmax(0, 1.82fr);
   align-items: center;
-  min-height: 54px;
-  content-visibility: auto;
-  contain-intrinsic-size: 54px;
+  min-height: 54px; 
   padding: 9px 12px;
   gap: 14px;
   border: 0;
