@@ -213,40 +213,20 @@ async function fetchOnlineDatabase() {
     setConnectionState('online');
     status.innerText = getDefaultStatusText();
 
-    // Prefetch kategori lain setelah fase initial load agar tidak menambah TBT.
-// Lewati jika Data Saver aktif atau kategori tersebut sudah keburu dimuat.
+    // Isi cache kategori lain tanpa menunda tampilan awal.
+// Hormati Data Saver agar tidak membuat request tambahan yang tidak perlu.
 const saveData = Boolean(navigator.connection?.saveData);
 
 if (!saveData) {
   const inactiveCategory =
     activeTab === 'rekening' ? 'genshin' : 'rekening';
 
-  const prefetchInactiveCategory = () => {
-    if (
-      document.hidden ||
-      database[inactiveCategory]?.length > 0
-    ) {
-      return;
-    }
-
-    void fetchCategoryRecords(
-      inactiveCategory,
-      { reset: true, query: '', silent: true }
-    ).then(ok => {
-      if (ok) cacheDatabase();
-    });
-  };
-
-  window.setTimeout(() => {
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(
-        prefetchInactiveCategory,
-        { timeout: 2000 }
-      );
-    } else {
-      prefetchInactiveCategory();
-    }
-  }, 6000);
+  void fetchCategoryRecords(
+    inactiveCategory,
+    { reset: true, query: '', silent: true }
+  ).then(ok => {
+    if (ok) cacheDatabase();
+  });
 }
 
   } catch (err) {
