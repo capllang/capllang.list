@@ -34,7 +34,7 @@ let activeTab = 'rekening';
 let searchTimeout = null;
 let toastTimer = null;
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 25;
 
 const PROVENANCE_CONFIG = {
   rekening: {
