@@ -898,7 +898,10 @@ function updateUrlParam(query) {
   const currentQuery =
     url.searchParams.get('search') || '';
 
-  if (query === currentQuery) {
+  const hasLegacyQuery =
+    url.searchParams.has('q');
+
+  if (query === currentQuery && !hasLegacyQuery) {
     return;
   }
 
@@ -907,6 +910,10 @@ function updateUrlParam(query) {
   } else {
     url.searchParams.delete('search');
   }
+
+  // Canonical URL hanya memakai parameter `search`. Parameter legacy `q`
+  // tetap dibaca oleh checkUrlParams(), tetapi dibersihkan saat URL diperbarui.
+  url.searchParams.delete('q');
 
   window.history.replaceState(
     {},
