@@ -1,32 +1,25 @@
 function exitAdminMode() {
-
   isAdmin = false;
   adminSessionActive = false;
   adminSessionExpiresAt = null;
-
   if (adminSessionExpiryTimer) {
     clearTimeout(adminSessionExpiryTimer);
     adminSessionExpiryTimer = null;
   }
-
   document.getElementById('authBtn').innerText =
     "🔑 Mode Pemilik";
-
   document.getElementById('authBtn').setAttribute(
     'aria-pressed',
     'false'
   );
-
   document.getElementById('addBox').classList.add('is-hidden');
-
+  if (database[activeTab]?.length > 0) {
   filterData();
+}
   restoreDefaultStatusBar();
 }
-
 async function toggleAdmin() {
-
   if (!isAdmin) {
-
     const pwdInput =
       document.getElementById(
         'adminPasswordInput'
