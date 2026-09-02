@@ -1,3 +1,5 @@
+let adminLoginInFlight = false;
+
 function exitAdminMode() {
   isAdmin = false;
   adminSessionActive = false;
@@ -143,6 +145,10 @@ function handleAdminModalKeyDown(e) {
 
 async function submitAdminLogin() {
 
+  if (adminLoginInFlight) {
+    return;
+  }
+
   const inputSecret =
     document.getElementById(
       'adminPasswordInput'
@@ -170,6 +176,8 @@ async function submitAdminLogin() {
 
   const originalBtnText =
     submitBtn.innerText;
+
+  adminLoginInFlight = true;
 
   submitBtn.disabled = true;
   submitBtn.innerText =
@@ -251,6 +259,8 @@ async function submitAdminLogin() {
     );
 
   } finally {
+
+    adminLoginInFlight = false;
 
     submitBtn.disabled = false;
     submitBtn.innerText =
