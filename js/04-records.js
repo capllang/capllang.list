@@ -1,3 +1,6 @@
+let addRecordInFlight = false;
+let editRecordSaveInFlight = false;
+
 function handleInputKeyDown(e) {
 
   if (e.key === 'Enter') {
@@ -30,6 +33,10 @@ function normalizeNumberInput(rawValue) {
 }
 
 async function addNumber() {
+
+  if (addRecordInFlight) {
+    return;
+  }
 
   const input =
     document.getElementById(
@@ -170,6 +177,8 @@ async function addNumber() {
     }
   }
 
+
+  addRecordInFlight = true;
 
   btnAdd.disabled = true;
   btnAdd.innerText =
@@ -333,6 +342,8 @@ async function addNumber() {
 
   } finally {
 
+    addRecordInFlight = false;
+
     btnAdd.disabled = false;
     btnAdd.innerText =
       "+ Simpan Data";
@@ -457,6 +468,10 @@ function closeEditRecordModal() {
 }
 
 async function saveEditedRecord() {
+  if (editRecordSaveInFlight) {
+    return;
+  }
+
   if (!isAdmin || !adminSessionActive) {
     await showConfirm({
       title: "Sesi Admin Berakhir",
@@ -480,10 +495,17 @@ async function saveEditedRecord() {
 
   const category =
     document.getElementById('editCategoryInput').value;
-  const nomor = document
-    .getElementById('editNumberInput')
-    .value
-    .replace(/\D/g, '');
+  const rawNomor =
+    document.getElementById('editNumberInput').value;
+  const normalizedNumber =
+    normalizeNumberInput(rawNomor);
+
+  if (!normalizedNumber.ok) {
+    showToast(`⚠️ ${normalizedNumber.error}`);
+    return;
+  }
+
+  const nomor = normalizedNumber.value;
   const tanggal =
     document.getElementById('editDateInput').value;
   const metaRaw =
@@ -534,6 +556,9 @@ async function saveEditedRecord() {
   }
 
   const saveBtn = document.getElementById('editSaveBtn');
+
+  editRecordSaveInFlight = true;
+
   saveBtn.disabled = true;
   saveBtn.textContent = "Menyimpan...";
   setLoading(true, "Memperbarui data...");
@@ -660,6 +685,8 @@ async function saveEditedRecord() {
       danger: false
     });
   } finally {
+    editRecordSaveInFlight = false;
+
     saveBtn.disabled = false;
     saveBtn.textContent = "Simpan Perubahan";
     setLoading(false);
