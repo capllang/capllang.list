@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capllang-shell-v17';
+const CACHE_NAME = 'capllang-shell-v18';
 
 const APP_SHELL = [
   '/',
@@ -18,7 +18,7 @@ const APP_SHELL = [
   '/js/06-ui-init.js',
 
   '/favicon.ico',
-  '/assets/qris.jpg'
+  '/assets/qris-thumb.webp'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(
