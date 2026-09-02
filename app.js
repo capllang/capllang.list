@@ -1860,10 +1860,18 @@ async function addNumber() {
 
     filterData();
 
-    showTransientStatus("🟢 Tersimpan di D1!");
+    const wasRestored = responseData.restored === true;
+
+    showTransientStatus(
+      wasRestored
+        ? "🟢 Data dipulihkan di D1!"
+        : "🟢 Tersimpan di D1!"
+    );
 
     showToast(
-      "Data berhasil ditambahkan!"
+      wasRestored
+        ? "Data lama berhasil dipulihkan!"
+        : "Data berhasil ditambahkan!"
     );
 
   } catch (err) {
@@ -2255,7 +2263,7 @@ async function deleteNumber(
     await showConfirm({
       title: "Hapus Data?",
       message:
-        `Data "${nomorStr}" akan dihapus dari database. Tindakan ini tidak dapat dibatalkan.`,
+        `Data "${nomorStr}" akan disembunyikan dari daftar publik. Riwayat tetap disimpan untuk audit dan dapat dipulihkan dengan menambahkan kembali nomor/UID yang sama.`,
       confirmText: "Hapus",
       danger: true
     });
