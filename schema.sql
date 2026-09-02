@@ -1,5 +1,5 @@
 -- Capllang List — Canonical D1 Schema
--- Current schema: P3 / after migrations 0001 + 0002 + 0003.
+-- Current schema: P4 / after migrations 0001 + 0002 + 0003 + 0004.
 -- Gunakan file ini untuk membuat database D1 BARU/KOSONG dari nol.
 -- Untuk production yang sudah berjalan, gunakan migration berikutnya saja.
 
@@ -37,10 +37,7 @@ CREATE TABLE IF NOT EXISTS admin_audit_logs (
   after_snapshot TEXT DEFAULT NULL
 );
 
--- P2 indexes
-CREATE INDEX IF NOT EXISTS idx_records_active_category_date_id
-ON records (deleted_at, category, tanggal DESC, id DESC);
-
+-- P2/P4 record indexes
 CREATE INDEX IF NOT EXISTS idx_records_soft_deleted_lookup
 ON records (category, nomor, deleted_at);
 
@@ -53,3 +50,12 @@ ON admin_sessions (expires_at);
 
 CREATE INDEX IF NOT EXISTS idx_admin_audit_action_id
 ON admin_audit_logs (action, id DESC);
+
+-- P4 public search/pagination indexes
+CREATE INDEX IF NOT EXISTS idx_records_public_category_date_id
+ON records (category, tanggal DESC, id DESC)
+WHERE deleted_at IS NULL;
+
+CREATE INDEX IF NOT EXISTS idx_records_public_category_nomor
+ON records (category, nomor)
+WHERE deleted_at IS NULL;
