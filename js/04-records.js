@@ -888,8 +888,10 @@ async function switchTab(tab) {
       ? "Cari nomor rekening..."
       : "Cari UID...";
 
+  if (isAdmin && adminSessionActive) {
   updateMetaSelectOptions();
   populateProvenanceControls(tab);
+}
 
   const query =
     getSearchQuery();
