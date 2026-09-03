@@ -416,7 +416,9 @@ function closeConfirmModal(result) {
    EDIT RECORD
 ========================= */
 
-function openEditRecord(itemObj) {
+let editRecordLoadInFlight = false;
+
+async function openEditRecord(itemObj) {
   if (!isAdmin || !adminSessionActive) {
     showToast("⚠️ Sesi admin tidak aktif.");
     exitAdminMode();
@@ -429,37 +431,87 @@ function openEditRecord(itemObj) {
     return;
   }
 
-  editingRecord = { ...itemObj, id };
+  if (editRecordLoadInFlight) {
+    return;
+  }
 
-  const category =
-    itemObj.category === 'genshin'
-      ? 'genshin'
-      : 'rekening';
+  editRecordLoadInFlight = true;
+  setLoading(true, "Memuat detail data...");
 
-  document.getElementById('editCategoryInput').value = category;
-  document.getElementById('editNumberInput').value = String(itemObj.nomor || '');
-  document.getElementById('editMetaInput').value =
-    itemObj.meta && itemObj.meta !== '-'
-      ? String(itemObj.meta)
-      : '';
-  document.getElementById('editDateInput').value =
-    itemObj.tanggal && itemObj.tanggal !== '-'
-      ? String(itemObj.tanggal)
-      : getLocalDateInputValue();
-  populateProvenanceControls(category, {
-    edit: true,
-    sourceType: itemObj.source_type,
-    status: itemObj.verification_status
-  });
-  document.getElementById('editSourceRefInput').value =
-    itemObj.source_ref && itemObj.source_ref !== '-'
-      ? String(itemObj.source_ref)
-      : '';
+  try {
+    const res = await fetch(
+      apiUrl(`records/${id}`),
+      {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store'
+      }
+    );
 
-  openModalAccessible(
-    'editRecordModal',
-    '#editNumberInput'
-  );
+    if (res.status === 401 || res.status === 403) {
+      exitAdminMode();
+      showToast("⚠️ Sesi admin tidak aktif.");
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error(`Gagal memuat detail data (${res.status})`);
+    }
+
+    const data = await res.json();
+
+    if (!isAdmin || !adminSessionActive) {
+      return;
+    }
+
+    const detailedRecord = migrateData(
+      [data?.record],
+      itemObj?.category || activeTab
+    )[0];
+
+    if (!detailedRecord || Number(detailedRecord.id) !== id) {
+      throw new Error("Detail data tidak valid.");
+    }
+
+    editingRecord = detailedRecord;
+
+    const category =
+      detailedRecord.category === 'genshin'
+        ? 'genshin'
+        : 'rekening';
+
+    document.getElementById('editCategoryInput').value = category;
+    document.getElementById('editNumberInput').value = String(detailedRecord.nomor || '');
+    document.getElementById('editMetaInput').value =
+      detailedRecord.meta && detailedRecord.meta !== '-'
+        ? String(detailedRecord.meta)
+        : '';
+    document.getElementById('editDateInput').value =
+      detailedRecord.tanggal && detailedRecord.tanggal !== '-'
+        ? String(detailedRecord.tanggal)
+        : getLocalDateInputValue();
+    populateProvenanceControls(category, {
+      edit: true,
+      sourceType: detailedRecord.source_type,
+      status: detailedRecord.verification_status
+    });
+    document.getElementById('editSourceRefInput').value =
+      detailedRecord.source_ref && detailedRecord.source_ref !== '-'
+        ? String(detailedRecord.source_ref)
+        : '';
+
+    openModalAccessible(
+      'editRecordModal',
+      '#editNumberInput'
+    );
+
+  } catch (err) {
+    console.warn('Gagal memuat detail edit:', err);
+    showToast("⚠️ Detail data gagal dimuat. Coba lagi.");
+  } finally {
+    editRecordLoadInFlight = false;
+    setLoading(false);
+  }
 }
 
 function closeEditRecordModal() {
