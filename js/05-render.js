@@ -154,7 +154,10 @@ function copyReportTemplate(itemObj) {
   const statusLabel = getVerificationStatusLabel(normalized.verification_status, category);
 
   const sourceRef =
-    typeof itemObj === 'object' && itemObj.source_ref && itemObj.source_ref !== '-'
+    isAdmin &&
+    typeof itemObj === 'object' &&
+    itemObj.source_ref &&
+    itemObj.source_ref !== '-'
       ? String(itemObj.source_ref)
       : '-';
 
@@ -166,6 +169,11 @@ function copyReportTemplate(itemObj) {
     ? 'Status menunjukkan hasil pemeriksaan langsung admin pada tanggal verifikasi.'
     : 'Status menjelaskan dokumentasi/telaah bukti dan bukan penetapan bersalah.';
 
+  const referenceLine =
+    isAdmin && sourceRef !== '-'
+      ? `\nReferensi: ${sourceRef}`
+      : '';
+
   const template =
 `${heading}
 
@@ -173,8 +181,7 @@ Nomor/UID: ${nomorStr}
 Platform/Bank: ${metaStr}
 ${dateLabel}: ${tanggalStr}
 ${provenanceLabel}: ${sourceLabel}
-Status: ${statusLabel}
-Referensi: ${sourceRef}
+Status: ${statusLabel}${referenceLine}
 
 Catatan: ${disclaimer}`;
 
@@ -474,9 +481,9 @@ function filterData() {
         : `Status laporan: ${getVerificationStatusLabel(verificationStatus, itemCategory)}`;
       rightContent.appendChild(statusBadge);
 
-      // Provenance tetap disimpan dan tersedia di API/admin, tetapi tampilan publik
-      // hanya menampilkan satu status utama agar kartu tetap ringkas dan jelas.
-      if (item?.source_ref && item.source_ref !== '-') {
+      // Referensi bukti/verifikasi adalah detail admin. Tampilan publik hanya
+      // menampilkan status utama agar informasi internal tidak ikut terekspos.
+      if (isAdmin && item?.source_ref && item.source_ref !== '-') {
         const sourceRef = document.createElement('span');
         sourceRef.className = 'record-reference';
         sourceRef.textContent = `Ref: ${item.source_ref}`;
