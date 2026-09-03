@@ -4,6 +4,9 @@ function exitAdminMode() {
   isAdmin = false;
   adminSessionActive = false;
   adminSessionExpiresAt = null;
+  editingRecord = null;
+  closeModalAccessible('editRecordModal');
+  scrubPrivateRecordData();
   if (adminSessionExpiryTimer) {
     clearTimeout(adminSessionExpiryTimer);
     adminSessionExpiryTimer = null;
