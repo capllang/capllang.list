@@ -1,11 +1,11 @@
 -- Capllang List — Canonical D1 Schema
--- Current schema: P4 / after migrations 0001 + 0002 + 0003 + 0004.
+-- Current schema: P13 / after migrations 0001 + 0002 + 0003 + 0004 + 0005.
 -- Gunakan file ini untuk membuat database D1 BARU/KOSONG dari nol.
 -- Untuk production yang sudah berjalan, gunakan migration berikutnya saja.
 
 CREATE TABLE IF NOT EXISTS records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  category TEXT NOT NULL,
+  category TEXT NOT NULL CHECK (category IN ('rekening', 'genshin')),
   nomor TEXT NOT NULL,
   tanggal TEXT NOT NULL DEFAULT '',
   meta TEXT NOT NULL DEFAULT '-',
@@ -37,21 +37,13 @@ CREATE TABLE IF NOT EXISTS admin_audit_logs (
   after_snapshot TEXT DEFAULT NULL
 );
 
--- P2/P4 record indexes
+-- Record indexes used by current public list/search/count/restore paths.
 CREATE INDEX IF NOT EXISTS idx_records_soft_deleted_lookup
 ON records (category, nomor, deleted_at);
 
-CREATE INDEX IF NOT EXISTS idx_admin_audit_target_id
-ON admin_audit_logs (target_record_id, id DESC);
+CREATE INDEX IF NOT EXISTS idx_records_nomor
+ON records (nomor);
 
--- P3 operational indexes
-CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires_at
-ON admin_sessions (expires_at);
-
-CREATE INDEX IF NOT EXISTS idx_admin_audit_action_id
-ON admin_audit_logs (action, id DESC);
-
--- P4 public search/pagination indexes
 CREATE INDEX IF NOT EXISTS idx_records_public_category_date_id
 ON records (category, tanggal DESC, id DESC)
 WHERE deleted_at IS NULL;
@@ -59,3 +51,14 @@ WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_records_public_category_nomor
 ON records (category, nomor)
 WHERE deleted_at IS NULL;
+
+-- Admin session indexes.
+CREATE INDEX IF NOT EXISTS idx_admin_sessions_expires_at
+ON admin_sessions (expires_at);
+
+-- Admin audit indexes.
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_action
+ON admin_audit_logs (action);
+
+CREATE INDEX IF NOT EXISTS idx_admin_audit_target_id
+ON admin_audit_logs (target_record_id, id DESC);
