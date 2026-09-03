@@ -10,7 +10,7 @@ const ROUTES = [
   { pattern: /^auth\/logout$/, methods: new Set(['POST']) },
   { pattern: /^admin\/audit$/, methods: new Set(['GET']) },
   { pattern: /^records$/, methods: new Set(['GET', 'POST']) },
-  { pattern: /^records\/[^/]+$/, methods: new Set(['PUT', 'DELETE']) }
+  { pattern: /^records\/[^/]+$/, methods: new Set(['GET', 'PUT', 'DELETE']) }
 ];
 
 const STATE_CHANGING_METHODS = new Set(['POST', 'PUT', 'DELETE']);
@@ -42,6 +42,7 @@ function jsonError(message, status, extraHeaders = {}) {
       status,
       headers: {
         'cache-control': 'no-store',
+        'x-robots-tag': 'noindex, nofollow, noarchive',
         ...extraHeaders
       }
     }
@@ -158,10 +159,15 @@ export default {
         'etag',
         'retry-after',
         'location',
-        'x-request-id'
+        'x-request-id',
+        'x-robots-tag'
       ]) {
         const value = upstream.headers.get(name);
         if (value) responseHeaders.set(name, value);
+      }
+
+      if (!responseHeaders.has('x-robots-tag')) {
+        responseHeaders.set('x-robots-tag', 'noindex, nofollow, noarchive');
       }
 
       // Semua respons auth/admin bersifat private dan tidak boleh dicache.
