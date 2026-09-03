@@ -19,7 +19,7 @@ function apiUrl(path, params = null) {
 
   return `${API_PROXY_URL}?${query.toString()}`;
 }
-const CACHE_KEY = "cached_scammer_db_v4";
+const CACHE_KEY = "cached_scammer_db_v5";
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
 
 let database = {
@@ -490,6 +490,9 @@ function safeStorageRemove(key) {
   }
 }
 
+// P11: hapus cache P10 yang mungkin pernah menyimpan detail referensi admin.
+safeStorageRemove("cached_scammer_db_v4");
+
 function getLocalDateInputValue(date = new Date()) {
   const localTime = new Date(
     date.getTime() - date.getTimezoneOffset() * 60 * 1000
@@ -587,6 +590,25 @@ function migrateData(dataArray, fallbackCategory = "") {
     .filter(item => item && item.nomor);
 }
 
+function toPublicRecordView(item) {
+  if (!item || typeof item !== 'object') return item;
+
+  return {
+    id: item.id ?? null,
+    category: item.category || '',
+    nomor: item.nomor ?? '',
+    tanggal: item.tanggal || '-',
+    meta: item.meta || '-',
+    source_type: item.source_type || null,
+    verification_status: item.verification_status || null
+  };
+}
+
+function scrubPrivateRecordData() {
+  database.rekening = database.rekening.map(toPublicRecordView);
+  database.genshin = database.genshin.map(toPublicRecordView);
+}
+
 function sortRecords(dataArray) {
   dataArray.sort((a, b) => {
     const aDate =
@@ -627,7 +649,10 @@ function cacheDatabase() {
   safeStorageSet(
     CACHE_KEY,
     JSON.stringify({
-      ...database,
+      rekening: database.rekening.map(toPublicRecordView),
+      genshin: database.genshin.map(toPublicRecordView),
+      lastUpdated: database.lastUpdated,
+      infoTambahan: database.infoTambahan,
       cachedAt: Date.now(),
       paginationState: cachedState
     })
