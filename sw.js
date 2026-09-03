@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capllang-shell-v19';
+const CACHE_NAME = 'capllang-shell-v20';
 
 const APP_SHELL = [
   '/',
@@ -9,6 +9,7 @@ const APP_SHELL = [
   '/css/03-compact-dashboard.css',
   '/css/04-visual-refresh.css',
   '/css/05-row-alignment.css',
+  '/css/06-saas-redesign.css',
 
   '/js/01-core.js',
   '/js/02-data.js',
@@ -16,6 +17,7 @@ const APP_SHELL = [
   '/js/04-records.js',
   '/js/05-render.js',
   '/js/06-ui-init.js',
+  '/js/07-saas-ui.js',
 
   '/favicon.ico',
   '/assets/qris-thumb.webp'

@@ -4,452 +4,347 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <title>Capllang List | Cek Scammer & UID HB</title>
-  <meta name="description" content="Cek daftar rekening yang dilaporkan scammer dan UID HB dalam database Capllang List sebelum melakukan transaksi atau pengecekan akun.">
+  <title>Capllang List | Cek Rekening & UID Game</title>
+  <meta name="description" content="Cek rekening, e-wallet, dan UID game yang tercatat dalam database Capllang List sebelum melakukan transaksi jual beli akun game.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="author" content="Capllang List">
   <meta name="application-name" content="Capllang List">
   <meta name="apple-mobile-web-app-title" content="Capllang List">
-  <meta name="theme-color" content="#071426">
-  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#05050a">
+  <meta name="color-scheme" content="dark">
   <meta name="format-detection" content="telephone=no">
 
   <link rel="canonical" href="https://capllang-list.vercel.app/">
   <link rel="icon" href="/favicon.ico" sizes="any">
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:locale" content="id_ID">
   <meta property="og:site_name" content="Capllang List">
-  <meta property="og:title" content="Capllang List | Cek Scammer & UID HB">
-  <meta property="og:description" content="Cek daftar rekening yang dilaporkan scammer dan UID HB dalam database Capllang List sebelum melakukan transaksi atau pengecekan akun.">
+  <meta property="og:title" content="Capllang List | Cek Rekening & UID Game">
+  <meta property="og:description" content="Cek rekening, e-wallet, dan UID game sebelum transaksi jual beli akun game.">
   <meta property="og:url" content="https://capllang-list.vercel.app/">
 
-  <!-- X / Twitter -->
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Capllang List | Cek Scammer & UID HB">
-  <meta name="twitter:description" content="Cek daftar rekening yang dilaporkan scammer dan UID HB dalam database Capllang List sebelum melakukan transaksi atau pengecekan akun.">
-<link rel="stylesheet" href="/css/01-foundation.css">
-<link rel="stylesheet" href="/css/02-responsive-layout.css">
-<link rel="stylesheet" href="/css/03-compact-dashboard.css">
-<link rel="stylesheet" href="/css/04-visual-refresh.css">
-<link rel="stylesheet" href="/css/05-row-alignment.css">
-</head>
+  <meta name="twitter:title" content="Capllang List | Cek Rekening & UID Game">
+  <meta name="twitter:description" content="Cek rekening, e-wallet, dan UID game sebelum transaksi jual beli akun game.">
 
+  <link rel="stylesheet" href="/css/01-foundation.css">
+  <link rel="stylesheet" href="/css/02-responsive-layout.css">
+  <link rel="stylesheet" href="/css/03-compact-dashboard.css">
+  <link rel="stylesheet" href="/css/04-visual-refresh.css">
+  <link rel="stylesheet" href="/css/05-row-alignment.css">
+  <link rel="stylesheet" href="/css/06-saas-redesign.css">
+</head>
 <body>
 
-<div class="container" role="main">
-
-  <div class="header-area">
-    <h1 class="site-title">
-      <button
-        type="button"
-        id="homeTitle"
-        class="home-title-button"
-        aria-label="Kembali ke halaman utama"
-        title="Kembali ke Halaman Utama">
-        🛡️ CEK SCAMMER & UID HB
-      </button>
-    </h1>
-
-    <div class="header-actions">
-      <button type="button" id="authBtn" class="btn-header-admin" aria-pressed="false">
-        🔑 Mode Pemilik
-      </button>
-
-      <button type="button" id="themeToggleBtn" class="btn-theme" aria-label="Ganti tema" aria-pressed="false">
-        Dark
-      </button>
-    </div>
-  </div>
-
-  <div class="status-bar-container">
-    <div id="statusBar" class="status-bar" role="status" aria-live="polite" aria-atomic="true">
-      ● Memeriksa koneksi...
-    </div>
-
-    <div id="dataCounter" class="data-counter" aria-live="polite" aria-atomic="true">
-      0 Rekening
-    </div>
-  </div>
-
-  <div class="tabs" role="tablist" aria-label="Kategori database">
+<div class="app-shell">
+  <header class="site-header" aria-label="Navigasi utama">
     <button
       type="button"
-      class="tab-btn active"
-      id="tabRekening"
-      role="tab"
-      aria-selected="true"
-      aria-controls="resultPanel"
-      tabindex="0">
-      LIST REK SCAMMER
+      id="homeTitle"
+      class="brand-button"
+      aria-label="Kembali ke halaman utama"
+      title="Kembali ke halaman utama">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 54" focusable="false" aria-hidden="true">
+          <defs>
+            <linearGradient id="brandGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#4f6cff"/>
+              <stop offset="0.45" stop-color="#8a2cff"/>
+              <stop offset="0.72" stop-color="#ed2ea6"/>
+              <stop offset="1" stop-color="#ff8a45"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 2 43 10v14c0 13-7.8 22.3-19 28C12.8 46.3 5 37 5 24V10L24 2Z" fill="url(#brandGradient)"/>
+          <path d="m15 26 6 6 13-15" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <strong>Capllang List</strong>
+        <small>Cek sebelum transaksi</small>
+      </span>
     </button>
 
-    <button
-      type="button"
-      class="tab-btn"
-      id="tabGenshin"
-      role="tab"
-      aria-selected="false"
-      aria-controls="resultPanel"
-      tabindex="-1">
-      LIST UID HB
+    <button type="button" id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Buka menu" aria-expanded="false" aria-controls="mainNav">
+      <span></span><span></span><span></span>
     </button>
-  </div>
 
-  <div class="admin-panel">
-    <div id="addBox" class="admin-box is-hidden">
+    <nav id="mainNav" class="main-nav" aria-label="Menu">
+      <button type="button" class="nav-link" data-scroll-target="features">Fitur</button>
+      <button type="button" class="nav-link" data-tab-target="rekening">Cek Rekening</button>
+      <button type="button" class="nav-link" data-tab-target="genshin">Cek UID</button>
+      <button type="button" class="nav-link" data-scroll-target="guide">Panduan</button>
+      <button type="button" class="nav-link" data-scroll-target="about">Tentang</button>
+    </nav>
 
-      <div class="admin-inputs">
+    <div class="header-actions saas-header-actions">
+      <button type="button" id="authBtn" class="btn-header-admin" aria-pressed="false">Masuk</button>
+      <button type="button" id="heroCtaBtn" class="btn-gradient">Cek Sekarang <span aria-hidden="true">→</span></button>
+      <button type="button" id="themeToggleBtn" class="legacy-theme-control" aria-label="Ganti tema" aria-pressed="true">Light</button>
+    </div>
+  </header>
 
-        <select
-          id="metaSelectInput"
-          aria-label="Pilih bank atau game"
-          class="meta-select-flex">
-        </select>
-
-        <input
-          type="text"
-          id="metaCustomInput"
-          aria-label="Nama bank atau game lainnya"
-          class="meta-custom-flex is-hidden"
-          maxlength="100"
-          placeholder="Nama Bank/Game Lain...">
-
-        <input
-          type="text"
-          id="newNumberInput"
-          aria-label="Nomor rekening atau UID baru"
-          inputmode="numeric"
-          maxlength="40"
-          autocomplete="off"
-          spellcheck="false"
-          class="number-input-flex"
-          placeholder="Nomor/UID baru...">
-
-        <input
-          type="date"
-          id="newDateInput"
-          aria-label="Tanggal dilaporkan"
-          class="date-input-flex"
-          title="Tanggal Dilaporkan">
-
-        <select
-          id="sourceTypeInput"
-          aria-label="Jenis bukti rekening"
-          class="provenance-select-flex"
-          title="Jenis bukti rekening">
-          <option value="community_screenshot" selected>Screenshot Laporan</option>
-          <option value="legacy_archive">Arsip Capllang</option>
-        </select>
-
-        <select
-          id="verificationStatusInput"
-          aria-label="Status provenance"
-          class="provenance-select-flex"
-          title="Status provenance">
-          <option value="report_recorded">Laporan Tercatat</option>
-          <option value="evidence_reviewed" selected>Bukti Ditinjau</option>
-          <option value="multi_report">Laporan Multi-Sumber</option>
-        </select>
-
-        <input
-          type="text"
-          id="sourceRefInput"
-          aria-label="Referensi sumber opsional"
-          class="source-ref-flex"
-          maxlength="80"
-          autocomplete="off"
-          placeholder="Ref laporan/SS opsional (tanpa data pribadi)">
-
+  <main class="saas-main">
+    <section class="hero-section" aria-labelledby="heroTitle">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-icon">♢</span> Database komunitas untuk verifikasi awal</div>
+        <h1 id="heroTitle">Cek. Verifikasi.<br>Transaksi<br><span>Lebih Aman.</span></h1>
+        <p>Capllang List membantu kamu mengecek rekening, e-wallet, dan UID game yang tercatat sebelum transaksi jual beli akun game.</p>
+        <div class="hero-actions">
+          <button type="button" class="btn-gradient btn-large" data-scroll-target="checker">Cek Sekarang <span aria-hidden="true">→</span></button>
+          <button type="button" class="btn-outline btn-large" data-scroll-target="guide">▣&nbsp;&nbsp;Lihat Panduan</button>
+        </div>
       </div>
 
-      <button
-        type="button"
-        class="btn btn-add"
-        id="btnAdd">
-        + Simpan Data
-      </button>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-glow hero-glow-a"></div>
+        <div class="hero-glow hero-glow-b"></div>
+        <div class="hero-orbit hero-orbit-one"></div>
+        <div class="hero-orbit hero-orbit-two"></div>
+        <div class="hero-blob">
+          <div class="hero-blob-inner"></div>
+        </div>
+        <div class="hero-metric-card">
+          <span>Total data terindeks</span>
+          <strong id="heroTotalData">0</strong>
+          <div class="mini-chart" aria-hidden="true">
+            <svg viewBox="0 0 240 74" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#6846ff"/>
+                  <stop offset="0.55" stop-color="#e742d1"/>
+                  <stop offset="1" stop-color="#ff9147"/>
+                </linearGradient>
+              </defs>
+              <path d="M2 56 C28 22 42 66 68 39 S105 58 130 30 S166 52 188 23 S218 35 238 9" fill="none" stroke="url(#lineGradient)" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="metric-foot"><span class="metric-shield">♢</span><span id="heroStatusText">Memeriksa koneksi…</span></div>
+        </div>
+      </div>
+    </section>
 
-    </div>
-  </div>
+    <section class="trust-strip" aria-label="Ringkasan layanan">
+      <div class="trust-item"><span class="trust-icon">◎</span><span><strong>Database Komunitas</strong><small>Laporan terdokumentasi</small></span></div>
+      <div class="trust-item"><span class="trust-icon">⌕</span><span><strong>Pencarian Cepat</strong><small>Rekening & UID game</small></span></div>
+      <div class="trust-item"><span class="trust-icon">♢</span><span><strong>Status Terverifikasi</strong><small>Provenance ditampilkan</small></span></div>
+      <div class="trust-item"><span class="trust-icon">↻</span><span><strong>Data Aktif</strong><small id="trustUpdateText">Memeriksa koneksi</small></span></div>
+    </section>
 
-  <div class="search-box">
-    <input
-      type="text"
-      id="searchInput"
-      aria-label="Cari Rekening atau UID"
-      maxlength="100"
-      enterkeyhint="search"
-      spellcheck="false"
-      placeholder="Cari nomor rekening..."
-      autocomplete="off">
-  </div>
+    <section id="features" class="feature-grid" aria-label="Fitur Capllang List">
+      <article class="feature-card feature-purple">
+        <div class="feature-icon">▤</div>
+        <h2>Database Rekening</h2>
+        <p>Cek nomor rekening dan e-wallet yang tercatat di database laporan komunitas.</p>
+        <button type="button" class="feature-link" data-tab-target="rekening">Cek Sekarang <span aria-hidden="true">→</span></button>
+        <div class="feature-art feature-art-purple" aria-hidden="true"><span></span><span></span><span></span></div>
+      </article>
 
-  <div id="loadingIndicator" class="loading-indicator" role="status" aria-live="polite" aria-atomic="true">
-    <span class="loading-spinner"></span>
-    <span id="loadingText">Memuat...</span>
-  </div>
+      <article class="feature-card feature-orange">
+        <div class="feature-icon">🎮</div>
+        <h2>Verifikasi UID Game</h2>
+        <p>Cari UID game untuk memeriksa apakah nomor tersebut tercatat dalam database risiko.</p>
+        <button type="button" class="feature-link" data-tab-target="genshin">Cek Sekarang <span aria-hidden="true">→</span></button>
+        <div class="feature-art feature-art-orange" aria-hidden="true"><span></span></div>
+      </article>
 
-  <div
-    id="resultPanel"
-    class="result-panel"
-    role="tabpanel"
-    aria-labelledby="tabRekening">
-    <ul
-      class="result-list"
-      id="resultList"
-      aria-label="Hasil pencarian database"></ul>
-  </div>
+      <article class="feature-card feature-pink">
+        <div class="feature-icon">♢</div>
+        <h2>Panduan Keamanan</h2>
+        <p>Pahami arti status laporan dan gunakan hasil pengecekan sebagai salah satu langkah verifikasi.</p>
+        <button type="button" class="feature-link" data-scroll-target="guide">Lihat Panduan <span aria-hidden="true">→</span></button>
+        <div class="feature-art feature-art-pink" aria-hidden="true"><span></span></div>
+      </article>
+    </section>
 
-  <p class="trust-note">
-    Pencatatan rekening dan UID Game merupakan tindakan administratif awal, bukan penetapan bersalah secara hukum. Data yang masuk tetap menjunjung asas praduga tak bersalah hingga verifikasi selesai.
-  </p>
+    <section id="checker" class="checker-section" aria-labelledby="checkerTitle">
+      <div class="section-heading checker-heading">
+        <div>
+          <span class="section-kicker">ALAT PENGECEKAN</span>
+          <h2 id="checkerTitle">Cek sebelum transaksi</h2>
+          <p>Pilih kategori, masukkan nomor, lalu lihat apakah data tercatat di database.</p>
+        </div>
+        <div class="checker-status-group">
+          <div id="dataCounter" class="data-counter" aria-live="polite" aria-atomic="true">0 Rekening</div>
+        </div>
+      </div>
 
-  <div class="donation-section">
-    <div class="donation-text">
-      <span class="donation-title">☕ Dukung pengembangan Capllang List</span>
-      <span class="donation-subtitle">Dukungan Anda membantu operasional dan pemeliharaan layanan.</span>
-    </div>
+      <div class="tabs checker-tabs" role="tablist" aria-label="Kategori database">
+        <button type="button" class="tab-btn active" id="tabRekening" role="tab" aria-selected="true" aria-controls="resultPanel" tabindex="0">▤ Rekening / E-Wallet</button>
+        <button type="button" class="tab-btn" id="tabGenshin" role="tab" aria-selected="false" aria-controls="resultPanel" tabindex="-1">🎮 UID Game</button>
+      </div>
 
-    <div class="donation-action">
+      <div class="admin-panel">
+        <div id="addBox" class="admin-box is-hidden">
+          <div class="admin-inputs">
+            <select id="metaSelectInput" aria-label="Pilih bank atau game" class="meta-select-flex"></select>
+            <input type="text" id="metaCustomInput" aria-label="Nama bank atau game lainnya" class="meta-custom-flex is-hidden" maxlength="100" placeholder="Nama Bank/Game Lain...">
+            <input type="text" id="newNumberInput" aria-label="Nomor rekening atau UID baru" inputmode="numeric" maxlength="40" autocomplete="off" spellcheck="false" class="number-input-flex" placeholder="Nomor/UID baru...">
+            <input type="date" id="newDateInput" aria-label="Tanggal dilaporkan" class="date-input-flex" title="Tanggal Dilaporkan">
+            <select id="sourceTypeInput" aria-label="Jenis bukti rekening" class="provenance-select-flex" title="Jenis bukti rekening">
+              <option value="community_screenshot" selected>Screenshot Laporan</option>
+              <option value="legacy_archive">Arsip Capllang</option>
+            </select>
+            <select id="verificationStatusInput" aria-label="Status provenance" class="provenance-select-flex" title="Status provenance">
+              <option value="report_recorded">Laporan Tercatat</option>
+              <option value="evidence_reviewed" selected>Bukti Ditinjau</option>
+              <option value="multi_report">Laporan Multi-Sumber</option>
+            </select>
+            <input type="text" id="sourceRefInput" aria-label="Referensi sumber opsional" class="source-ref-flex" maxlength="80" autocomplete="off" placeholder="Ref laporan/SS opsional (tanpa data pribadi)">
+          </div>
+          <button type="button" class="btn btn-add" id="btnAdd">+ Simpan Data</button>
+        </div>
+      </div>
 
-      <button
-        type="button"
-        id="qrisButton"
-        class="qris-button"
-        aria-label="Perbesar QRIS"
-        aria-haspopup="dialog"
-        aria-controls="qrisModal"
-        title="Perbesar QRIS">
-        <img
-  src="/assets/qris-thumb.webp"
-  data-full-src="/assets/qris.jpg"
-  id="qrisThumb"
-  alt="QRIS donasi Capllang List"
-  class="qris-img"
-  width="120"
-  height="169"
-  decoding="async">
-      </button>
+      <div class="search-action-row">
+        <div class="search-box">
+          <input type="text" id="searchInput" aria-label="Cari Rekening atau UID" maxlength="100" enterkeyhint="search" spellcheck="false" placeholder="Cari nomor rekening..." autocomplete="off">
+        </div>
+        <button type="button" id="checkerSearchBtn" class="btn-gradient search-submit">Periksa Sekarang <span aria-hidden="true">⌕</span></button>
+      </div>
 
-      <a
-        href="https://saweria.co/capllang/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn-donate-link">
-        Saweria
-      </a>
+      <div id="loadingIndicator" class="loading-indicator" role="status" aria-live="polite" aria-atomic="true">
+        <span class="loading-spinner"></span><span id="loadingText">Memuat...</span>
+      </div>
 
-    </div>
-  </div>
+      <div id="resultPanel" class="result-panel" role="tabpanel" aria-labelledby="tabRekening">
+        <ul class="result-list" id="resultList" aria-label="Hasil pencarian database"></ul>
+      </div>
 
+      <p class="trust-note">Pencatatan rekening dan UID Game merupakan tindakan administratif awal, bukan penetapan bersalah secara hukum. Data yang masuk tetap menjunjung asas praduga tak bersalah hingga verifikasi selesai.</p>
+    </section>
+
+    <section class="summary-section" aria-labelledby="summaryTitle">
+      <div class="section-heading summary-heading">
+        <div>
+          <span class="section-kicker">RINGKASAN DATABASE</span>
+          <h2 id="summaryTitle">Status database saat ini</h2>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <article class="stat-card"><span class="stat-icon stat-purple">▤</span><span><strong id="statRekeningTotal">0</strong><small>Rekening tercatat</small></span></article>
+        <article class="stat-card"><span class="stat-icon stat-orange">🎮</span><span><strong id="statUidTotal">0</strong><small>UID game tercatat</small></span></article>
+        <article class="stat-card"><span class="stat-icon stat-pink">♢</span><span><strong id="statTotalData">0</strong><small>Total data</small></span></article>
+        <article class="stat-card"><span class="stat-icon stat-green">●</span><span><strong id="statusBar" role="status" aria-live="polite" aria-atomic="true">● Memeriksa koneksi...</strong><small>Status database</small></span></article>
+      </div>
+
+      <div class="summary-panels">
+        <article class="distribution-card">
+          <div class="distribution-head"><div><strong>Distribusi Data</strong><small>Perbandingan kategori aktif</small></div><span id="distributionTotal">0 data</span></div>
+          <div class="distribution-visual" role="img" aria-label="Distribusi jumlah rekening dan UID game">
+            <div class="distribution-bar"><span id="rekeningBar"></span><span id="uidBar"></span></div>
+            <div class="distribution-legend">
+              <span><i class="legend-dot legend-purple"></i>Rekening <strong id="rekeningPercent">0%</strong></span>
+              <span><i class="legend-dot legend-orange"></i>UID Game <strong id="uidPercent">0%</strong></span>
+            </div>
+          </div>
+        </article>
+
+        <article id="about" class="about-card">
+          <div>
+            <span class="section-kicker">TENTANG CAPLLANG LIST</span>
+            <h2>Alat bantu verifikasi sebelum transaksi.</h2>
+            <p>Capllang List menggabungkan database laporan rekening dan UID game dalam satu alat pencarian sederhana untuk membantu pengguna melakukan pemeriksaan awal.</p>
+          </div>
+          <div class="about-lock" aria-hidden="true"><span>⌾</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="guide" class="guide-section" aria-labelledby="guideTitle">
+      <div class="guide-copy">
+        <span class="section-kicker">PANDUAN SINGKAT</span>
+        <h2 id="guideTitle">Verifikasi dulu, transaksi kemudian.</h2>
+        <p>Hasil pencarian adalah salah satu sinyal pemeriksaan. Cocokkan identitas, riwayat transaksi, bukti kepemilikan, dan metode pembayaran sebelum mengambil keputusan.</p>
+      </div>
+      <div class="guide-points">
+        <div class="guide-point"><span>◎</span><div><strong>Periksa nomor</strong><small>Cari rekening atau UID yang akan digunakan.</small></div></div>
+        <div class="guide-point"><span>♢</span><div><strong>Baca status</strong><small>Perhatikan tanggal, platform, dan status verifikasi.</small></div></div>
+        <div class="guide-point"><span>⌕</span><div><strong>Verifikasi silang</strong><small>Jangan bergantung pada satu sinyal saja.</small></div></div>
+      </div>
+    </section>
+
+    <section class="donation-section saas-donation">
+      <div class="donation-text">
+        <span class="donation-title">☕ Dukung pengembangan Capllang List</span>
+        <span class="donation-subtitle">Dukungan membantu operasional dan pemeliharaan layanan.</span>
+      </div>
+      <div class="donation-action">
+        <button type="button" id="qrisButton" class="qris-button" aria-label="Perbesar QRIS" aria-haspopup="dialog" aria-controls="qrisModal" title="Perbesar QRIS">
+          <img src="/assets/qris-thumb.webp" data-full-src="/assets/qris.jpg" id="qrisThumb" alt="QRIS donasi Capllang List" class="qris-img" width="120" height="169" decoding="async">
+        </button>
+        <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">Saweria</a>
+      </div>
+    </section>
+
+    <section class="final-cta" aria-label="Ajakan pengecekan">
+      <span>♢&nbsp;&nbsp;Jangan ambil risiko. Verifikasi dulu, transaksi kemudian.</span>
+      <button type="button" class="btn-gradient" data-scroll-target="checker">Cek Sekarang <span aria-hidden="true">→</span></button>
+    </section>
+  </main>
 </div>
 
 <!-- ADMIN LOGIN MODAL -->
-<div
-  id="adminModal"
-  class="qris-modal"
-  role="dialog"
-  aria-modal="true"
-  aria-hidden="true"
-  aria-labelledby="adminModalTitle"
-  aria-describedby="adminModalDesc">
-
-  <div
-    class="admin-modal-content">
-
-    <h3 id="adminModalTitle" class="modal-title">
-      🔑 Autentikasi Pemilik
-    </h3>
-
-    <p id="adminModalDesc" class="modal-description">
-      Masukkan password admin untuk mengakses panel kontrol.
-    </p>
-
-    <input
-      type="password"
-      id="adminPasswordInput"
-      aria-label="Password admin"
-      autocomplete="current-password"
-      placeholder="Password admin..."
-      class="admin-password-input">
-
+<div id="adminModal" class="qris-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="adminModalTitle" aria-describedby="adminModalDesc">
+  <div class="admin-modal-content">
+    <h3 id="adminModalTitle" class="modal-title">🔑 Autentikasi Pemilik</h3>
+    <p id="adminModalDesc" class="modal-description">Masukkan password admin untuk mengakses panel kontrol.</p>
+    <input type="password" id="adminPasswordInput" aria-label="Password admin" autocomplete="current-password" placeholder="Password admin..." class="admin-password-input">
     <div class="modal-actions">
-
-      <button
-        type="button"
-        class="btn btn-confirm-cancel flex-1"
-        id="adminCancelBtn">
-        Batal
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-add flex-1"
-        id="adminLoginBtn">
-        Masuk
-      </button>
-
+      <button type="button" class="btn btn-confirm-cancel flex-1" id="adminCancelBtn">Batal</button>
+      <button type="button" class="btn btn-add flex-1" id="adminLoginBtn">Masuk</button>
     </div>
   </div>
 </div>
 
 <!-- EDIT RECORD MODAL -->
-<div
-  id="editRecordModal"
-  class="qris-modal"
-  role="dialog"
-  aria-modal="true"
-  aria-hidden="true"
-  aria-labelledby="editRecordTitle"
-  aria-describedby="editRecordDesc">
-
+<div id="editRecordModal" class="qris-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="editRecordTitle" aria-describedby="editRecordDesc">
   <div class="edit-modal-content">
-    <h3 id="editRecordTitle" class="modal-title">
-      ✏️ Edit Data
-    </h3>
-
-    <p id="editRecordDesc" class="modal-description">
-      Perbarui data yang salah tanpa menghapus record lama.
-    </p>
-
+    <h3 id="editRecordTitle" class="modal-title">✏️ Edit Data</h3>
+    <p id="editRecordDesc" class="modal-description">Perbarui data yang salah tanpa menghapus record lama.</p>
     <div class="edit-form">
       <label for="editCategoryInput">Kategori</label>
-      <select id="editCategoryInput">
-        <option value="rekening">Rekening / E-Wallet</option>
-        <option value="genshin">UID Game</option>
-      </select>
-
+      <select id="editCategoryInput"><option value="rekening">Rekening / E-Wallet</option><option value="genshin">UID Game</option></select>
       <label for="editNumberInput">Nomor / UID</label>
-      <input
-        type="text"
-        id="editNumberInput"
-        inputmode="numeric"
-        maxlength="40"
-        autocomplete="off"
-        spellcheck="false">
-
+      <input type="text" id="editNumberInput" inputmode="numeric" maxlength="40" autocomplete="off" spellcheck="false">
       <label for="editMetaInput">Bank / Game</label>
-      <input
-        type="text"
-        id="editMetaInput"
-        maxlength="100"
-        autocomplete="off">
-
+      <input type="text" id="editMetaInput" maxlength="100" autocomplete="off">
       <label for="editDateInput">Tanggal dilaporkan</label>
-      <input
-        type="date"
-        id="editDateInput">
-
+      <input type="date" id="editDateInput">
       <label for="editSourceTypeInput">Bukti / metode verifikasi</label>
-      <select id="editSourceTypeInput">
-        <option value="community_screenshot">Screenshot Laporan</option>
-        <option value="legacy_archive">Arsip Capllang</option>
-      </select>
-
+      <select id="editSourceTypeInput"><option value="community_screenshot">Screenshot Laporan</option><option value="legacy_archive">Arsip Capllang</option></select>
       <label for="editVerificationStatusInput">Status provenance</label>
-      <select id="editVerificationStatusInput">
-        <option value="report_recorded">Laporan Tercatat</option>
-        <option value="evidence_reviewed">Bukti Ditinjau</option>
-        <option value="multi_report">Laporan Multi-Sumber</option>
-      </select>
-
+      <select id="editVerificationStatusInput"><option value="report_recorded">Laporan Tercatat</option><option value="evidence_reviewed">Bukti Ditinjau</option><option value="multi_report">Laporan Multi-Sumber</option></select>
       <label for="editSourceRefInput">Referensi bukti/verifikasi (opsional, tanpa data pribadi)</label>
-      <input
-        type="text"
-        id="editSourceRefInput"
-        maxlength="80"
-        autocomplete="off">
+      <input type="text" id="editSourceRefInput" maxlength="80" autocomplete="off">
     </div>
-
     <div class="modal-actions">
-      <button
-        type="button"
-        class="btn btn-confirm-cancel flex-1"
-        id="editCancelBtn">
-        Batal
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-add flex-1"
-        id="editSaveBtn">
-        Simpan Perubahan
-      </button>
+      <button type="button" class="btn btn-confirm-cancel flex-1" id="editCancelBtn">Batal</button>
+      <button type="button" class="btn btn-add flex-1" id="editSaveBtn">Simpan Perubahan</button>
     </div>
   </div>
 </div>
 
 <!-- CONFIRM MODAL -->
-<div
-  id="confirmModal"
-  class="qris-modal"
-  role="alertdialog"
-  aria-modal="true"
-  aria-hidden="true"
-  aria-labelledby="confirmTitle"
-  aria-describedby="confirmMessage">
-
-  <div
-    class="confirm-modal-content">
-
-    <div class="confirm-title" id="confirmTitle">
-      Konfirmasi
-    </div>
-
-    <div class="confirm-message" id="confirmMessage">
-      Apakah Anda yakin?
-    </div>
-
+<div id="confirmModal" class="qris-modal" role="alertdialog" aria-modal="true" aria-hidden="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+  <div class="confirm-modal-content">
+    <div class="confirm-title" id="confirmTitle">Konfirmasi</div>
+    <div class="confirm-message" id="confirmMessage">Apakah Anda yakin?</div>
     <div class="confirm-actions">
-
-      <button
-        type="button"
-        class="btn btn-confirm-cancel"
-        id="confirmCancelBtn">
-        Batal
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-confirm-danger"
-        id="confirmOkBtn">
-        Hapus
-      </button>
-
+      <button type="button" class="btn btn-confirm-cancel" id="confirmCancelBtn">Batal</button>
+      <button type="button" class="btn btn-confirm-danger" id="confirmOkBtn">Hapus</button>
     </div>
   </div>
 </div>
 
 <!-- QRIS MODAL -->
-<div
-  id="qrisModal"
-  class="qris-modal"
-  role="dialog"
-  aria-modal="true"
-  aria-hidden="true"
-  aria-label="Pratinjau QRIS"
-  tabindex="-1">
-
-  <button
-    type="button"
-    id="qrisCloseBtn"
-    class="qris-close-btn"
-    aria-label="Tutup pratinjau QRIS">
-    ×
-  </button>
-
-  <img
-    id="modalImg"
-    src=""
-    alt="QRIS Preview">
-
+<div id="qrisModal" class="qris-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Pratinjau QRIS" tabindex="-1">
+  <button type="button" id="qrisCloseBtn" class="qris-close-btn" aria-label="Tutup pratinjau QRIS">×</button>
+  <img id="modalImg" src="" alt="QRIS Preview">
 </div>
 
-<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
-  Berhasil disalin!
-</div>
+<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">Berhasil disalin!</div>
 
 <script src="/js/01-core.js" defer></script>
 <script src="/js/02-data.js" defer></script>
@@ -457,6 +352,6 @@
 <script src="/js/04-records.js" defer></script>
 <script src="/js/05-render.js" defer></script>
 <script src="/js/06-ui-init.js" defer></script>
-
+<script src="/js/07-saas-ui.js" defer></script>
 </body>
 </html>
