@@ -2,6 +2,9 @@ const UPSTREAM_ORIGIN = 'https://jsonbin-proxy.awak-cot-u-sibak.workers.dev';
 const FRONTEND_ORIGIN = 'https://capllang-list.vercel.app';
 const SESSION_COOKIE = 'admin_session';
 const MAX_BODY_BYTES = 16 * 1024;
+const PROXY_CLIENT_HEADER = 'x-capllang-proxy-client';
+const PROXY_SIGNATURE_HEADER = 'x-capllang-proxy-signature';
+const MIN_PROXY_SIGNING_KEY_LENGTH = 32;
 
 const ROUTES = [
   { pattern: /^health$/, methods: new Set(['GET']) },
@@ -33,6 +36,92 @@ function getSetCookies(headers) {
   }
   const cookie = headers.get('set-cookie');
   return cookie ? [cookie] : [];
+}
+
+function getProxySigningKey() {
+  if (typeof process === 'undefined' || !process?.env) {
+    return '';
+  }
+
+  const value = process.env.PROXY_SIGNING_KEY;
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function getVercelClientIp(request) {
+  const raw = request.headers.get('x-vercel-forwarded-for') || '';
+  const ip = raw.split(',')[0].trim();
+
+  if (!ip || ip.length > 128) {
+    return '';
+  }
+
+  return ip;
+}
+
+async function importProxyHmacKey(secret) {
+  return crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    {
+      name: 'HMAC',
+      hash: 'SHA-256'
+    },
+    false,
+    ['sign']
+  );
+}
+
+function base64urlEncodeBytes(bytes) {
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+async function signProxyValue(secret, value) {
+  const key = await importProxyHmacKey(secret);
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(value)
+  );
+
+  return base64urlEncodeBytes(new Uint8Array(signature));
+}
+
+async function appendSignedProxyIdentity(request, headers, rawPath, method) {
+  const secret = getProxySigningKey();
+  if (secret.length < MIN_PROXY_SIGNING_KEY_LENGTH) {
+    return false;
+  }
+
+  // Vercel overwrites the client-IP forwarding header and exposes the
+  // trusted value to the Function. The raw IP never leaves Vercel here:
+  // only a deterministic HMAC-derived pseudonymous key is forwarded.
+  const clientIp = getVercelClientIp(request);
+  if (!clientIp) {
+    return false;
+  }
+
+  const clientKey = await signProxyValue(
+    secret,
+    `client:${clientIp}`
+  );
+
+  const requestSignature = await signProxyValue(
+    secret,
+    `request:${method}:${rawPath}:${clientKey}`
+  );
+
+  headers.set(PROXY_CLIENT_HEADER, clientKey);
+  headers.set(PROXY_SIGNATURE_HEADER, requestSignature);
+
+  return true;
 }
 
 function jsonError(message, status, extraHeaders = {}) {
@@ -138,6 +227,13 @@ export default {
         // Worker tetap melakukan verifikasi signature + status sesi di D1.
         upstreamHeaders.set('cookie', `${SESSION_COOKIE}=${sessionToken}`);
       }
+
+      await appendSignedProxyIdentity(
+        request,
+        upstreamHeaders,
+        rawPath,
+        method
+      );
 
       // Worker memerlukan Origin resmi pada route state-changing.
       // Nilai ini hanya dipasang setelah Origin browser lolos validasi di atas.
