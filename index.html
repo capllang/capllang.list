@@ -158,10 +158,10 @@
       </article>
 
       <article class="feature-card feature-pink">
-        <div class="feature-icon">♢</div>
-        <h2>Panduan Keamanan</h2>
-        <p>Pahami arti status laporan dan gunakan hasil pengecekan sebagai salah satu langkah verifikasi.</p>
-        <button type="button" class="feature-link" data-scroll-target="guide">Lihat Panduan <span aria-hidden="true">→</span></button>
+        <div class="feature-icon">▣</div>
+        <h2>Riwayat Laporan</h2>
+        <p>Area laporan publik dipertahankan sebagai bagian dari patokan visual dan akan diaktifkan pada fase fitur berikutnya.</p>
+        <button type="button" class="feature-link" data-scroll-target="guide">Lihat Laporan <span aria-hidden="true">→</span></button>
         <div class="feature-art feature-art-pink" aria-hidden="true"><span></span></div>
       </article>
     </section>
@@ -169,10 +169,10 @@
     <section class="summary-section" aria-labelledby="summaryTitle">
       <div class="activity-heading">
         <div>
-          <span class="section-kicker">RINGKASAN DATABASE</span>
-          <h2 id="summaryTitle">Ringkasan data saat ini</h2>
+          <span class="section-kicker">RINGKASAN AKTIVITAS</span>
+          <h2 id="summaryTitle">Aktivitas Pengecekan</h2>
         </div>
-        <span class="activity-filter" aria-label="Periode analytics belum aktif">Analytics R2</span>
+        <span class="activity-filter" aria-label="Patokan visual periode analytics">7 Hari Terakhir</span>
       </div>
 
       <div class="stat-grid">
@@ -202,40 +202,51 @@
           <circle cx="1000" cy="48" r="7" fill="#fff" stroke="#ff9a46" stroke-width="5"/>
         </svg>
         <div class="activity-preview-note">
-          <strong>Grafik aktivitas akan aktif pada R2</strong>
-          <span>R1 hanya menampilkan struktur visual. Data 7/30 hari tidak akan dibuat-buat.</span>
+          <strong>Patokan visual analytics</strong>
+          <span>Grafik riil akan dihubungkan ke data agregat pada fase analytics.</span>
         </div>
       </div>
     </section>
 
-    <section id="guide" class="credibility-section" aria-labelledby="guideTitle">
-      <div class="credibility-emblem" aria-hidden="true">
-        <div class="credibility-emblem-ring">
-          <span class="credibility-shield">♢</span>
+    <section id="guide" class="credibility-section testimonial-layout" aria-labelledby="guideTitle">
+      <div class="testimonial-visual" aria-hidden="true">
+        <div class="testimonial-avatar">
+          <svg viewBox="0 0 160 160" focusable="false" aria-hidden="true">
+            <defs>
+              <linearGradient id="avatarBg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#5f4bff"/>
+                <stop offset="0.55" stop-color="#c93bdf"/>
+                <stop offset="1" stop-color="#ff7b66"/>
+              </linearGradient>
+            </defs>
+            <rect width="160" height="160" rx="36" fill="url(#avatarBg)"/>
+            <circle cx="80" cy="62" r="31" fill="#f2c2a9"/>
+            <path d="M49 62c2-29 18-42 34-42 22 0 35 17 34 43-10-9-22-14-36-14-11 0-22 4-32 13Z" fill="#171525"/>
+            <path d="M34 154c4-39 22-59 46-59 25 0 44 20 48 59Z" fill="#161526"/>
+            <path d="M55 112c8 8 17 12 26 12s19-4 27-12l8 42H47Z" fill="#2d2a55"/>
+          </svg>
+          <span class="testimonial-badge">♢</span>
         </div>
       </div>
 
-      <div id="about" class="credibility-message">
-        <span class="section-kicker">DIBANGUN UNTUK PEMERIKSAAN AWAL</span>
-        <h2 id="guideTitle">Platform yang dibangun untuk keamanan.</h2>
-        <p>Capllang List membantu komunitas memeriksa rekening dan UID game yang tercatat. Hasil pencarian tetap perlu diverifikasi silang sebelum transaksi.</p>
-        <div class="credibility-mini">
-          <span><strong>Transparan</strong><small>Status dan konteks data ditampilkan.</small></span>
-          <span><strong>Terukur</strong><small>Angka publik hanya memakai data nyata.</small></span>
-          <span><strong>Privasi</strong><small>Pencarian tidak dijadikan analytics mentah.</small></span>
-        </div>
+      <div id="about" class="credibility-message testimonial-copy">
+        <div class="testimonial-stars" aria-label="Patokan visual rating">★★★★★</div>
+        <span class="section-kicker">CONTOH TATA LETAK TESTIMONI</span>
+        <h2 id="guideTitle">“Cek dulu sebelum transaksi, lalu verifikasi kembali dari sumber lain.”</h2>
+        <p>Bagian ini sengaja dipertahankan sebagai patokan visual. Isi testimoni, identitas, dan rating final akan diedit setelah struktur halaman selesai.</p>
+        <span class="credibility-signature">Pengguna Capllang List · Konten contoh</span>
       </div>
 
       <div class="credibility-points">
-        <div class="credibility-point"><span>◎</span><div><strong>Data & status yang jelas</strong><small>Tanggal, kategori, dan status membantu pengguna membaca konteks hasil.</small></div></div>
-        <div class="credibility-point"><span>♢</span><div><strong>Verifikasi komunitas</strong><small>Laporan menjadi sinyal pemeriksaan, bukan penetapan bersalah.</small></div></div>
-        <div class="credibility-point"><span>⌾</span><div><strong>Privasi dijaga</strong><small>Fitur publik dirancang tanpa mengekspos data internal admin.</small></div></div>
+        <div class="credibility-point"><span>◎</span><div><strong>Data Akurat & Terupdate</strong><small>Struktur siap menampilkan informasi yang telah diverifikasi dan diperbarui.</small></div></div>
+        <div class="credibility-point"><span>♢</span><div><strong>Komunitas Solid</strong><small>Bagian ini mempertahankan posisi trust point seperti master preview.</small></div></div>
+        <div class="credibility-point"><span>⌾</span><div><strong>Privasi Terjaga</strong><small>Data internal admin tetap terpisah dari tampilan publik.</small></div></div>
       </div>
     </section>
 
-    <section class="final-cta" aria-label="Ajakan pengecekan">
-      <span>♢&nbsp;&nbsp;Jangan ambil risiko. Verifikasi dulu, transaksi kemudian.</span>
-      <button type="button" class="btn-gradient" data-scroll-target="checker">Cek Sekarang <span aria-hidden="true">→</span></button>
+    <section class="final-cta final-cta-master" aria-label="Ajakan pengecekan">
+      <span><b class="final-cta-shield">♢</b><span><strong>Jadilah Bagian dari Komunitas yang Lebih Aman</strong><small>Verifikasi dulu, transaksi kemudian.</small></span></span>
+      <button type="button" class="final-cta-dark" data-scroll-target="checker">Mulai Sekarang <span aria-hidden="true">→</span></button>
     </section>
 
 

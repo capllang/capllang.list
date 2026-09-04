@@ -2702,3 +2702,223 @@ button {
     width: min(320px, calc(100vw - 28px));
   }
 }
+
+
+/* =============================================================
+   R1-A.3 — Full Page Master Fidelity
+   Approved visual checkpoint. Preserve master section geometry first;
+   content/data refinement remains a later phase.
+============================================================= */
+.testimonial-layout {
+  grid-template-columns: 170px minmax(0, 1.25fr) minmax(300px, .9fr);
+  gap: 26px;
+  min-height: 220px;
+  padding: 24px 26px;
+}
+
+.testimonial-visual {
+  display: grid;
+  place-items: center;
+}
+
+.testimonial-avatar {
+  width: 138px;
+  height: 138px;
+  position: relative;
+  border-radius: 34px;
+  padding: 3px;
+  background: linear-gradient(135deg, #7750ff, #dc3dd0 62%, #ff8c59);
+  box-shadow: 0 0 34px rgba(120,62,255,.25), 0 0 54px rgba(232,57,190,.12);
+}
+
+.testimonial-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 31px;
+}
+
+.testimonial-badge {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: #fff;
+  background: linear-gradient(135deg, #6f42ff, #d83bd1);
+  border: 2px solid #0a0b16;
+  box-shadow: 0 8px 20px rgba(89,51,255,.35);
+}
+
+.testimonial-copy {
+  padding-left: 0;
+}
+
+.testimonial-stars {
+  margin-bottom: 8px;
+  color: #ffc81d;
+  font-size: 18px;
+  letter-spacing: .08em;
+}
+
+.testimonial-copy h2 {
+  max-width: 540px;
+  font-size: clamp(22px, 2.35vw, 31px);
+  line-height: 1.12;
+}
+
+.testimonial-copy p {
+  max-width: 560px;
+}
+
+.final-cta-master {
+  min-height: 82px;
+  padding: 13px 16px 13px 20px;
+  border: 0;
+  background: linear-gradient(105deg, #603dff 0%, #9a2dff 31%, #df38bd 64%, #ff8450 100%);
+  box-shadow: 0 18px 42px rgba(131,44,255,.18), 0 12px 36px rgba(255,91,104,.12);
+}
+
+.final-cta-master > span {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.final-cta-master > span > span {
+  display: grid;
+  gap: 4px;
+}
+
+.final-cta-master strong {
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.final-cta-master small {
+  color: rgba(255,255,255,.78);
+  font-size: 9px;
+}
+
+.final-cta-shield {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #fff;
+  font-size: 20px;
+}
+
+.final-cta-dark {
+  min-width: 205px;
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 20px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 12px;
+  color: #fff;
+  background: #0a0b14;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 780;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+}
+
+.final-cta-dark:hover,
+.final-cta-dark:focus-visible {
+  background: #11131f;
+}
+
+@media (min-width: 821px) {
+  .summary-section {
+    margin-top: 18px;
+    padding: 22px 22px 18px;
+  }
+
+  .activity-visual {
+    min-height: 220px;
+  }
+
+  .feature-grid {
+    margin-bottom: 18px;
+  }
+}
+
+@media (max-width: 1020px) {
+  .testimonial-layout {
+    grid-template-columns: 135px minmax(0, 1fr);
+  }
+
+  .testimonial-layout .credibility-points {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: 0;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+}
+
+@media (max-width: 820px) {
+  .testimonial-layout {
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .testimonial-avatar {
+    width: 104px;
+    height: 104px;
+    border-radius: 28px;
+  }
+
+  .testimonial-avatar svg {
+    border-radius: 25px;
+  }
+
+  .testimonial-layout .credibility-points {
+    grid-template-columns: 1fr;
+  }
+
+  .final-cta-master {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+  }
+
+  .final-cta-dark {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .testimonial-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonial-visual {
+    justify-content: start;
+  }
+
+  .testimonial-avatar {
+    width: 118px;
+    height: 118px;
+  }
+
+  .final-cta-master strong {
+    font-size: 13px;
+  }
+}
