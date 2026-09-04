@@ -1,4 +1,4 @@
-const CACHE_NAME = 'capllang-shell-v23';
+const CACHE_NAME = 'capllang-shell-v24';
 
 const APP_SHELL = [
   '/',

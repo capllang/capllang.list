@@ -2517,3 +2517,138 @@ button {
     text-align: left;
   }
 }
+
+/* =============================================================
+   R1-A.1 — Approved desktop visual refinement
+   Scope: desktop hero/header fidelity only.
+   Mobile behavior remains unchanged for the dedicated R1-D pass.
+============================================================= */
+@media (min-width: 821px) {
+  /* Navbar should visually merge into the page instead of reading as a card. */
+  .site-header {
+    padding: 10px 4px 12px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  /* R1-A.1 preview keeps one lightweight primary action in the header. */
+  .saas-header-actions #heroCtaBtn {
+    display: none;
+  }
+
+  .saas-header-actions #authBtn {
+    min-width: 118px;
+    min-height: 44px;
+    padding: 0 19px;
+    border: 0 !important;
+    border-radius: 13px;
+    background: var(--saas-gradient) !important;
+    color: transparent !important;
+    box-shadow: 0 12px 30px rgba(157,48,255,.22), 0 8px 26px rgba(255,83,138,.12) !important;
+    font-size: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .saas-header-actions #authBtn::before {
+    content: "Masuk";
+    color: #fff;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 750;
+  }
+
+  .saas-header-actions #authBtn::after {
+    content: "→";
+    color: #fff;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .saas-header-actions #authBtn[aria-pressed="true"]::before {
+    content: "Keluar";
+  }
+
+  /* Slightly stronger badge and more breathing room in the copy block. */
+  .eyebrow {
+    min-height: 36px;
+    padding-inline: 16px;
+    margin-bottom: 24px;
+    font-size: 10.5px;
+  }
+
+  .hero-copy > p {
+    margin-top: 23px;
+  }
+
+  /* Rebalance the hero so the illustration does not overpower the copy. */
+  .hero-section {
+    grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr);
+    gap: 38px;
+  }
+
+  .hero-visual {
+    min-height: 452px;
+  }
+
+  /* Bean/peanut silhouette: organic outer radius + a masked concave notch. */
+  .hero-blob {
+    width: min(455px, 79%);
+    right: 5%;
+    top: 5%;
+    aspect-ratio: 1.18;
+    border-radius: 50% 50% 44% 56% / 44% 38% 62% 56%;
+    transform: rotate(4deg);
+    -webkit-mask-image: radial-gradient(circle 118px at 101% 18%, transparent 0 58%, #000 59%);
+    mask-image: radial-gradient(circle 118px at 101% 18%, transparent 0 58%, #000 59%);
+  }
+
+  .hero-blob-inner {
+    width: 44%;
+    height: 48%;
+    right: -4%;
+    bottom: -4%;
+    opacity: .72;
+  }
+
+  .hero-glow-a {
+    width: 315px;
+    height: 315px;
+    right: 24%;
+    top: 11%;
+    opacity: .46;
+  }
+
+  .hero-glow-b {
+    width: 260px;
+    height: 235px;
+    right: 7%;
+    bottom: 7%;
+    opacity: .29;
+  }
+
+  .hero-orbit-one {
+    width: 565px;
+    height: 220px;
+    right: -4%;
+    top: 22%;
+  }
+
+  .hero-orbit-two {
+    width: 455px;
+    height: 170px;
+    right: 3%;
+    top: 34%;
+  }
+
+  /* The floating card overlaps the blob more deliberately, like the approved preview. */
+  .hero-metric-card {
+    right: 5%;
+    bottom: 31px;
+    width: 250px;
+  }
+}
