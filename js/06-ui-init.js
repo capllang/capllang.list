@@ -168,23 +168,6 @@ function showToast(message) {
 }
 
 /* =========================
-   QRIS
-========================= */
-
-function openQrisModal(src) {
-
-  document.getElementById(
-    'modalImg'
-  ).src = src;
-
-  openModalAccessible('qrisModal');
-}
-
-function closeQrisModal() {
-  closeModalAccessible('qrisModal');
-}
-
-/* =========================
    STATIC EVENT BINDING
    (CSP: tanpa inline onclick/onkeydown)
 ========================= */
@@ -217,18 +200,6 @@ function bindStaticEvents() {
 
   document.getElementById('btnAdd')
     ?.addEventListener('click', addNumber);
-
-  const qrisThumb = document.getElementById('qrisThumb');
-  const qrisButton = document.getElementById('qrisButton');
-  qrisButton?.addEventListener('click', () => {
-  const fullSrc =
-    qrisThumb?.dataset.fullSrc ||
-    qrisThumb?.src;
-
-  if (fullSrc) {
-    openQrisModal(fullSrc);
-  }
-});
 
   const adminModal = document.getElementById('adminModal');
   adminModal?.addEventListener('click', event => {
@@ -269,13 +240,6 @@ function bindStaticEvents() {
   document.getElementById('confirmOkBtn')
     ?.addEventListener('click', () => closeConfirmModal(true));
 
-  document.getElementById('qrisCloseBtn')
-    ?.addEventListener('click', closeQrisModal);
-
-  const qrisModal = document.getElementById('qrisModal');
-  qrisModal?.addEventListener('click', event => {
-    if (event.target === event.currentTarget) closeQrisModal();
-  });
 }
 
 bindStaticEvents();
@@ -290,8 +254,7 @@ document.addEventListener(
     const openModal = [
       'confirmModal',
       'editRecordModal',
-      'adminModal',
-      'qrisModal'
+      'adminModal'
     ]
       .map(id => document.getElementById(id))
       .find(modal => modal && modal.classList.contains('is-open'));
@@ -307,8 +270,6 @@ document.addEventListener(
         closeEditRecordModal();
       } else if (openModal.id === 'adminModal') {
         closeAdminModal();
-      } else if (openModal.id === 'qrisModal') {
-        closeQrisModal();
       }
 
       return;

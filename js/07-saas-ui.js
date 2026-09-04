@@ -20,30 +20,24 @@
     setText('statUidTotal', formatNumber(uid));
     setText('statTotalData', formatNumber(total));
     setText('heroTotalData', formatNumber(total));
-    setText('distributionTotal', `${formatNumber(total)} data`);
-
-    const rekeningPercent = total > 0 ? (rekening / total) * 100 : 50;
-    const uidPercent = total > 0 ? (uid / total) * 100 : 50;
-
-    const rekeningBar = document.getElementById('rekeningBar');
-    const uidBar = document.getElementById('uidBar');
-    if (rekeningBar) rekeningBar.style.width = `${rekeningPercent}%`;
-    if (uidBar) uidBar.style.width = `${uidPercent}%`;
-
-    setText('rekeningPercent', `${Math.round(rekeningPercent)}%`);
-    setText('uidPercent', `${Math.round(uidPercent)}%`);
 
     const state = document.body.dataset.connectionState || 'checking';
     const isOnline = state === 'online';
-    const statusLabel = isOnline
-      ? 'Online'
-      : state === 'checking'
-        ? 'Memeriksa'
-        : 'Terbatas';
 
-    setText('statOnlineText', statusLabel);
-    setText('heroStatusText', isOnline ? 'Database terhubung' : getDefaultStatusText().replace(/^●\s*/, ''));
-    setText('trustUpdateText', isOnline ? 'Terhubung ke database' : 'Status koneksi terbatas');
+    setText(
+      'heroStatusText',
+      isOnline
+        ? 'Database terhubung'
+        : getDefaultStatusText().replace(/^●\s*/, '')
+    );
+    setText(
+      'trustUpdateText',
+      isOnline
+        ? 'Terhubung ke database'
+        : state === 'checking'
+          ? 'Memeriksa koneksi'
+          : 'Status koneksi terbatas'
+    );
   }
 
   function scrollToTarget(id) {
@@ -109,6 +103,30 @@
   document.getElementById('tabGenshin')?.addEventListener('click', () => window.setTimeout(syncDashboardStats, 0));
 
   syncDashboardStats();
+
+  // Close the mobile menu with Escape or when clicking outside the header.
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeMobileNav();
+  });
+
+  document.addEventListener('click', event => {
+    const nav = document.getElementById('mainNav');
+    const menuButton = document.getElementById('mobileMenuBtn');
+    if (!nav?.classList.contains('is-open')) return;
+    if (nav.contains(event.target) || menuButton?.contains(event.target)) return;
+    closeMobileNav();
+  });
+
+  // Shared URLs that already contain a search query should land users near
+  // the checker instead of making them hunt for the matching result panel.
+  const initialParams = new URLSearchParams(window.location.search);
+  const hasInitialSearch = Boolean(
+    (initialParams.get('search') || initialParams.get('q') || '').trim()
+  );
+  if (hasInitialSearch) {
+    window.setTimeout(() => scrollToTarget('checker'), 650);
+  }
+
 
   let attempts = 0;
   const warmupTimer = window.setInterval(() => {

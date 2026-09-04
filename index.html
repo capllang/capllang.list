@@ -61,7 +61,6 @@
       </span>
       <span class="brand-copy">
         <strong>Capllang List</strong>
-        <small>Cek sebelum transaksi</small>
       </span>
     </button>
 
@@ -89,7 +88,7 @@
       <div class="hero-copy">
         <div class="eyebrow"><span class="eyebrow-icon">♢</span> Database komunitas untuk verifikasi awal</div>
         <h1 id="heroTitle">Cek. Verifikasi.<br>Transaksi<br><span>Lebih Aman.</span></h1>
-        <p>Capllang List membantu kamu mengecek rekening, e-wallet, dan UID game yang tercatat sebelum transaksi jual beli akun game.</p>
+        <p>Capllang List membantu kamu mengecek rekening, e-wallet, dan UID game yang tercatat sebelum transaksi jual beli akun game. Kurangi risiko, tingkatkan keamanan.</p>
         <div class="hero-actions">
           <button type="button" class="btn-gradient btn-large" data-scroll-target="checker">Cek Sekarang <span aria-hidden="true">→</span></button>
           <button type="button" class="btn-outline btn-large" data-scroll-target="guide">▣&nbsp;&nbsp;Lihat Panduan</button>
@@ -127,8 +126,9 @@
     <section class="trust-strip" aria-label="Ringkasan layanan">
       <div class="trust-item"><span class="trust-icon">◎</span><span><strong>Database Komunitas</strong><small>Laporan terdokumentasi</small></span></div>
       <div class="trust-item"><span class="trust-icon">⌕</span><span><strong>Pencarian Cepat</strong><small>Rekening & UID game</small></span></div>
-      <div class="trust-item"><span class="trust-icon">♢</span><span><strong>Status Terverifikasi</strong><small>Provenance ditampilkan</small></span></div>
-      <div class="trust-item"><span class="trust-icon">↻</span><span><strong>Data Aktif</strong><small id="trustUpdateText">Memeriksa koneksi</small></span></div>
+      <div class="trust-item"><span class="trust-icon">♢</span><span><strong>Status & Provenance</strong><small>Konteks data ditampilkan</small></span></div>
+      <div class="trust-item"><span class="trust-icon">⌾</span><span><strong>Privasi Pencarian</strong><small>Query tidak dijadikan analytics mentah</small></span></div>
+      <div class="trust-item"><span class="trust-icon">↻</span><span><strong>Status Database</strong><small id="trustUpdateText">Memeriksa koneksi</small></span></div>
     </section>
 
     <section id="features" class="feature-grid" aria-label="Fitur Capllang List">
@@ -156,6 +156,85 @@
         <div class="feature-art feature-art-pink" aria-hidden="true"><span></span></div>
       </article>
     </section>
+
+    <section class="summary-section" aria-labelledby="summaryTitle">
+      <div class="activity-heading">
+        <div>
+          <span class="section-kicker">RINGKASAN DATABASE</span>
+          <h2 id="summaryTitle">Ringkasan data saat ini</h2>
+        </div>
+        <span class="activity-filter" aria-label="Periode analytics belum aktif">Analytics R2</span>
+      </div>
+
+      <div class="stat-grid">
+        <article class="stat-card"><span class="stat-icon stat-purple">▤</span><span><small>Rekening tercatat</small><strong id="statRekeningTotal">0</strong></span></article>
+        <article class="stat-card"><span class="stat-icon stat-orange">🎮</span><span><small>UID game tercatat</small><strong id="statUidTotal">0</strong></span></article>
+        <article class="stat-card"><span class="stat-icon stat-pink">⌕</span><span><small>Total data terindeks</small><strong id="statTotalData">0</strong></span></article>
+        <article class="stat-card"><span class="stat-icon stat-green">●</span><span><small>Status database</small><strong id="statusBar" role="status" aria-live="polite" aria-atomic="true">Memeriksa</strong></span></article>
+      </div>
+
+      <div class="activity-visual" aria-label="Area grafik aktivitas yang akan menggunakan data historis nyata pada fase analytics R2">
+        <div class="activity-gridlines" aria-hidden="true"></div>
+        <svg class="activity-preview-line" viewBox="0 0 1000 210" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="activityStroke" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#5749ff"/>
+              <stop offset="0.45" stop-color="#8e35ff"/>
+              <stop offset="0.72" stop-color="#ed39bf"/>
+              <stop offset="1" stop-color="#ff8a45"/>
+            </linearGradient>
+            <linearGradient id="activityFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#e13fc3" stop-opacity=".22"/>
+              <stop offset="1" stop-color="#6b40ff" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0 155 C70 150 90 105 155 125 S260 165 325 112 S415 83 475 117 S590 160 655 125 S748 72 810 118 S900 92 1000 48 L1000 210 L0 210 Z" fill="url(#activityFill)"/>
+          <path d="M0 155 C70 150 90 105 155 125 S260 165 325 112 S415 83 475 117 S590 160 655 125 S748 72 810 118 S900 92 1000 48" fill="none" stroke="url(#activityStroke)" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="1000" cy="48" r="7" fill="#fff" stroke="#ff9a46" stroke-width="5"/>
+        </svg>
+        <div class="activity-preview-note">
+          <strong>Grafik aktivitas akan aktif pada R2</strong>
+          <span>R1 hanya menampilkan struktur visual. Data 7/30 hari tidak akan dibuat-buat.</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="guide" class="credibility-section" aria-labelledby="guideTitle">
+      <div class="credibility-emblem" aria-hidden="true">
+        <div class="credibility-emblem-ring">
+          <span class="credibility-shield">♢</span>
+        </div>
+      </div>
+
+      <div id="about" class="credibility-message">
+        <span class="section-kicker">DIBANGUN UNTUK PEMERIKSAAN AWAL</span>
+        <h2 id="guideTitle">Platform yang dibangun untuk keamanan.</h2>
+        <p>Capllang List membantu komunitas memeriksa rekening dan UID game yang tercatat. Hasil pencarian tetap perlu diverifikasi silang sebelum transaksi.</p>
+        <div class="credibility-mini">
+          <span><strong>Transparan</strong><small>Status dan konteks data ditampilkan.</small></span>
+          <span><strong>Terukur</strong><small>Angka publik hanya memakai data nyata.</small></span>
+          <span><strong>Privasi</strong><small>Pencarian tidak dijadikan analytics mentah.</small></span>
+        </div>
+      </div>
+
+      <div class="credibility-points">
+        <div class="credibility-point"><span>◎</span><div><strong>Data & status yang jelas</strong><small>Tanggal, kategori, dan status membantu pengguna membaca konteks hasil.</small></div></div>
+        <div class="credibility-point"><span>♢</span><div><strong>Verifikasi komunitas</strong><small>Laporan menjadi sinyal pemeriksaan, bukan penetapan bersalah.</small></div></div>
+        <div class="credibility-point"><span>⌾</span><div><strong>Privasi dijaga</strong><small>Fitur publik dirancang tanpa mengekspos data internal admin.</small></div></div>
+      </div>
+    </section>
+
+    <section class="final-cta" aria-label="Ajakan pengecekan">
+      <span>♢&nbsp;&nbsp;Jangan ambil risiko. Verifikasi dulu, transaksi kemudian.</span>
+      <button type="button" class="btn-gradient" data-scroll-target="checker">Cek Sekarang <span aria-hidden="true">→</span></button>
+    </section>
+
+
+
+
+
+
+
 
     <section id="checker" class="checker-section" aria-labelledby="checkerTitle">
       <div class="section-heading checker-heading">
@@ -214,74 +293,20 @@
       <p class="trust-note">Pencatatan rekening dan UID Game merupakan tindakan administratif awal, bukan penetapan bersalah secara hukum. Data yang masuk tetap menjunjung asas praduga tak bersalah hingga verifikasi selesai.</p>
     </section>
 
-    <section class="summary-section" aria-labelledby="summaryTitle">
-      <div class="section-heading summary-heading">
-        <div>
-          <span class="section-kicker">RINGKASAN DATABASE</span>
-          <h2 id="summaryTitle">Status database saat ini</h2>
-        </div>
-      </div>
+    <footer class="site-footer" aria-label="Footer Capllang List">
+      <button type="button" class="footer-brand" data-scroll-target="heroTitle" aria-label="Kembali ke bagian atas">
+        <span class="footer-brand-mark" aria-hidden="true">♢</span>
+        <strong>Capllang List</strong>
+      </button>
+      <nav class="footer-nav" aria-label="Navigasi footer">
+        <button type="button" data-scroll-target="features">Fitur</button>
+        <button type="button" data-scroll-target="guide">Panduan</button>
+        <button type="button" data-scroll-target="about">Tentang</button>
+        <button type="button" data-scroll-target="checker">Cek Data</button>
+      </nav>
+      <small>© 2026 Capllang List. Gunakan hasil pengecekan sebagai verifikasi awal.</small>
+    </footer>
 
-      <div class="stat-grid">
-        <article class="stat-card"><span class="stat-icon stat-purple">▤</span><span><strong id="statRekeningTotal">0</strong><small>Rekening tercatat</small></span></article>
-        <article class="stat-card"><span class="stat-icon stat-orange">🎮</span><span><strong id="statUidTotal">0</strong><small>UID game tercatat</small></span></article>
-        <article class="stat-card"><span class="stat-icon stat-pink">♢</span><span><strong id="statTotalData">0</strong><small>Total data</small></span></article>
-        <article class="stat-card"><span class="stat-icon stat-green">●</span><span><strong id="statusBar" role="status" aria-live="polite" aria-atomic="true">● Memeriksa koneksi...</strong><small>Status database</small></span></article>
-      </div>
-
-      <div class="summary-panels">
-        <article class="distribution-card">
-          <div class="distribution-head"><div><strong>Distribusi Data</strong><small>Perbandingan kategori aktif</small></div><span id="distributionTotal">0 data</span></div>
-          <div class="distribution-visual" role="img" aria-label="Distribusi jumlah rekening dan UID game">
-            <div class="distribution-bar"><span id="rekeningBar"></span><span id="uidBar"></span></div>
-            <div class="distribution-legend">
-              <span><i class="legend-dot legend-purple"></i>Rekening <strong id="rekeningPercent">0%</strong></span>
-              <span><i class="legend-dot legend-orange"></i>UID Game <strong id="uidPercent">0%</strong></span>
-            </div>
-          </div>
-        </article>
-
-        <article id="about" class="about-card">
-          <div>
-            <span class="section-kicker">TENTANG CAPLLANG LIST</span>
-            <h2>Alat bantu verifikasi sebelum transaksi.</h2>
-            <p>Capllang List menggabungkan database laporan rekening dan UID game dalam satu alat pencarian sederhana untuk membantu pengguna melakukan pemeriksaan awal.</p>
-          </div>
-          <div class="about-lock" aria-hidden="true"><span>⌾</span></div>
-        </article>
-      </div>
-    </section>
-
-    <section id="guide" class="guide-section" aria-labelledby="guideTitle">
-      <div class="guide-copy">
-        <span class="section-kicker">PANDUAN SINGKAT</span>
-        <h2 id="guideTitle">Verifikasi dulu, transaksi kemudian.</h2>
-        <p>Hasil pencarian adalah salah satu sinyal pemeriksaan. Cocokkan identitas, riwayat transaksi, bukti kepemilikan, dan metode pembayaran sebelum mengambil keputusan.</p>
-      </div>
-      <div class="guide-points">
-        <div class="guide-point"><span>◎</span><div><strong>Periksa nomor</strong><small>Cari rekening atau UID yang akan digunakan.</small></div></div>
-        <div class="guide-point"><span>♢</span><div><strong>Baca status</strong><small>Perhatikan tanggal, platform, dan status verifikasi.</small></div></div>
-        <div class="guide-point"><span>⌕</span><div><strong>Verifikasi silang</strong><small>Jangan bergantung pada satu sinyal saja.</small></div></div>
-      </div>
-    </section>
-
-    <section class="donation-section saas-donation">
-      <div class="donation-text">
-        <span class="donation-title">☕ Dukung pengembangan Capllang List</span>
-        <span class="donation-subtitle">Dukungan membantu operasional dan pemeliharaan layanan.</span>
-      </div>
-      <div class="donation-action">
-        <button type="button" id="qrisButton" class="qris-button" aria-label="Perbesar QRIS" aria-haspopup="dialog" aria-controls="qrisModal" title="Perbesar QRIS">
-          <img src="/assets/qris-thumb.webp" data-full-src="/assets/qris.jpg" id="qrisThumb" alt="QRIS donasi Capllang List" class="qris-img" width="120" height="169" decoding="async">
-        </button>
-        <a href="https://saweria.co/capllang/" target="_blank" rel="noopener noreferrer" class="btn-donate-link">Saweria</a>
-      </div>
-    </section>
-
-    <section class="final-cta" aria-label="Ajakan pengecekan">
-      <span>♢&nbsp;&nbsp;Jangan ambil risiko. Verifikasi dulu, transaksi kemudian.</span>
-      <button type="button" class="btn-gradient" data-scroll-target="checker">Cek Sekarang <span aria-hidden="true">→</span></button>
-    </section>
   </main>
 </div>
 
@@ -336,12 +361,6 @@
       <button type="button" class="btn btn-confirm-danger" id="confirmOkBtn">Hapus</button>
     </div>
   </div>
-</div>
-
-<!-- QRIS MODAL -->
-<div id="qrisModal" class="qris-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Pratinjau QRIS" tabindex="-1">
-  <button type="button" id="qrisCloseBtn" class="qris-close-btn" aria-label="Tutup pratinjau QRIS">×</button>
-  <img id="modalImg" src="" alt="QRIS Preview">
 </div>
 
 <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">Berhasil disalin!</div>
