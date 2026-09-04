@@ -2652,3 +2652,53 @@ button {
     width: 250px;
   }
 }
+
+/* =============================================================
+   R1-A.2 — Mobile Nav Fix
+   Approved preview: compact right-aligned menu + visible owner login CTA.
+   Desktop visual shell remains unchanged.
+============================================================= */
+.mobile-auth-btn {
+  display: none;
+}
+
+@media (max-width: 820px) {
+  .main-nav {
+    left: auto;
+    right: 18px;
+    width: min(320px, calc(100vw - 36px));
+    padding: 10px;
+  }
+
+  .mobile-auth-btn {
+    width: 100%;
+    min-height: 46px;
+    margin-top: 8px;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--saas-gradient);
+    color: #fff;
+    box-shadow: 0 10px 26px rgba(150, 45, 255, .22);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 780;
+    cursor: pointer;
+  }
+
+  .mobile-auth-btn:focus-visible {
+    outline: 2px solid rgba(255,255,255,.9);
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 560px) {
+  .main-nav {
+    right: 14px;
+    width: min(320px, calc(100vw - 28px));
+  }
+}

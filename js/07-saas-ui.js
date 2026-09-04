@@ -90,6 +90,37 @@
     mobileMenuBtn.setAttribute('aria-expanded', String(opening));
   });
 
+  // R1-A.2: expose the same owner authentication action inside the mobile menu.
+  // The desktop auth button remains the source of truth for the session state.
+  const desktopAuthBtn = document.getElementById('authBtn');
+  const mobileAuthBtn = document.getElementById('mobileAuthBtn');
+
+  function syncMobileAuthButton() {
+    if (!mobileAuthBtn) return;
+    const active = desktopAuthBtn?.getAttribute('aria-pressed') === 'true';
+    const label = mobileAuthBtn.querySelector('span:first-child');
+    if (label) label.textContent = active ? 'Keluar' : 'Masuk';
+    mobileAuthBtn.setAttribute('aria-pressed', String(active));
+  }
+
+  mobileAuthBtn?.addEventListener('click', async () => {
+    closeMobileNav();
+    await toggleAdmin();
+    syncMobileAuthButton();
+  });
+
+  if (desktopAuthBtn) {
+    const authStateObserver = new MutationObserver(syncMobileAuthButton);
+    authStateObserver.observe(desktopAuthBtn, {
+      attributes: true,
+      attributeFilter: ['aria-pressed'],
+      childList: true,
+      characterData: true,
+      subtree: true
+    });
+  }
+  syncMobileAuthButton();
+
   const statusBar = document.getElementById('statusBar');
   if (statusBar) {
     const statusObserver = new MutationObserver(syncDashboardStats);
